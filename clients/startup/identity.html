@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth OS | Identity</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/startup/onboarding.css">
+    <link rel="stylesheet" href="../css/startup/identity.css">
+</head>
+
+<body>
+
+<main class="identity-page">
+
+    <!-- BACK -->
+    <header class="identity-header">
+        <button type="button" class="identity-back" id="backButton" aria-label="Go back">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+    </header>
+
+    <!-- INTRO -->
+    <section class="identity-intro">
+        <p class="identity-step">IDENTITY SELECTION</p>
+        <h1>Who do you want to become?</h1>
+        <p>Choose the identity you want to build every day. This helps Growth OS personalize your journey.</p>
+    </section>
+
+    <!-- IDENTITY GRID -->
+    <section class="identity-grid" id="identityGrid">
+
+        <!-- Programmer -->
+        <button type="button" class="identity-card" data-identity="programmer">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">code</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Disciplined Programmer</h2>
+                <p>Build software with consistency every day.</p>
+            </div>
+        </button>
+
+        <!-- Student -->
+        <button type="button" class="identity-card" data-identity="student">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">school</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Focused Student</h2>
+                <p>Learn deeply and improve every day.</p>
+            </div>
+        </button>
+
+        <!-- Athlete -->
+        <button type="button" class="identity-card" data-identity="athlete">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">fitness_center</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Healthy Athlete</h2>
+                <p>Build a strong body and disciplined mind.</p>
+            </div>
+        </button>
+
+        <!-- Reader -->
+        <button type="button" class="identity-card" data-identity="reader">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">menu_book</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Consistent Reader</h2>
+                <p>Grow your knowledge one page at a time.</p>
+            </div>
+        </button>
+
+        <!-- Better Muslim -->
+        <button type="button" class="identity-card" data-identity="better-muslim">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">mosque</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Better Muslim</h2>
+                <p>Strengthen your faith and grow closer to Allah every day.</p>
+            </div>
+        </button>
+
+        <!-- Lifelong Learner -->
+        <button type="button" class="identity-card" data-identity="lifelong-learner">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">auto_stories</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Lifelong Learner</h2>
+                <p>Stay curious, keep learning, and become better every day.</p>
+            </div>
+        </button>
+
+        <!-- Custom -->
+        <button type="button" class="identity-card" data-identity="custom">
+            <div class="identity-card-top">
+                <span class="material-symbols-outlined identity-icon">auto_awesome</span>
+                <span class="material-symbols-outlined check-icon">check_circle</span>
+            </div>
+            <div class="identity-card-content">
+                <h2>Create My Own</h2>
+                <p>Define your own future identity.</p>
+            </div>
+        </button>
+
+    </section>
+
+    <!-- ACTIONS -->
+    <section class="identity-actions">
+        <button type="button" class="identity-continue" id="continueButton" disabled>
+            Continue
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <p>YOU CAN CHANGE YOUR IDENTITY LATER</p>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="identity-progress">
+        <span class="progress-dot active"></span>
+        <span class="progress-dot active"></span>
+        <span class="progress-dot active"></span>
+        <span class="progress-dot"></span>
+        <span class="progress-dot"></span>
+        <span class="progress-dot"></span>
+    </section>
+
+</main>
+
+<script src="../js/storage.js"></script>
+<script src="../js/onboarding.js"></script>
+
+</body>
+</html>

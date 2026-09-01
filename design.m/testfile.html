@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Growth OS | Build Your Future</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:          #131313;
+      --surface:     #1c1b1b;
+      --surface-hi:  #2a2a2a;
+      --surface-low: #0e0e0e;
+      --on:          #e5e2e1;
+      --on-muted:    #c4c7c8;
+      --border:      #444748;
+      --border-hi:   #8e9192;
+      --primary:     #ffffff;
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   16px;
+      --radius-full: 9999px;
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Geist', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--on);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+      display: inline-flex;
+      align-items: center;
+      user-select: none;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── LAYOUT HELPERS ── */
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: opacity .2s, transform .2s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-white  { background: #fff; color: #131313; }
+    .btn-white:hover { opacity: .88; }
+    .btn-ghost  { background: transparent; color: #fff; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--border-hi); background: var(--surface); }
+    .btn-dark   { background: var(--on); color: var(--bg); }
+    .btn-dark:hover { opacity: .9; }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 100;
+      height: 64px;
+      background: rgba(19,19,19,.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: background .3s;
+    }
+    .nav.scrolled { background: rgba(19,19,19,.98); }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 20px;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.02em;
+    }
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: 36px;
+    }
+    .nav-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--on-muted);
+      transition: color .2s;
+    }
+    .nav-link:hover { color: #fff; }
+    .nav-cta { display: none; padding: 8px 20px; font-size: 14px; }
+    .hamburger { color: #fff; padding: 8px; }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 0 20px 40px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .mobile-menu.open { opacity: 1; pointer-events: auto; }
+    .mobile-menu-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .mobile-link {
+      display: block;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mobile-cta {
+      margin-top: 24px;
+      width: 100%;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 80px;
+      overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 100%);
+      opacity: .18;
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 16px;
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--on-muted);
+      margin-bottom: 24px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.4; transform:scale(.8); }
+    }
+    .hero-title {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+    .hero-sub {
+      font-size: 17px;
+      color: var(--on-muted);
+      line-height: 1.65;
+      max-width: 520px;
+      margin: 0 auto 40px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ── SECTION SHARED ── */
+    section { padding: 80px 0; }
+    .section-eye {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--on-muted);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.02em;
+      margin-bottom: 12px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--on-muted);
+      line-height: 1.6;
+    }
+    .section-head { text-align: center; margin-bottom: 48px; }
+
+    /* ── VISUAL MOCK ── */
+    .visual-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface-low);
+      position: relative;
+    }
+    .visual-fade {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 55%;
+      background: linear-gradient(to top, var(--bg), transparent);
+      z-index: 2;
+      pointer-events: none;
+    }
+    /* wireframe mock */
+    .mock {
+      padding: 20px;
+      opacity: .6;
+    }
+    .mock-top {
+      display: flex;
+      gap: 6px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .mock-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-hi); }
+    .mock-row { display: flex; gap: 16px; }
+    .mock-side { width: 52px; display: flex; flex-direction: column; gap: 10px; }
+    .mock-nav { height: 7px; border-radius: 3px; background: var(--surface-hi); }
+    .mock-nav.active { background: #fff; opacity: .5; }
+    .mock-main { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .mock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .mock-card.tall { min-height: 90px; display:flex; flex-direction:column; justify-content:space-between; }
+    .mock-card-row { display:flex; gap:10px; }
+    .mock-card.half { flex:1; min-height:44px; }
+    .mock-pill { width: 38%; height: 7px; background: var(--surface-hi); border-radius: 3px; }
+    .mock-num { font-size: 24px; font-weight: 700; color: #fff; opacity:.6; letter-spacing:-.02em; }
+    .visual-cap {
+      position: absolute;
+      bottom: 24px; left: 24px; right: 24px;
+      z-index: 3;
+    }
+    .visual-cap-title { font-size: 18px; font-weight: 700; color:#fff; margin-bottom: 4px; }
+    .visual-cap-sub { font-size: 13px; color: var(--on-muted); }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: border-color .2s, transform .25s;
+    }
+    .feature-card:hover {
+      border-color: var(--border-hi);
+      transform: translateY(-3px);
+    }
+    .feature-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-full);
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .feature-title { font-size: 17px; font-weight: 700; color:#fff; margin-bottom: 8px; letter-spacing:-.01em; }
+    .feature-body  { font-size: 14px; color: var(--on-muted); line-height: 1.65; }
+
+    /* ── QUOTE ── */
+    .quote-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .quote-mark { font-size: 72px; line-height:1; color: var(--border-hi); font-family: Georgia,serif; display:block; margin-bottom:16px; }
+    .quote-text { font-size: 20px; font-style:italic; color: var(--on); line-height:1.55; max-width:600px; margin: 0 auto 32px; }
+    .quote-author { display:inline-flex; align-items:center; gap:14px; }
+    .quote-avatar {
+      width:44px; height:44px; border-radius:50%;
+      background: var(--surface-hi); border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; font-weight:700; color:#fff;
+    }
+    .quote-name { font-size:15px; font-weight:700; color:#fff; text-align:left; }
+    .quote-role { font-size:11px; color:var(--on-muted); text-transform:uppercase; letter-spacing:.06em; text-align:left; margin-top:2px; }
+
+    /* ── CTA STRIP ── */
+    .cta-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 56px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-glow {
+      position:absolute; right:-80px; top:-80px;
+      width:240px; height:240px;
+      background:rgba(0,0,0,.07);
+      border-radius:50%; filter:blur(40px);
+      pointer-events:none;
+    }
+    .cta-title { font-size: 28px; font-weight:700; color:#131313; letter-spacing:-.02em; margin-bottom:14px; position:relative; z-index:1; }
+    .cta-sub   { font-size:16px; color:rgba(19,19,19,.65); line-height:1.6; margin-bottom:32px; position:relative; z-index:1; }
+    .cta-note  { font-size:11px; color:rgba(19,19,19,.45); text-transform:uppercase; letter-spacing:.07em; margin-top:14px; position:relative; z-index:1; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+    }
+    .footer-inner {
+      display:flex; flex-direction:column; gap:24px; margin-bottom:24px;
+    }
+    .footer-tagline { font-size:11px; color:var(--on-muted); text-transform:uppercase; letter-spacing:.07em; margin-top:4px; }
+    .footer-links { display:flex; flex-wrap:wrap; gap:24px; }
+    .footer-link {
+      font-size:12px; font-weight:600; color:var(--on-muted);
+      text-transform:uppercase; letter-spacing:.06em;
+      transition:color .2s;
+    }
+    .footer-link:hover { color:#fff; }
+    .footer-copy {
+      font-size:11px; color:var(--on-muted); opacity:.5;
+      text-transform:uppercase; letter-spacing:.06em;
+      border-top:1px solid var(--border); padding-top:24px;
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1);
+    }
+    .reveal.on { opacity:1; transform:translateY(0); }
+    .features-grid .reveal:nth-child(2) { transition-delay:.07s; }
+    .features-grid .reveal:nth-child(3) { transition-delay:.14s; }
+    .features-grid .reveal:nth-child(4) { transition-delay:.21s; }
+    .features-grid .reveal:nth-child(5) { transition-delay:.28s; }
+    .features-grid .reveal:nth-child(6) { transition-delay:.35s; }
+
+    @media (prefers-reduced-motion:reduce) {
+      .reveal { opacity:1; transform:none; transition:none; }
+      .badge-dot { animation:none; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (min-width: 680px) {
+      .hero-title { font-size: 58px; }
+      .hero-actions { flex-direction:row; justify-content:center; }
+      .features-grid { grid-template-columns: repeat(2,1fr); }
+      .footer-inner { flex-direction:row; justify-content:space-between; align-items:center; }
+      .section-title { font-size:38px; }
+    }
+
+    @media (min-width: 1024px) {
+      .nav-links { display:flex; }
+      .nav-cta   { display:inline-flex; }
+      .hamburger { display:none; }
+      .hero-title { font-size:72px; letter-spacing:-.04em; }
+      .features-grid { grid-template-columns: repeat(3,1fr); }
+      .section-title { font-size:46px; }
+      .cta-title { font-size:38px; }
+      .quote-text { font-size:24px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="product-showcase reveal" id="about">
+      <div class="wrap">
+        <!-- PRODUCT HEADER -->
+        <header class="product-header">
+          <span class="section-tag">
+            PRODUCT SHOWCASE
+          </span>
+          <h2 class="product-title">
+            Everything You Need.
+            <br>
+            Nothing You Don't.
+          </h2>
+          <p class="product-description">
+            Growth OS combines habits, focus sessions, journaling,
+            goals, and long-term progress into one intentional
+            workspace designed for students, athletes, and anyone
+            committed to building discipline.
+          </p>
+        </header>
+        <!--  PRODUCT CONTENT -->
+        <div class="product-showcase-main">
+            <div class="problem-panel">
+              <span class="problem-tag">
+                WHY GROWTH OS?
+              </span>
+              <h3 class="problem-title">
+                Most people don't fail because they lack potential.
+              </h3>
+              <p class="problem-description">
+                They struggle because their daily system works
+                against them instead of for them.
+              </p>
+              <ul class="problem-list">
+                <li class="problem-item">
+                  <span class="material-symbols-outlined">
+                    check_circle
+                  </span>
+                  Poor consistency in building habits.
+                </li>
+                <li class="problem-item">
+                  <span class="material-symbols-outlined">
+                    check_circle
+                  </span>
+                  Difficulty maintaining focus.
+                </li>
+                <li class="problem-item">
+                  <span class="material-symbols-outlined">
+                    check_circle
+                  </span>
+                  Lack of self-reflection.
+                </li>
+                <li class="problem-item">
+                  <span class="material-symbols-outlined">
+                    check_circle
+                  </span>
+                  Goals, notes and tasks scattered across multiple apps.
+                </li>
+                <li class="problem-item">
+                  <span class="material-symbols-outlined">
+                    check_circle
+                  </span>
+                  Limited understanding of long-term progress.
+                </li>
+              </ul>
+          </div>
+
+          <div class="dashboard-preview">
+              <div class="dashboard-img">
+                <img
+                    src="./assets/product imge.png"
+                    alt="Growth OS Dashboard"
+                    class="dashboard-image"
+                >
+              </div>
+              <div class="dashboard">
+                <div class="dashboard-topbar">
+                    <div class="browser-controls">
+                      <span class="browser-dot"></span>
+                      <span class="browser-dot"></span>
+                      <span class="browser-dot"></span>
+                    </div>
+                    <p class="dashboard-brand">
+                          Growth OS
+                    </p>
+                </div>
+                <div class="dashboard-content">
+                  <div class="dashboard-header">
+                          <h3 class="dashboard-title">Good Morning 👋</h3>
+                          <p class="dashboard-subtitle">
+                              Let's build discipline today.
+                          </p>
+                  </div>
+                  <article class="dashboard-card focus-card">
+                    <div class="card-top">
+                        <span class="material-symbols-outlined">
+                          timer
+                        </span>
+                        <p class="card-label">
+                          Focus Session
+                        </p>
+                      </div>
+                      <h2 class="focus-time">
+                        23:57
+                      </h2>
+                      <p class="focus-status">
+                        Stay locked in.
+                      </p>
+                    </article>
+                    <article class="dashboard-card">
+                  <div class="card-top">
+                    <span class="material-symbols-outlined">
+                            task_alt
+                    </span>
+                    <p class="card-label">
+                            Today's Habits
+                    </p>
+                  </div>
+                  <ul class="habit-list">
+                      <li class="habit-item completed">
+                          <div class="habit-icon quran">
+                              <span class="material-symbols-outlined">
+                                  menu_book
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Quran Revision</h4>
+                              <p class="habit-subtitle">Completed</p>
+                          </div>
+                          <span class="material-symbols-outlined habit-check">
+                              check_circle
+                          </span>
+                      </li>
+                      <li class="habit-item completed">
+                          <div class="habit-icon run">
+                              <span class="material-symbols-outlined">
+                                  directions_run
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Morning Run</h4>
+                              <p class="habit-subtitle">8 km completed</p>
+                          </div>
+                          <span class="material-symbols-outlined habit-check">
+                              check_circle
+                          </span>
+                      </li>
+                      <li class="habit-item">
+                          <div class="habit-icon read">
+                              <span class="material-symbols-outlined">
+                                  auto_stories
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Read 20 Pages</h4>
+                              <p class="habit-subtitle">In Progress</p>
+                          </div>
+                      </li>
+                      <li class="habit-item">
+                          <div class="habit-icon journal">
+                              <span class="material-symbols-outlined">
+                                  edit_note
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Journal</h4>
+                              <p class="habit-subtitle">Not Started</p>
+                          </div>
+                      </li>
+                  </ul>
+                </article>
+              </div>
+          </div>
+        </div> 
+        <div class="product-content">
+          <!-- PROBLEM PANEL -->
+          
+          <div class="dashboard">
+            <div class="dashboard-topbar">
+                <div class="browser-controls">
+                  <span class="browser-dot"></span>
+                  <span class="browser-dot"></span>
+                  <span class="browser-dot"></span>
+                </div>
+                <p class="dashboard-brand">
+                      Growth OS
+                </p>
+            </div>
+            <div class="dashboard-content">
+              <div class="dashboard-header">
+                      <h3 class="dashboard-title">Good Morning 👋</h3>
+                      <p class="dashboard-subtitle">
+                          Let's build discipline today.
+                      </p>
+              </div>
+              <article class="dashboard-card focus-card">
+                <div class="card-top">
+                    <span class="material-symbols-outlined">
+                      timer
+                    </span>
+                    <p class="card-label">
+                      Focus Session
+                    </p>
+                  </div>
+                  <h2 class="focus-time">
+                    23:57
+                  </h2>
+                  <p class="focus-status">
+                    Stay locked in.
+                  </p>
+                </article>
+                <article class="dashboard-card">
+                  <div class="card-top">
+                    <span class="material-symbols-outlined">
+                            task_alt
+                    </span>
+                    <p class="card-label">
+                            Today's Habits
+                    </p>
+                  </div>
+                  <ul class="habit-list">
+                      <li class="habit-item completed">
+                          <div class="habit-icon quran">
+                              <span class="material-symbols-outlined">
+                                  menu_book
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Quran Revision</h4>
+                              <p class="habit-subtitle">Completed</p>
+                          </div>
+                          <span class="material-symbols-outlined habit-check">
+                              check_circle
+                          </span>
+                      </li>
+                      <li class="habit-item completed">
+                          <div class="habit-icon run">
+                              <span class="material-symbols-outlined">
+                                  directions_run
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Morning Run</h4>
+                              <p class="habit-subtitle">8 km completed</p>
+                          </div>
+                          <span class="material-symbols-outlined habit-check">
+                              check_circle
+                          </span>
+                      </li>
+                      <li class="habit-item">
+                          <div class="habit-icon read">
+                              <span class="material-symbols-outlined">
+                                  auto_stories
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Read 20 Pages</h4>
+                              <p class="habit-subtitle">In Progress</p>
+                          </div>
+                      </li>
+                      <li class="habit-item">
+                          <div class="habit-icon journal">
+                              <span class="material-symbols-outlined">
+                                  edit_note
+                              </span>
+                          </div>
+                          <div class="habit-content">
+                              <h4 class="habit-title">Journal</h4>
+                              <p class="habit-subtitle">Not Started</p>
+                          </div>
+                      </li>
+                  </ul>
+                </article>
+              </div>  
+            </div>
+          </div>
+        </div>
+        
+        
+        <!-- BENEFITS -->
+        <div class="benefits-grid">
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">
+              dashboard
+            </span>
+            <h3 class="benefit-title">
+              Everything Together
+            </h3>
+            <p class="benefit-description">
+              Habits, journal, goals and focus sessions
+              live in one organized workspace.
+            </p>
+          </article>
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">
+              center_focus_strong
+            </span>
+            <h3 class="benefit-title">
+              Built for Focus
+            </h3>
+            <p class="benefit-description">
+              A clean interface that removes distractions
+              and keeps your attention on what matters.
+            </p>
+          </article>
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">
+              monitoring
+            </span>
+            <h3 class="benefit-title">
+              Track Your Growth
+            </h3>
+            <p class="benefit-description">
+              Measure consistency, streaks and long-term
+              progress instead of relying on memory.
+            </p>
+          </article>
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">
+              military_tech
+            </span>
+            <h3 class="benefit-title">
+              Built for Discipline
+            </h3>
+            <p class="benefit-description">
+              Designed for students, athletes and ambitious
+              people striving to become better every day.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <span class="logo">Growth OS</span>
+      <nav class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#about"    class="nav-link">About</a>
+        <a href="./startup.html" class="nav-link">Sign In</a>
+      </nav>
+      <a href="./startup.html" class="btn btn-white nav-cta">Get Started</a>
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span class="material-symbols-outlined" style="font-size:24px">menu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobile-menu">
+    <div class="mobile-menu-head">
+      <span class="logo">Growth OS</span>
+      <button id="menu-close" aria-label="Close menu">
+        <span class="material-symbols-outlined" style="font-size:24px;color:#fff">close</span>
+      </button>
+    </div>
+    <a href="#features"      class="mobile-link" id="m-features">Features</a>
+    <a href="#about"         class="mobile-link" id="m-about">About</a>
+    <a href="./startup.html" class="mobile-link">Sign In</a>
+    <a href="./startup.html" class="btn btn-white mobile-cta">Get Started</a>
+  </div>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero reveal" id="hero">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <span class="badge">
+          <span class="badge-dot"></span>
+          Growth Operating System
+        </span>
+        <h1 class="hero-title">
+          Build Discipline.<br/>
+          Build Focus.<br/>
+          Build Your Future.
+        </h1>
+        <p class="hero-sub">
+          Growth OS helps you track habits, deepen focus, journal your
+          progress, and become the person you want to be — one intentional
+          day at a time.
+        </p>
+        <div class="hero-actions">
+          <a href="./startup.html" class="btn btn-white">
+            Start My Journey
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </a>
+          <a href="#features" class="btn btn-ghost">
+            Learn More
+            <span class="material-symbols-outlined">expand_more</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCT VISUAL -->
+    <section style="padding:0 0 80px">
+      <div class="wrap reveal">
+        <div class="visual-wrap" style="min-height:340px">
+          <div class="visual-fade"></div>
+          <div class="mock">
+            <div class="mock-top">
+              <div class="mock-dot"></div>
+              <div class="mock-dot"></div>
+              <div class="mock-dot"></div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-side">
+                <div class="mock-nav active"></div>
+                <div class="mock-nav"></div>
+                <div class="mock-nav"></div>
+                <div class="mock-nav"></div>
+                <div class="mock-nav"></div>
+              </div>
+              <div class="mock-main">
+                <div class="mock-card tall">
+                  <div class="mock-pill"></div>
+                  <div class="mock-num">23:57</div>
+                </div>
+                <div class="mock-card-row">
+                  <div class="mock-card half"></div>
+                  <div class="mock-card half"></div>
+                </div>
+                <div class="mock-card" style="min-height:36px"></div>
+                <div class="mock-card" style="min-height:28px"></div>
+              </div>
+            </div>
+          </div>
+          <div class="visual-cap">
+            <p class="visual-cap-title">Focused Workspace</p>
+            <p class="visual-cap-sub">Eliminate the noise. Everything you need, nothing you don't.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="section-eye">Core Disciplines</span>
+          <h2 class="section-title">Everything you need to grow.</h2>
+          <p class="section-sub">Minimalist tools for maximal output.</p>
+        </div>
+        <div class="features-grid">
+
+          <div class="feature-card reveal">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">check_circle</span>
+            </div>
+            <h3 class="feature-title">Habit Tracking</h3>
+            <p class="feature-body">Build consistency with intuitive streaks and daily check-ins designed to reduce friction and maximise adherence.</p>
+          </div>
+
+          <div class="feature-card reveal">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">timer</span>
+            </div>
+            <h3 class="feature-title">Deep Focus</h3>
+            <p class="feature-body">Enter flow states faster with integrated session timers and noise-cancelling digital environments.</p>
+          </div>
+
+          <div class="feature-card reveal">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">edit_note</span>
+            </div>
+            <h3 class="feature-title">Daily Journal</h3>
+            <p class="feature-body">Reflect on your progress with guided journaling. Capture thoughts, lessons, and wins to clarify your path forward.</p>
+          </div>
+
+          <div class="feature-card reveal">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined filled">auto_awesome</span>
+            </div>
+            <h3 class="feature-title">AI Insights</h3>
+            <p class="feature-body">Your personal AI reflects on your data and surfaces patterns you'd otherwise miss — keeping you on your growth edge.</p>
+          </div>
+
+          <div class="feature-card reveal">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">bar_chart</span>
+            </div>
+            <h3 class="feature-title">Analytics</h3>
+            <p class="feature-body">Visual weekly trajectories and performance graphs show the compound effect of your daily effort over time.</p>
+          </div>
+
+          <div class="feature-card reveal">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">restart_alt</span>
+            </div>
+            <h3 class="feature-title">Reset Mode</h3>
+            <p class="feature-body">When life disrupts your rhythm, Reset Mode helps you re-anchor and rebuild momentum without guilt.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIAL -->
+    <section id="about">
+      <div class="wrap reveal">
+        <div class="quote-card">
+          <span class="quote-mark">&ldquo;</span>
+          <blockquote class="quote-text">
+            The only tool that doesn't feel like another chore to manage.
+            It's the silent operating system for my life.
+          </blockquote>
+          <div class="quote-author">
+            <div class="quote-avatar">A</div>
+            <div>
+              <p class="quote-name">Abdimalik</p>
+              <p class="quote-role">Builder &amp; Growth OS User</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section>
+      <div class="wrap reveal">
+        <div class="cta-card">
+          <div class="cta-glow"></div>
+          <h2 class="cta-title">Start your evolution.</h2>
+          <p class="cta-sub">
+            The best time to start was yesterday.<br/>
+            The second best time is now.
+          </p>
+          <a href="./startup.html" class="btn btn-dark" style="font-size:16px;padding:16px 36px">
+            Get Started Free
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </a>
+          <p class="cta-note">No credit card required</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-inner">
+        <div>
+          <span class="logo">Growth OS</span>
+          <p class="footer-tagline">Intentional Progress</p>
+        </div>
+        <nav class="footer-links">
+          <a href="#" class="footer-link">Privacy</a>
+          <a href="#" class="footer-link">Terms</a>
+          <a href="#" class="footer-link">Twitter</a>
+          <a href="#" class="footer-link">Support</a>
+        </nav>
+      </div>
+      <p class="footer-copy">© 2024 Growth OS. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const ro = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); ro.unobserve(e.target); } }),
+      { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+    );
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+    // Nav tint
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20), { passive:true });
+
+    // Mobile menu
+    const mm = document.getElementById('mobile-menu');
+    const open  = () => { mm.classList.add('open');    document.body.style.overflow='hidden'; };
+    const close = () => { mm.classList.remove('open'); document.body.style.overflow=''; };
+    document.getElementById('hamburger').addEventListener('click', open);
+    document.getElementById('menu-close').addEventListener('click', close);
+    document.getElementById('m-features').addEventListener('click', close);
+    document.getElementById('m-about').addEventListener('click', close);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,179 @@
+/* =========================================================
+   DASHBOARD.CSS — layout for dashboard.html only
+   ========================================================= */
+
+.app-shell {
+    min-height: 100vh;
+}
+
+.dashboard-main {
+    margin-left: 256px;
+    min-height: 100vh;
+}
+
+.dashboard-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--xl);
+}
+.topbar-actions { display: none; gap: var(--sm); }
+
+/* ---------------------------------------------------------
+   GRID — the bento layout described in the blueprint:
+   FOCUS(8) HABITS(4)
+   ROUTINE(4) GOALS(8)
+   WEEK(8) REFLECT(4)
+   --------------------------------------------------------- */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--md);
+}
+
+.dashboard-focus-card    { grid-column: span 8; }
+.dashboard-habits-card   { grid-column: span 4; }
+.dashboard-routine-card  { grid-column: span 4; }
+.dashboard-goals-card    { grid-column: span 8; }
+.dashboard-week-card     { grid-column: span 8; }
+.dashboard-reflection-card { grid-column: span 4; }
+
+/* ---------------------------------------------------------
+   FOCUS CARD
+   --------------------------------------------------------- */
+
+.dashboard-focus-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 280px;
+}
+
+.focus-task {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: var(--md) 0 var(--lg);
+}
+
+.focus-next {
+    padding-left: var(--md);
+    border-left: 2px solid var(--outline-variant);
+}
+
+.focus-next-label {
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.05em;
+    margin-bottom: var(--xs);
+}
+
+.focus-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+    margin-top: var(--xl);
+}
+
+/* ---------------------------------------------------------
+   HABITS CARD
+   --------------------------------------------------------- */
+
+.habit-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xs);
+}
+
+/* ---------------------------------------------------------
+   ROUTINE CARD
+   --------------------------------------------------------- */
+
+.dashboard-routine-card .timeline {
+    margin-top: var(--sm);
+}
+
+/* ---------------------------------------------------------
+   GOALS CARD
+   --------------------------------------------------------- */
+
+.goal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--md);
+}
+
+.goal-card {
+    padding: var(--md);
+    background: var(--surface-container-high);
+    border: 1px solid var(--outline);
+    border-radius: var(--radius-md);
+}
+
+.goal-title {
+    font-size: var(--fs-headline-sm);
+    font-weight: 600;
+    margin-bottom: var(--xs);
+}
+
+.goal-focus-label {
+    font-size: 10px;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.05em;
+    display: block;
+    margin-top: var(--sm);
+}
+
+.goal-focus-value {
+    font-size: var(--fs-body-sm);
+    display: block;
+    margin-top: 2px;
+}
+
+/* ---------------------------------------------------------
+   WEEK CARD
+   --------------------------------------------------------- */
+
+.week-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--md);
+}
+
+/* ---------------------------------------------------------
+   REFLECTION CARD
+   --------------------------------------------------------- */
+
+.dashboard-reflection-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.reflection-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+    flex: 1;
+}
+
+.reflection-prompt {
+    font-size: var(--fs-headline-sm);
+    font-weight: 600;
+}
+
+#reflection-input {
+    min-height: 110px;
+}
+
+.reflection-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+}
+
+.reflection-last-saved {
+    font-size: 11px;
+    color: var(--on-surface-variant);
+}

@@ -1,0 +1,588 @@
+/* ============================================
+   ROUTINE PAGE LAYOUT
+============================================ */
+
+.routine-page {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 48px;
+    background: var(--background);
+    color: var(--on-surface);
+}
+
+
+/* ============================================
+   HEADER
+============================================ */
+
+.routine-header {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 36px;
+}
+
+.routine-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    margin-left: -12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.routine-back:hover {
+    color: var(--primary);
+    background: var(--surface-container-low);
+    transform: translateX(-3px);
+}
+
+.routine-back .material-symbols-outlined {
+    font-size: 20px;
+}
+
+
+/* ============================================
+   INTRO & PROGRESS
+============================================ */
+
+.routine-intro {
+    width: 100%;
+    max-width: 680px;
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.routine-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.routine-step p {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.routine-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.routine-progress span {
+    width: 28px;
+    height: 4px;
+    border-radius: 99px;
+    background: var(--outline-variant);
+    transition: background 0.3s ease;
+}
+
+.routine-progress span.active {
+    background: var(--primary);
+}
+
+.routine-intro h1 {
+    margin: 0 0 16px;
+    font-size: clamp(36px, 5vw, 48px);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--primary);
+}
+
+.routine-intro > p {
+    max-width: 580px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+}
+
+
+/* ============================================
+   ROUTINE SECTION & LIST
+============================================ */
+
+.routine-section {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 48px;
+}
+
+.routine-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+/* ============================================
+   ROUTINE ITEM CARD
+============================================ */
+
+.routine-item {
+    width: 100%;
+    min-height: 80px;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 20px;
+    border: 1px solid var(--outline-variant);
+    border-radius: 14px;
+    background: var(--surface-container-lowest);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.routine-item:hover {
+    border-color: var(--outline);
+    background: var(--surface-container-low);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+
+/* ============================================
+   ROUTINE INFO & TYPOGRAPHY
+============================================ */
+
+.routine-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.routine-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--surface-container-high);
+    color: var(--primary);
+    transition: transform 0.2s ease;
+}
+
+.routine-item:hover .routine-icon {
+    transform: scale(1.05);
+}
+
+.routine-icon .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.routine-name {
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--primary);
+    font-family: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.routine-type {
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+
+/* ============================================
+   ENHANCED TIME INPUT
+============================================ */
+
+.routine-time {
+    width: 124px;
+    height: 44px;
+    padding: 0 12px;
+    border: 1.5px solid var(--outline-variant);
+    border-radius: 10px;
+    background: var(--surface-container-lowest);
+    color: var(--primary);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.routine-time:hover {
+    border-color: var(--outline);
+    background: var(--surface-container-high);
+}
+
+.routine-time:focus {
+    border-color: var(--primary);
+    background: var(--surface-container-lowest);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.routine-time::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.routine-time::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+
+/* ============================================
+   REMOVE BUTTON
+============================================ */
+
+.remove-routine {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.remove-routine:hover {
+    color: #ef4444;
+    background: var(--surface-container-high);
+}
+
+.remove-routine .material-symbols-outlined {
+    font-size: 20px;
+}
+
+
+/* ============================================
+   ADD ROUTINE BUTTON
+============================================ */
+
+.add-routine-btn {
+    width: 100%;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 0 20px;
+    border: 2px dashed var(--outline-variant);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.add-routine-btn:hover {
+    border-color: var(--primary);
+    border-style: solid;
+    color: var(--primary);
+    background: var(--surface-container-low);
+}
+
+.add-routine-btn .material-symbols-outlined {
+    font-size: 22px;
+}
+
+
+/* ============================================
+   ACTIVITY FORM
+============================================ */
+
+.activity-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid var(--outline-variant);
+    border-radius: 14px;
+    background: var(--surface-container-low);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.activity-name-wrapper {
+    min-width: 0;
+}
+
+.activity-name-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    border: 1.5px solid var(--outline-variant);
+    border-radius: 10px;
+    background: var(--surface-container-high);
+    color: var(--primary);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.activity-name-input:focus {
+    border-color: var(--primary);
+    background: var(--surface-container-lowest);
+}
+
+.activity-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.save-activity-btn {
+    height: 44px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--background);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.save-activity-btn:hover {
+    opacity: 0.92;
+}
+
+.save-activity-btn:active {
+    transform: scale(0.97);
+}
+/* Container layout fix */
+.time-input-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Adjusted time input container */
+input[type="time"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--surface-container-high, #1e1e1e);
+    color: var(--on-surface, #ffffff);
+    border: 1px solid var(--outline-variant, #444);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 15px;            /* Increased slightly for better baseline readability */
+    font-weight: 500;
+    text-align: center;         /* Centers placeholder and time values */
+    letter-spacing: 0.05em;     /* Adds breathing space to the placeholders and digits */
+    outline: none;
+    cursor: pointer;
+    width: 150px;               /* Keeps consistent footprint regardless of state */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Fix blank/empty placeholder sizing and spacing in WebKit browsers (Chrome, Safari, Edge) */
+input[type="time"]::-webkit-datetime-edit {
+    display: inline-flex;
+    justify-content: center;
+    padding: 0;
+}
+
+input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+    display: inline-flex;
+}
+
+/* Gives the dash placeholders and time segments explicit sizing */
+input[type="time"]::-webkit-datetime-edit-text {
+    padding: 0 2px;
+    color: var(--on-surface-variant, #888);
+}
+
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+    padding: 0 2px;
+    color: var(--on-surface, #ffffff);
+}
+
+/* Brightens native clock icon in dark mode */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+
+/* ============================================
+   FOOTER ACTIONS
+============================================ */
+
+.routine-footer {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 24px;
+    border-top: 1px solid var(--outline-variant);
+}
+
+.routine-back-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    margin-left: -16px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.routine-back-footer:hover {
+    color: var(--primary);
+    background: var(--surface-container-low);
+    transform: translateX(-3px);
+}
+
+.routine-back-footer .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.routine-continue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 190px;
+    height: 50px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary);
+    color: var(--background);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.routine-continue:hover {
+    opacity: 0.92;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.routine-continue:active {
+    transform: scale(0.97);
+}
+
+.routine-continue .material-symbols-outlined {
+    font-size: 20px;
+}
+
+
+/* ============================================
+   RESPONSIVE / MOBILE DESIGN
+============================================ */
+
+@media (max-width: 650px) {
+    .routine-page {
+        padding: 24px 16px 32px;
+    }
+
+    .routine-header {
+        margin-bottom: 24px;
+    }
+
+    .routine-intro {
+        margin-bottom: 36px;
+    }
+
+    .routine-intro h1 {
+        font-size: 32px;
+    }
+
+    .routine-item {
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .routine-time {
+        width: 110px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .remove-routine {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: end;
+    }
+
+    .activity-form {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-form-actions {
+        width: 100%;
+    }
+
+    .activity-form-actions .routine-time {
+        flex: 1;
+    }
+
+    .save-activity-btn {
+        min-width: 90px;
+    }
+
+    .routine-footer {
+        padding-top: 16px;
+    }
+
+    .routine-continue {
+        min-width: 140px;
+        height: 46px;
+    }
+}

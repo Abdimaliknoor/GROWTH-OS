@@ -1,0 +1,181 @@
+/* =========================================================
+   BASE.CSS — Design tokens, resets, utilities
+   This file never contains layout for a specific page.
+   ========================================================= */
+
+:root {
+    /* Color */
+    --primary: #ffffff;
+    --background: #131313;
+    --surface-container-lowest: #0e0e0e;
+    --surface-container-low: #1c1b1b;
+    --surface-container: #201f1f;
+    --surface-container-high: #2a2a2a;
+    --surface-container-highest: #353534;
+    --surface-bright: #393939;
+    --on-surface: #e5e2e1;
+    --on-surface-variant: #c4c7c8;
+    --outline: #8e9192;
+    --outline-variant: #444748;
+    --error: #ffb4ab;
+    --error-container: #93000a;
+    --accent: #3b82f6;
+
+    /* Spacing */
+    --xs: 4px;
+    --sm: 8px;
+    --md: 16px;
+    --lg: 24px;
+    --xl: 48px;
+    --xxl: 80px;
+    --gutter: 24px;
+    --margin-mobile: 16px;
+    --margin-desktop: 48px;
+
+    /* Typography */
+    --font-family-base: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-family-mono: 'Geist Mono', 'Courier New', monospace;
+
+    --fs-label: 12px;
+    --fs-body-sm: 14px;
+    --fs-body-lg: 16px;
+    --fs-headline-sm: 20px;
+    --fs-headline-md: 24px;
+    --fs-display-lg: 48px;
+
+    --lh-label: 16px;
+    --lh-body: 24px;
+    --lh-headline: 28px;
+
+    /* Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+
+    /* Z-index */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family-base);
+    background-color: var(--background);
+    color: var(--on-surface);
+    font-size: var(--fs-body-lg);
+    line-height: var(--lh-body);
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 { font-weight: 600; line-height: 1.2; margin: 0; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+textarea, input {
+    font-family: inherit;
+    color: inherit;
+}
+
+/* =========================================================
+   TYPOGRAPHY HELPERS
+   ========================================================= */
+
+.text-label {
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    line-height: var(--lh-label);
+}
+.text-body-sm { font-size: var(--fs-body-sm); line-height: var(--lh-body); }
+.text-body-lg { font-size: var(--fs-body-lg); line-height: var(--lh-body); }
+.text-headline-sm { font-size: var(--fs-headline-sm); font-weight: 600; line-height: var(--lh-headline); }
+.text-headline-md { font-size: var(--fs-headline-md); font-weight: 600; line-height: var(--lh-headline); }
+.text-display-lg { font-size: var(--fs-display-lg); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+.text-muted { color: var(--on-surface-variant); }
+
+/* =========================================================
+   MATERIAL SYMBOLS
+   ========================================================= */
+
+.icon {
+    font-family: 'Material Symbols Outlined';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-size: 22px;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.icon-sm { font-size: 18px; }
+
+/* =========================================================
+   LAYOUT UTILITIES
+   ========================================================= */
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-xs { gap: var(--xs); }
+.gap-sm { gap: var(--sm); }
+.gap-md { gap: var(--md); }
+.gap-lg { gap: var(--lg); }
+
+.hidden { display: none !important; }
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sm);
+    padding: 12px 24px;
+    font-size: var(--fs-body-sm);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: opacity .15s ease, background-color .15s ease, border-color .15s ease, transform .1s ease;
+    white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--background); }
+.btn-primary:hover { opacity: .88; }
+
+.btn-outline { background: transparent; color: var(--on-surface); border: 1px solid var(--outline-variant); }
+.btn-outline:hover { border-color: var(--outline); background: var(--surface-container); }
+
+/* =========================================================
+   SCROLLBARS
+   ========================================================= */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--outline); }

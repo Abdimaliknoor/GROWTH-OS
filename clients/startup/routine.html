@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Growth OS | Routine</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/startup/onboarding.css">
+<link rel="stylesheet" href="../css/startup/routine.css">
+</head>
+
+<body>
+
+<main class="routine-page">
+
+    <!-- ============================================
+         HEADER
+    ============================================= -->
+
+    <header class="routine-header">
+
+        <button
+            type="button"
+            class="routine-back"
+            id="backButton">
+
+            <span class="material-symbols-outlined">
+                arrow_back
+            </span>
+
+            <span>
+                Back
+            </span>
+
+        </button>
+
+    </header>
+
+
+    <!-- ============================================
+         INTRO
+    ============================================= -->
+
+    <section class="routine-intro">
+
+        <div class="routine-step">
+
+            <div class="routine-progress">
+
+                <span></span>
+                <span></span>
+                <span></span>
+                <span class="active"></span>
+                <span></span>
+                <span></span>
+
+            </div>
+
+            <p>
+                Step 4 of 6: Routine Architecture
+            </p>
+
+        </div>
+
+        <h1>
+            Architect Your Day
+        </h1>
+
+        <p>
+            Bridge your practices with your schedule.
+            Habits define what you do; routine defines when.
+        </p>
+
+    </section>
+
+
+    <!-- ============================================
+         ROUTINE LIST
+    ============================================= -->
+
+    <section class="routine-section">
+
+        <div
+            class="routine-list"
+            id="routineList">
+
+            <!-- JavaScript inserts routine items here -->
+
+        </div>
+
+
+        <!-- ========================================
+             ADD ACTIVITY BUTTON
+        ========================================= -->
+
+        <button
+            type="button"
+            class="add-routine-btn"
+            id="addRoutineBtn">
+
+            <span class="material-symbols-outlined">
+                add
+            </span>
+
+            <span>
+                Add Activity
+            </span>
+
+        </button>
+
+
+        <!-- ========================================
+             ADD ACTIVITY FORM
+        ========================================= -->
+
+        <div
+            class="activity-form"
+            id="activityForm"
+            hidden>
+
+            <div class="activity-name-wrapper">
+
+                <input
+                    type="text"
+                    id="activityName"
+                    class="activity-name-input"
+                    placeholder="Activity Name..."
+                    autocomplete="off">
+
+            </div>
+
+            <div class="activity-form-actions">
+
+                <input
+                    type="time"
+                    id="activityTime"
+                    class="routine-time">
+
+                <button
+                    type="button"
+                    id="saveActivityBtn"
+                    class="save-activity-btn">
+
+                    Add
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================
+         FOOTER ACTIONS
+    ============================================= -->
+
+    <footer class="routine-footer">
+
+        <button
+            type="button"
+            class="routine-back-footer"
+            id="footerBackButton">
+
+            <span class="material-symbols-outlined">
+                arrow_back
+            </span>
+
+            Back
+
+        </button>
+
+
+        <button
+            type="button"
+            class="routine-continue"
+            id="continueBtn">
+
+            Continue
+
+            <span class="material-symbols-outlined">
+                arrow_forward
+            </span>
+
+        </button>
+
+    </footer>
+
+</main>
+
+
+<script src="../js/storage.js"></script>
+<script src="../js/onboarding.js"></script>
+
+</body>
+</html>

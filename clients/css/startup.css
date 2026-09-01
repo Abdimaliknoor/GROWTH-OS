@@ -1,0 +1,165 @@
+/* ============================================
+   STARTUP.CSS — Home page overrides only
+   ============================================
+
+   LOAD ORDER (must match <head> in startup.html):
+     1. base.css        → color/spacing/type tokens
+     2. layout.css      → sidebar, header, grid, main, bottom-nav
+     3. components.css  → cards, buttons, habits, focus, journal, ai-card
+     4. responsive.css  → all breakpoints
+     5. startup.css     → THIS FILE (startup.html only)
+
+   RULE: Only styles that are UNIQUE to startup.html live here.
+   If a style should appear on every page → put it in components.css.
+   If it changes layout/grid → put it in layout.css.
+   ============================================ */
+
+
+/* ============================================
+   CTA ROW (Get Started + Guided Tour buttons)
+   Sits below the greeting, above the focus card.
+   ============================================ */
+
+.startup-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--md);
+    margin-top: var(--lg);
+}
+
+
+/* ============================================
+   DAY BADGE
+   Small pill above the greeting title.
+   Uses .badge styles from components.css as a base,
+   then adds an icon-aware flex layout.
+   ============================================ */
+
+.startup-day-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--xs);
+    padding: var(--xs) var(--md);
+    background-color: var(--surface-container-high);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: var(--md);
+}
+
+
+/* ============================================
+   EMPTY STATE CARD
+   Used for Habits when the user has no habits yet.
+   Sits inside a .card (from components.css), adds
+   centered column layout.
+   ============================================ */
+
+.startup-empty-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--md);
+    padding: var(--xl);
+    text-align: center;
+    min-height: 180px;
+}
+
+.startup-empty-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface-container-high);
+    border-radius: var(--radius-full);
+    color: var(--on-surface-variant);
+    margin-bottom: var(--sm);
+}
+
+.startup-empty-title {
+    font-size: var(--fs-headline-sm);
+    font-weight: 600;
+    color: var(--on-surface);
+}
+
+.startup-empty-subtitle {
+    font-size: var(--fs-body-sm);
+    color: var(--on-surface-variant);
+    max-width: 320px;
+    line-height: var(--lh-body);
+}
+
+
+/* ============================================
+   WEEKLY TRAJECTORY CHART
+   Skeleton bar chart inside a .card.
+   ============================================ */
+
+.startup-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sm);
+    height: 120px;
+    padding: 0 var(--sm);
+    margin-bottom: var(--sm);
+}
+
+.startup-bar {
+    flex: 1;
+    background-color: var(--surface-container-high);
+    border-radius: 3px 3px 0 0;
+    /* Subtle pulse animation to signal "data pending" */
+    animation: startup-bar-pulse 3s ease-in-out infinite;
+}
+
+/* Projected / future bar — dashed outline only */
+.startup-bar--projected {
+    background-color: transparent;
+    border: 1px dashed var(--outline-variant);
+    animation: none;
+}
+
+@keyframes startup-bar-pulse {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 1;   }
+}
+
+.startup-chart-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--sm);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--on-surface-variant);
+}
+
+/* Highlight today's label */
+.startup-chart-label--today {
+    color: var(--primary);
+}
+
+
+/* ============================================
+   JOURNAL PROMPT VARIANT
+   Adds a faint dashed top border to visually
+   distinguish the "prompt" state from a real entry.
+   Uses .journal-entry (components.css) as base.
+   ============================================ */
+
+.startup-journal-prompt {
+    border-style: dashed;
+    opacity: 0.85;
+}
+
+.startup-journal-prompt:hover {
+    opacity: 1;
+    cursor: pointer;
+}

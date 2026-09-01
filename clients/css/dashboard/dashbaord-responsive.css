@@ -1,0 +1,64 @@
+/* =========================================================
+   DASHBOARD-RESPONSIVE.CSS — every @media rule for the
+   dashboard lives here, and nowhere else.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   TABLET (768px – 1023px)
+   Sidebar collapses, cards regroup to a 2-column grid.
+   --------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+
+    .sidebar { display: none; }
+
+    .dashboard-main { margin-left: 0; margin-bottom: 64px; }
+
+    .topbar { padding: var(--lg) var(--md); }
+
+    .dashboard-content { padding: var(--lg) var(--md); }
+
+    .dashboard-grid { grid-template-columns: repeat(8, 1fr); }
+
+    .dashboard-focus-card    { grid-column: span 8; }
+    .dashboard-habits-card   { grid-column: span 4; }
+    .dashboard-routine-card  { grid-column: span 4; }
+    .dashboard-goals-card    { grid-column: span 8; }
+    .dashboard-week-card     { grid-column: span 8; }
+    .dashboard-reflection-card { grid-column: span 8; }
+    .topbar-actions { display: flex; }
+    .bottom-nav { display: flex; }
+}
+
+/* ---------------------------------------------------------
+   MOBILE (< 768px)
+   Everything stacks into a single column.
+   --------------------------------------------------------- */
+
+@media (max-width: 767px) {
+
+    .dashboard-grid { grid-template-columns: 1fr; }
+
+    .dashboard-focus-card,
+    .dashboard-habits-card,
+    .dashboard-routine-card,
+    .dashboard-goals-card,
+    .dashboard-week-card,
+    .dashboard-reflection-card {
+        grid-column: span 1;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sm);
+    }
+
+    .topbar-actions {display:none ;align-self :flex-end; margin-top: calc(-1 * var(--xl)); }
+
+    .focus-task { font-size: 26px; }
+
+    .goal-grid { grid-template-columns: 1fr; }
+
+    .week-stat-grid { grid-template-columns: repeat(3, 1fr); gap: var(--sm); }
+}
