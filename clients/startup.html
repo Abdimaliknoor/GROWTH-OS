@@ -10,10 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="../clients/css/base.css">
-<link rel="stylesheet" href="../clients/css/components.css">
-<link rel="stylesheet" href="../clients/css/dashboard/dashboard.css">
-<link rel="stylesheet" href="../clients/css/dashboard/dashbaord-responsive.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard/dashboard.css">
+<link rel="stylesheet" href="css//dashboard/dashbaord-responsive.css">
 </head>
 <body>
 
@@ -119,12 +119,12 @@
                         </div>
 
                         <div id="focusEmpty" class="empty-state hidden">
-                            Add a goal to see your focus here.
+                            No focus set for today yet.
                         </div>
                     </div>
 
-                    <div class="focus-actions">
-                        <button class="btn btn-primary">
+                    <div class="focus-actions" id="focusActions">
+                        <button class="btn btn-primary" id="focusStartBtn">
                             <span class="icon icon-sm icon-filled">play_arrow</span>
                             Start Focus
                         </button>
@@ -240,7 +240,7 @@
     </a>
 </nav>
 
-<script src='./js/state.js'></script>
-<script src="./js/dashboard.js"></script>
+<script src="js/state.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>

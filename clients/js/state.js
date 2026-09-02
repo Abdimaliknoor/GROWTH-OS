@@ -26,6 +26,17 @@ function defaultUser() {
         },
         goals: [],
         journal: [],
+        // Focus is its own lightweight daily-planning object — not derived
+        // from goals[0]. It can optionally point at a goal via goalId, but
+        // it always has its own title/next-action for today.
+        focus: {
+            goalId: null,
+            title: "",
+            nextAction: "",
+            estimatedMinutes: null,
+            date: "",
+            completed: false
+        },
         stats: {
             streak: 0,
             completedHabits: 0,
@@ -71,6 +82,7 @@ function fillMissingFields(user) {
         lifestyle: { ...fresh.lifestyle, ...user.lifestyle },
         goals: user.goals || fresh.goals,
         journal: user.journal || fresh.journal,
+        focus: { ...fresh.focus, ...user.focus },
         stats: { ...fresh.stats, ...user.stats },
         onboarding: { ...fresh.onboarding, ...user.onboarding },
         version: user.version || fresh.version
@@ -262,6 +274,52 @@ function saveGoals(goals) {
     const user = getUser();
     user.goals = goals;
     saveUser(user);
+}
+
+/* ------------------------------------------------------------
+   FOCUS
+   ------------------------------------------------------------
+   Focus answers "what deserves attention right now" — it is set
+   deliberately by the user, not guessed from goals[0]. It can
+   optionally reference a goal via goalId, but always carries its
+   own title/nextAction. It resets each day: a focus set for a
+   past date is treated as stale rather than shown as today's.
+   ------------------------------------------------------------ */
+
+function todayDateString() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function getFocus() {
+    return getUser().focus;
+}
+
+// Returns the focus object only if it was set for today, otherwise null —
+// this is what the dashboard should render from.
+function getTodayFocus() {
+    const focus = getFocus();
+    return focus.date === todayDateString() ? focus : null;
+}
+
+function setFocus({ goalId, title, nextAction, estimatedMinutes }) {
+    const user = getUser();
+    user.focus = {
+        goalId: goalId || null,
+        title: title || "",
+        nextAction: nextAction || "",
+        estimatedMinutes: estimatedMinutes || null,
+        date: todayDateString(),
+        completed: false
+    };
+    saveUser(user);
+}
+
+function completeFocus() {
+    const user = getUser();
+    if (user.focus.date === todayDateString()) {
+        user.focus.completed = true;
+        saveUser(user);
+    }
 }
 
 /* ------------------------------------------------------------

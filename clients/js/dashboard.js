@@ -79,29 +79,37 @@ function renderTopbar() {
    ------------------------------------------------------------ */
 
 function renderFocus() {
-    const goals = getGoals();
+    const focus = getTodayFocus();
     const taskEl = document.getElementById("focusTask");
     const nextEl = document.getElementById("focusNextAction");
     const emptyEl = document.getElementById("focusEmpty");
     const bodyEl = document.getElementById("focusBody");
+    const actionsEl = document.getElementById("focusActions");
 
-    if (!goals.length) {
+    if (!focus) {
         if (bodyEl) bodyEl.classList.add("hidden");
         if (emptyEl) emptyEl.classList.remove("hidden");
+        if (actionsEl) actionsEl.classList.add("hidden");
         return;
     }
 
     if (bodyEl) bodyEl.classList.remove("hidden");
     if (emptyEl) emptyEl.classList.add("hidden");
+    if (actionsEl) actionsEl.classList.remove("hidden");
 
-    const primaryGoal = goals[0];
-    const headline = primaryGoal.currentFocus || primaryGoal.title;
-    const nextAction = primaryGoal.currentFocus
-        ? `Part of your goal: ${primaryGoal.title}`
-        : "Decide the next concrete step for this goal.";
+    if (taskEl) taskEl.textContent = focus.title;
 
-    if (taskEl) taskEl.textContent = headline;
-    if (nextEl) nextEl.textContent = nextAction;
+    // If this focus is tied to a goal, show that goal as context under it.
+    if (nextEl) {
+        if (focus.nextAction) {
+            nextEl.textContent = focus.nextAction;
+        } else if (focus.goalId) {
+            const goal = getGoals().find(g => g.id === focus.goalId);
+            nextEl.textContent = goal ? `Part of your goal: ${goal.title}` : "";
+        } else {
+            nextEl.textContent = "";
+        }
+    }
 }
 
 /* ------------------------------------------------------------
