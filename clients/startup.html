@@ -7,138 +7,186 @@
 
 <link href="https://fonts.googleapis.com" rel="preconnect">
 <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/dashboard/dashboard.css">
-<link rel="stylesheet" href="css//dashboard/dashbaord-responsive.css">
+<link rel="stylesheet" href="css/dashboard/dashbaord-responsive.css">
 </head>
 <body>
 
 <div class="app-shell">
 
     <!-- ================= SIDEBAR ================= -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <span class="icon icon-filled">adjust</span>
-            <div>
-                <div class="sidebar-brand-name">Growth OS</div>
-                <div class="sidebar-brand-tag">Peak Performance</div>
+    <aside class="app-sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-brand">
+                <span class="sidebar-brand-mark"></span>
+                <span class="sidebar-brand-name">GROWTH OS</span>
             </div>
+
+            <button class="sidebar-cta-button">
+                <span class="icon icon-sm">add</span>
+                Quick Entry
+            </button>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-group">
+                    <span class="sidebar-nav-group-title">Workspace</span>
+
+                    <a class="sidebar-nav-link is-active" href="dashboard.html">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm icon-filled">dashboard</span> Dashboard
+                        </span>
+                    </a>
+                    <a class="sidebar-nav-link" href="#">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm">bolt</span> Focus
+                        </span>
+                    </a>
+                    <a class="sidebar-nav-link" href="goals.html">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm">flag</span> Goals
+                        </span>
+                        <span class="sidebar-nav-link-count" id="sidebarGoalsCount"></span>
+                    </a>
+                    <a class="sidebar-nav-link" href="habits.html">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm">event_repeat</span> Habits
+                        </span>
+                        <span class="sidebar-nav-link-count" id="sidebarHabitsCount"></span>
+                    </a>
+                    <a class="sidebar-nav-link" href="routine.html">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm">schedule</span> Routine
+                        </span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-group">
+                    <span class="sidebar-nav-group-title">Reflect &amp; Log</span>
+                    <a class="sidebar-nav-link" href="journal.html">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm">edit_note</span> Daily Log
+                        </span>
+                    </a>
+                    <a class="sidebar-nav-link" href="analytics.html">
+                        <span class="sidebar-nav-link-left">
+                            <span class="icon icon-sm">query_stats</span> Weekly Analytics
+                        </span>
+                    </a>
+                </div>
+            </nav>
         </div>
 
-        <nav class="sidebar-nav">
-            <div class="sidebar-group">
-                <span class="sidebar-group-title">Workspace</span>
-                <a class="sidebar-link is-active" href="dashboard.html">
-                    <span class="icon icon-filled icon-sm">dashboard</span> Dashboard
-                </a>
-                <a class="sidebar-link" href="habits.html">
-                    <span class="icon icon-sm">event_repeat</span> Habits
-                </a>
-                <a class="sidebar-link" href="routine.html">
-                    <span class="icon icon-sm">schedule</span> Routine
-                </a>
-                <a class="sidebar-link" href="goals.html">
-                    <span class="icon icon-sm">flag</span> Goals
-                </a>
+        <div class="sidebar-profile">
+            <div class="sidebar-profile-left">
+                <div class="sidebar-profile-avatar" id="sidebarProfileAvatar">?</div>
+                <div>
+                    <div class="sidebar-profile-name" id="sidebarProfileName">Guest</div>
+                    <div class="sidebar-profile-role" id="sidebarProfileRole"></div>
+                </div>
             </div>
-
-            <div class="sidebar-group">
-                <span class="sidebar-group-title">Reflection</span>
-                <a class="sidebar-link" href="journal.html">
-                    <span class="icon icon-sm">edit_note</span> Journal
-                </a>
+            <div class="status status-active">
+                <span class="status-dot"></span>
+                <span>Optimal</span>
             </div>
-
-            <div class="sidebar-group">
-                <span class="sidebar-group-title">Analytics</span>
-                <a class="sidebar-link" href="analytics.html">
-                    <span class="icon icon-sm">query_stats</span> Analytics
-                </a>
-            </div>
-
-            <div class="sidebar-group">
-                <span class="sidebar-group-title">System</span>
-                <a class="sidebar-link" href="settings.html">
-                    <span class="icon icon-sm">settings</span> Settings
-                </a>
-                <a class="sidebar-link" href="support.html">
-                    <span class="icon icon-sm">help_outline</span> Support
-                </a>
-            </div>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="avatar" id="sidebarUserAvatar">?</div>
-            <span class="text-body-sm" id="sidebarUserName">Guest</span>
         </div>
     </aside>
 
     <!-- ================= MAIN ================= -->
-    <main class="dashboard-main">
+    <main class="app-main">
 
-        <header class="topbar">
+        <header class="app-topbar">
             <div>
-                <h1 class="topbar-title" id="topbarTitle">Welcome back</h1>
-                <div class="topbar-subtitle">
-                    <span id="topbarDate"></span>
-                    <span class="topbar-dot"></span>
-                    <span>Build deliberately. One focused action at a time.</span>
+                <div class="app-topbar-eyebrow">
+                    <span>Growth OS</span>
+                    <span class="app-topbar-eyebrow-dim">•</span>
+                    <span>Execution Layer</span>
                 </div>
+                <h1 class="app-topbar-title" id="topbarTitle">Welcome back</h1>
+                <p class="app-topbar-subtitle" id="topbarDate"></p>
             </div>
-            <div class="topbar-actions">
+            <div class="app-topbar-actions">
+                <div class="app-topbar-status status status-active">
+                    <span class="status-dot"></span>
+                    <span>System Active</span>
+                </div>
                 <button class="icon-button" aria-label="Notifications">
-                    <span class="icon">notifications</span>
-                </button>
-                <button class="icon-button" aria-label="Search">
-                    <span class="icon">search</span>
+                    <span class="icon icon-sm">notifications</span>
                 </button>
             </div>
         </header>
 
-        <div class="dashboard-content">
+        <div class="app-content">
             <div class="dashboard-grid">
 
                 <!-- 1. TODAY'S FOCUS -->
-                <section class="card dashboard-focus-card">
+                <section class="panel dashboard-focus-panel">
                     <div>
-                        <div class="card-title">
-                            <span class="icon icon-filled icon-sm">target</span>
-                            <span class="text-label">Today's Focus</span>
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <span class="panel-title-dot"></span>
+                                <span class="text-label">Today's Focus</span>
+                            </div>
+                            <span class="badge hidden" id="focusCountBadge"></span>
                         </div>
 
-                        <div id="focusBody">
-                            <h2 class="focus-task" id="focusTask"></h2>
-                            <div class="focus-next">
-                                <div class="focus-next-label">NEXT ACTION</div>
-                                <p class="text-body-lg" id="focusNextAction"></p>
+                        <div id="focusBody" class="hidden">
+                            <div class="focus-body-top">
+                                <h2 class="focus-task" id="focusTask"></h2>
+                            </div>
+                            <p class="focus-meta" id="focusMeta"></p>
+
+                            <div class="focus-pill-row" id="focusPillRow" style="margin-top: var(--md);"></div>
+
+                            <div id="focusTargetWrap" style="margin-top: var(--md);">
+                                <div class="focus-target-row">
+                                    <span class="text-muted" id="focusTargetLabel"></span>
+                                    <span class="completed-label" id="focusPercentLabel"></span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" id="focusProgressBar"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <div id="focusEmpty" class="empty-state hidden">
-                            No focus set for today yet.
-                        </div>
+                        <div id="focusSetup" class="focus-setup hidden"></div>
                     </div>
 
-                    <div class="focus-actions" id="focusActions">
-                        <button class="btn btn-primary" id="focusStartBtn">
+                    <div class="focus-actions hidden" id="focusActions">
+                        <button class="btn btn-primary btn-full" id="focusStartBtn">
                             <span class="icon icon-sm icon-filled">play_arrow</span>
                             Start Focus
+                        </button>
+                        <button class="btn btn-outline btn-full" id="focusRecordBtn">
+                            Record Result
                         </button>
                     </div>
                 </section>
 
-                <!-- 2. TODAY'S HABITS -->
-                <section class="card dashboard-habits-card">
-                    <div class="card-header">
-                        <div class="card-title">
+                <!-- 2. THIS WEEK -->
+                <section class="panel dashboard-week-panel">
+                    <div class="panel-header">
+                        <span class="text-label">This Week</span>
+                        <span class="badge" id="weekLabelBadge"></span>
+                    </div>
+                    <div class="week-stat-grid" id="weekStatGrid"></div>
+                    <div id="weekEmpty" class="empty-state hidden">
+                        Add a habit to see weekly progress here.
+                    </div>
+                </section>
+
+                <!-- 3. TODAY'S HABITS -->
+                <section class="panel dashboard-habits-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
                             <span class="icon icon-sm">check_circle</span>
                             <span class="text-label">Today's Habits</span>
                         </div>
-                        <span class="card-count" id="habitCount">0/0</span>
+                        <span class="panel-count" id="habitCount">0/0</span>
                     </div>
 
                     <div class="habit-list" id="habitList"></div>
@@ -147,74 +195,58 @@
                     </div>
                 </section>
 
-                <!-- 3. TODAY'S ROUTINE -->
-                <section class="card dashboard-routine-card">
-                    <div class="card-title" style="margin-bottom: var(--lg);">
-                        <span class="icon icon-sm">schedule</span>
-                        <span class="text-label">Today's Routine</span>
+                <!-- 4. TODAY'S ROUTINE -->
+                <section class="panel dashboard-routine-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="icon icon-sm">schedule</span>
+                            <span class="text-label">Today's Routine</span>
+                        </div>
                     </div>
 
-                    <div class="timeline" id="routineList"></div>
+                    <div class="routine-list" id="routineList"></div>
                     <div id="routineEmpty" class="empty-state hidden">
                         No routine set yet. Add one on the Routine page.
                     </div>
                 </section>
 
-                <!-- 4. YOUR GOALS -->
-                <section class="card dashboard-goals-card">
-                    <div class="card-title" style="margin-bottom: var(--lg);">
-                        <span class="icon icon-sm">flag</span>
-                        <span class="text-label">Your Goals</span>
+                <!-- 5. YOUR GOALS -->
+                <section class="panel dashboard-goals-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="icon icon-sm">flag</span>
+                            <span class="text-label">Your Goals</span>
+                        </div>
+                        <span class="panel-count" id="goalCount">0</span>
                     </div>
 
-                    <div class="goal-grid" id="goalGrid"></div>
+                    <div class="goal-list" id="goalList"></div>
                     <div id="goalsEmpty" class="empty-state hidden">
                         No goals yet. Add one on the Goals page.
                     </div>
                 </section>
 
-                <!-- 5. THIS WEEK -->
-                <section class="card dashboard-week-card">
-                    <div class="card-title" style="margin-bottom: var(--lg);">
-                        <span class="icon icon-sm">monitoring</span>
-                        <span class="text-label">This Week</span>
-                    </div>
-
-                    <div class="week-stat-grid">
-                        <div class="stat-box">
-                            <div class="stat-box-value" id="statStreak">0</div>
-                            <div class="stat-box-label">Day Streak</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-box-value" id="statCompleted">0</div>
-                            <div class="stat-box-label">Habits Completed</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-box-value" id="statDays">0</div>
-                            <div class="stat-box-label">Total Days</div>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- 6. REFLECT -->
-                <section class="card dashboard-reflection-card">
-                    <div class="card-title" style="margin-bottom: var(--lg);">
-                        <span class="icon icon-sm">edit_note</span>
-                        <span class="text-label">Reflect</span>
+                <section class="panel dashboard-reflection-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="icon icon-sm">edit_note</span>
+                            <span class="text-label">Reflect</span>
+                        </div>
                     </div>
 
                     <div class="reflection-body">
                         <label class="reflection-prompt" for="reflectionInput">
-                            What became clearer today?
+                            What moved you forward today?
                         </label>
                         <textarea
-                            class="textarea-field"
+                            class="textarea"
                             id="reflectionInput"
-                            placeholder="Start typing your thoughts here..."></textarea>
+                            placeholder="Write a deliberate reflection..."></textarea>
 
                         <div class="reflection-footer">
                             <span class="reflection-last-saved" id="reflectionLastSaved"></span>
-                            <button class="btn btn-outline" id="reflectionSaveBtn">Save reflection</button>
+                            <button class="btn btn-primary" id="reflectionSaveBtn">Save Reflection</button>
                         </div>
                     </div>
                 </section>
@@ -225,17 +257,17 @@
 </div>
 
 <!-- ================= BOTTOM NAV (mobile / tablet) ================= -->
-<nav class="bottom-nav">
-    <a class="bottom-nav-link is-active" href="dashboard.html">
+<nav class="app-bottom-nav">
+    <a class="app-bottom-nav-link is-active" href="dashboard.html">
         <span class="icon icon-filled icon-sm">home</span> Home
     </a>
-    <a class="bottom-nav-link" href="habits.html">
+    <a class="app-bottom-nav-link" href="habits.html">
         <span class="icon icon-sm">check_circle</span> Habits
     </a>
-    <a class="bottom-nav-link" href="analytics.html">
+    <a class="app-bottom-nav-link" href="analytics.html">
         <span class="icon icon-sm">bar_chart</span> Stats
     </a>
-    <a class="bottom-nav-link" href="settings.html">
+    <a class="app-bottom-nav-link" href="settings.html">
         <span class="icon icon-sm">person</span> Profile
     </a>
 </nav>

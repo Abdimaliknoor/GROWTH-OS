@@ -1,28 +1,14 @@
 /* =========================================================
-   DASHBOARD.CSS — layout for dashboard.html only
+   DASHBOARD.CSS — layout for dashboard.html ONLY.
+   Every reusable piece lives in components.css instead;
+   this file is just the page's grid and section placement.
    ========================================================= */
 
-.app-shell {
-    min-height: 100vh;
-}
-
-.dashboard-main {
-    margin-left: 256px;
-    min-height: 100vh;
-}
-
-.dashboard-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--xl);
-}
-.topbar-actions { display: none; gap: var(--sm); }
-
 /* ---------------------------------------------------------
-   GRID — the bento layout described in the blueprint:
-   FOCUS(8) HABITS(4)
-   ROUTINE(4) GOALS(8)
-   WEEK(8) REFLECT(4)
+   GRID — matches the reference design's proportions:
+   FOCUS(7) THIS WEEK(5)
+   HABITS(6) ROUTINE(6)
+   GOALS(7) REFLECT(5)
    --------------------------------------------------------- */
 
 .dashboard-grid {
@@ -31,45 +17,47 @@
     gap: var(--md);
 }
 
-.dashboard-focus-card    { grid-column: span 8; }
-.dashboard-habits-card   { grid-column: span 4; }
-.dashboard-routine-card  { grid-column: span 4; }
-.dashboard-goals-card    { grid-column: span 8; }
-.dashboard-week-card     { grid-column: span 8; }
-.dashboard-reflection-card { grid-column: span 4; }
+.dashboard-focus-panel      { grid-column: span 7; }
+.dashboard-week-panel       { grid-column: span 5; }
+.dashboard-habits-panel     { grid-column: span 6; }
+.dashboard-routine-panel    { grid-column: span 6; }
+.dashboard-goals-panel      { grid-column: span 7; }
+.dashboard-reflection-panel { grid-column: span 5; }
 
 /* ---------------------------------------------------------
-   FOCUS CARD
+   FOCUS PANEL — this exact composition (title, pill row,
+   target line, habit list) is specific to how the dashboard
+   presents a focus session
    --------------------------------------------------------- */
 
-.dashboard-focus-card {
+.dashboard-focus-panel {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 280px;
+    min-height: 300px;
 }
 
-.focus-task {
-    font-size: 34px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+.dashboard-focus-panel .focus-task {
+    font-size: var(--fs-display-md);
+    font-weight: 800;
+    letter-spacing: -0.01em;
     line-height: 1.2;
-    margin: var(--md) 0 var(--lg);
 }
 
-.focus-next {
-    padding-left: var(--md);
-    border-left: 2px solid var(--outline-variant);
-}
-
-.focus-next-label {
-    font-size: 11px;
+.dashboard-focus-panel .focus-meta {
+    font-size: var(--fs-body-sm);
     color: var(--on-surface-variant);
-    letter-spacing: 0.05em;
-    margin-bottom: var(--xs);
 }
 
-.focus-actions {
+.dashboard-focus-panel .focus-body-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+}
+
+.dashboard-focus-panel .focus-actions {
     display: flex;
     align-items: center;
     gap: var(--md);
@@ -77,103 +65,75 @@
 }
 
 /* ---------------------------------------------------------
-   HABITS CARD
+   HABITS / ROUTINE PANELS — list containers
    --------------------------------------------------------- */
 
-.habit-list {
+.dashboard-habits-panel .habit-list,
+.dashboard-routine-panel .routine-list {
     display: flex;
     flex-direction: column;
     gap: var(--xs);
 }
 
 /* ---------------------------------------------------------
-   ROUTINE CARD
+   GOALS PANEL
    --------------------------------------------------------- */
 
-.dashboard-routine-card .timeline {
-    margin-top: var(--sm);
+.dashboard-goals-panel .goal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm);
 }
 
 /* ---------------------------------------------------------
-   GOALS CARD
+   THIS WEEK PANEL — 2x2 grid of real weekly habit totals
    --------------------------------------------------------- */
 
-.goal-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--md);
-}
-
-.goal-card {
-    padding: var(--md);
-    background: var(--surface-container-high);
-    border: 1px solid var(--outline);
-    border-radius: var(--radius-md);
-}
-
-.goal-title {
-    font-size: var(--fs-headline-sm);
-    font-weight: 600;
-    margin-bottom: var(--xs);
-}
-
-.goal-focus-label {
-    font-size: 10px;
-    color: var(--on-surface-variant);
-    letter-spacing: 0.05em;
-    display: block;
-    margin-top: var(--sm);
-}
-
-.goal-focus-value {
-    font-size: var(--fs-body-sm);
-    display: block;
-    margin-top: 2px;
-}
-
-/* ---------------------------------------------------------
-   WEEK CARD
-   --------------------------------------------------------- */
-
-.week-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--md);
-}
-
-/* ---------------------------------------------------------
-   REFLECTION CARD
-   --------------------------------------------------------- */
-
-.dashboard-reflection-card {
+.dashboard-week-panel {
     display: flex;
     flex-direction: column;
 }
 
-.reflection-body {
+.dashboard-week-panel .week-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sm);
+    flex: 1;
+}
+
+/* ---------------------------------------------------------
+   REFLECTION PANEL
+   --------------------------------------------------------- */
+
+.dashboard-reflection-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-reflection-panel .reflection-body {
     display: flex;
     flex-direction: column;
     gap: var(--md);
     flex: 1;
 }
 
-.reflection-prompt {
-    font-size: var(--fs-headline-sm);
-    font-weight: 600;
+.dashboard-reflection-panel .reflection-prompt {
+    font-size: var(--fs-body-lg);
+    font-weight: 700;
 }
 
-#reflection-input {
-    min-height: 110px;
-}
-
-.reflection-footer {
+.dashboard-reflection-panel .reflection-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--sm);
+    padding-top: var(--md);
+    margin-top: var(--xs);
+    border-top: 1px solid var(--outline-variant);
 }
 
-.reflection-last-saved {
-    font-size: 11px;
-    color: var(--on-surface-variant);
+.dashboard-reflection-panel .reflection-last-saved {
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-label);
+    color: var(--dim);
 }

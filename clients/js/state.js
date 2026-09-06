@@ -26,14 +26,13 @@ function defaultUser() {
         },
         goals: [],
         journal: [],
-        // Focus is its own lightweight daily-planning object — not derived
-        // from goals[0]. It can optionally point at a goal via goalId, but
-        // it always has its own title/next-action for today.
+        // Focus is today's execution session — a title plus the specific
+        // habits being worked on right now (e.g. "Morning Training" ->
+        // Running + Sprint). Recording progress happens against those
+        // habits directly, from inside the Focus card.
         focus: {
-            goalId: null,
             title: "",
-            nextAction: "",
-            estimatedMinutes: null,
+            habitIds: [],
             date: "",
             completed: false
         },
@@ -135,18 +134,30 @@ function humanizeFrequency(frequency) {
 
 function normalizeHabit(item, index) {
     if (typeof item === "string") {
-        return { id: "habit-" + index, name: item, detail: "", completed: false };
+        return {
+            id: "habit-" + index, name: item, detail: "",
+            goalId: null, target: null, unit: "", frequency: "",
+            todayAmount: 0, completedToday: false
+        };
     }
 
     const detailParts = [];
     if (item.target && item.unit) detailParts.push(`${item.target} ${item.unit}`);
     if (item.frequency) detailParts.push(humanizeFrequency(item.frequency));
 
+    const log = item.log || {};
+    const todayAmount = log[todayDateString()] || 0;
+
     return {
         id: item.id || "habit-" + index,
         name: item.name || item.title || humanizeHabitId(item.id),
         detail: detailParts.join(" · "),
-        completed: !!item.completed
+        goalId: item.goalId || null,
+        target: typeof item.target === "number" ? item.target : null,
+        unit: item.unit || "",
+        frequency: item.frequency || "",
+        todayAmount,
+        completedToday: typeof item.target === "number" ? todayAmount >= item.target : false
     };
 }
 
@@ -216,19 +227,20 @@ function saveHabits(habits) {
     saveUser(user);
 }
 
-function toggleHabit(habitId) {
+// Adds `amount` to today's logged total for a habit (not overwrite —
+// recording twice in a day accumulates, matching "7 pages, then 3 more").
+function addHabitProgress(habitId, amount) {
     const user = getUser();
+    const today = todayDateString();
 
-    // Toggle "completed" directly on the raw saved objects so fields like
-    // target/unit/frequency that aren't part of the display shape survive.
     const updatedRaw = user.habits.map((item, index) => {
         const itemId = typeof item === "string" ? "habit-" + index : item.id;
         if (itemId !== habitId) return item;
 
-        if (typeof item === "string") {
-            return { id: itemId, name: item, completed: true };
-        }
-        return { ...item, completed: !item.completed };
+        const base = typeof item === "string" ? { id: itemId, name: item } : { ...item };
+        const log = { ...(base.log || {}) };
+        log[today] = (log[today] || 0) + amount;
+        return { ...base, log };
     });
 
     user.habits = updatedRaw;
@@ -236,9 +248,66 @@ function toggleHabit(habitId) {
     return updatedRaw.map(normalizeHabit);
 }
 
-/* ------------------------------------------------------------
-   ROUTINE
-   ------------------------------------------------------------ */
+// How many days per week a habit is expected to occur, used to turn a
+// per-day target into a weekly target for goal-progress math.
+function frequencyDaysPerWeek(frequency) {
+    if (frequency === "weekdays") return 5;
+    if (frequency === "everyday") return 7;
+    return 7; // unknown/custom frequency defaults to daily
+}
+
+function habitWeeklyTarget(habit) {
+    if (typeof habit.target !== "number") return null;
+    return habit.target * frequencyDaysPerWeek(habit.frequency);
+}
+
+// Sums a habit's raw log entries over the last `days` days (default: this
+// week, including today).
+function getHabitWeeklyTotal(habitId, days = 7) {
+    const user = getUser();
+    const rawHabit = user.habits.find((item, index) => {
+        const itemId = typeof item === "string" ? "habit-" + index : item.id;
+        return itemId === habitId;
+    });
+    if (!rawHabit || typeof rawHabit === "string" || !rawHabit.log) return 0;
+
+    let total = 0;
+    for (let i = 0; i < days; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        total += rawHabit.log[key] || 0;
+    }
+    return total;
+}
+
+// The real behavioral progress behind a goal: every habit linked to it,
+// with how much was actually done this week vs. its weekly target.
+// Habits can have different units, so this returns one row per habit
+// rather than a single merged number.
+function getGoalProgress(goalId) {
+    return getHabits()
+        .filter(habit => habit.goalId === goalId)
+        .map(habit => ({
+            habitId: habit.id,
+            name: habit.name,
+            unit: habit.unit,
+            weeklyTotal: getHabitWeeklyTotal(habit.id),
+            weeklyTarget: habitWeeklyTarget(habit)
+        }));
+}
+
+// A single completion percentage for a goal card's badge — the average
+// of each linked habit's (weeklyTotal / weeklyTarget), so it's a real
+// derived number, not an invented one. Returns null if no linked habit
+// has a numeric target to measure against.
+function getGoalCompletionPercent(goalId) {
+    const measurable = getGoalProgress(goalId).filter(c => typeof c.weeklyTarget === "number" && c.weeklyTarget > 0);
+    if (!measurable.length) return null;
+
+    const avgRatio = measurable.reduce((sum, c) => sum + Math.min(1, c.weeklyTotal / c.weeklyTarget), 0) / measurable.length;
+    return Math.round(avgRatio * 100);
+}
 
 function getRoutine() {
     return getUser().routine.map(normalizeRoutineItem);
@@ -279,11 +348,13 @@ function saveGoals(goals) {
 /* ------------------------------------------------------------
    FOCUS
    ------------------------------------------------------------
-   Focus answers "what deserves attention right now" — it is set
-   deliberately by the user, not guessed from goals[0]. It can
-   optionally reference a goal via goalId, but always carries its
-   own title/nextAction. It resets each day: a focus set for a
-   past date is treated as stale rather than shown as today's.
+   Focus is today's execution session: a title plus the specific
+   habits being worked on right now — e.g. "Morning Training"
+   containing Running + Sprint. It doesn't invent its own
+   progress tracking; recording happens against the habits
+   themselves (via addHabitProgress), so Focus is just "which
+   habits am I executing in this session." It resets each day: a
+   focus set for a past date is treated as stale.
    ------------------------------------------------------------ */
 
 function todayDateString() {
@@ -301,13 +372,11 @@ function getTodayFocus() {
     return focus.date === todayDateString() ? focus : null;
 }
 
-function setFocus({ goalId, title, nextAction, estimatedMinutes }) {
+function setFocus({ title, habitIds }) {
     const user = getUser();
     user.focus = {
-        goalId: goalId || null,
         title: title || "",
-        nextAction: nextAction || "",
-        estimatedMinutes: estimatedMinutes || null,
+        habitIds: Array.isArray(habitIds) ? habitIds : [],
         date: todayDateString(),
         completed: false
     };
@@ -320,6 +389,18 @@ function completeFocus() {
         user.focus.completed = true;
         saveUser(user);
     }
+}
+
+// The full, normalized habit objects for today's focus session — this is
+// what the Focus card actually renders and lets the user log progress
+// against, one row per habit in the session.
+function getTodayFocusHabits() {
+    const focus = getTodayFocus();
+    if (!focus) return [];
+    const allHabits = getHabits();
+    return focus.habitIds
+        .map(id => allHabits.find(h => h.id === id))
+        .filter(Boolean);
 }
 
 /* ------------------------------------------------------------
