@@ -211,11 +211,10 @@ function getProfile() {
 
 
 function saveName(name) {
-    const user = getUser().user;
+    const user = getUser();      
     user.profile.name = name;
     saveUser(user);
 }
-
 function saveIdentity(identity) {
     const user = getUser();
     user.profile.identity = identity;

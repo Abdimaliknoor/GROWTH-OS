@@ -1,111 +1,38 @@
-.page-header{
-    width:75%;
-    display:flex;
-    align-items:center;
+/* =========================================================
+   NAME PAGE
+   Only what's unique to this page. Everything shared
+   lives in onboarding.css.
+   ========================================================= */
+
+.name-form {
+    margin-top: var(--xl);
 }
 
-
-
-.hero-content{
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-}
-.hero-title{
-    font-size:48px;
-    font-weight:700;
-    line-height:1.1;
-    letter-spacing:-0.04em;
-    color:var(--primary);
-}
-.hero-description{
-    font-size:16px;
-    line-height:1.7;
-    color:var(--on-surface-variant);
-}
-.name-section{
-    margin-top:64px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    position:relative;
-
-}
-.name-section::after{
-    content:"";
-    position:absolute;
-    left:0;
-    bottom:0;
-    width:0;
-    height:2px;
-    background:var(--primary);
-    transition:.35s;
-}
-.name-section:focus-within::after{
-    width:100%;
-}
-.input-label{
-    font-size:14px;
-    font-weight:600;
-    color:var(--on-surface-variant);
-    max-width: fit-content;
-    width: 60%;
-
-}
-.text-input{
-    width:100%;
-    padding:16px 0;
-    background:transparent;
-    border:none;
-    border-bottom:1px solid var(--outline-variant);
-    color:var(--primary);
-    font-size:24px;
-    font-weight:600;
-    font-family:inherit;
-    transition:.3s;
-}
-.progress-section{
-
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:16px;
-}
-.progress-bar{
-    display:flex;
-    gap:8px;
-}
-.progress-dot{
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    background:var(--outline-variant);
-    transition:.35s;
-}
-.progress-dot.active{
-
-    background:var(--primary);
-
-}
-.continue-btn{
-    background: #ffffff;
-    color: #09090b;
+.name-input {
+    width: 100%;
+    padding: 12px 0;
     border: none;
-    border-radius: 99px;
-    padding: 14px 28px;
-    font-weight: bold;
-    font-size: 20px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    transition: transform 0.2s ease;
+    border-bottom: 2px solid var(--outline-variant);
+    background: transparent;
+    color: var(--on-surface);          /* soft off-white, not pure white */
+    caret-color: var(--on-surface);    /* the blinking cursor matches */
+    font-size: 28px;
+    font-weight: 500;                  /* slightly lighter weight = less glare */
+    outline: none;
+    transition: border-color var(--transition-normal);
+}
 
-}
-.continue-btn:disabled{
-    opacity:.35;
-    cursor:not-allowed;
-}
-.continue-btn:not(:disabled):hover{
-    transform:translateY(-2px);
+.name-input::placeholder { color: var(--outline-variant); }
+
+/* Focus: a soft grey underline instead of a bright white one */
+.name-input:focus { border-bottom-color: var(--outline); }
+
+.name-input[aria-invalid="true"] { border-bottom-color: var(--error); }
+
+/* Stop Chrome autofill from painting a light background */
+.name-input:-webkit-autofill,
+.name-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--on-surface);
+    -webkit-box-shadow: 0 0 0 1000px var(--background) inset;
+    transition: background-color 5000s ease-in-out 0s;
 }

@@ -1,126 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your name | Growth OS</title>
 
-<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
 
-    <!-- =====================================
-         META DATA
-    ====================================== -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/onboarding.css" />
+    <link rel="stylesheet" href="../css/startup/name.css" />
+  </head>
+  <body>
+    <div class="ob-page">
+      <header class="ob-topbar">
+        <span class="ob-brand">
+          <span class="ob-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </span>
+      </header>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <main class="ob-content">
+        <p class="ob-eyebrow">Let's begin</p>
+        <h1 class="ob-title">What should we call you?</h1>
+        <p class="ob-subtitle">
+          We'll use your name throughout your Growth OS journey.
+        </p>
 
-    <title>Growth OS | Your Name</title>
+        <form class="name-form" id="nameForm" novalidate>
+          <label class="visually-hidden" for="nameInput">Your name</label>
+          <input
+            class="name-input"
+            id="nameInput"
+            type="text"
+            placeholder="Your name"
+            autocomplete="given-name"
+            maxlength="40"
+            aria-describedby="nameHint nameError"
+          />
+          <p class="ob-hint" id="nameHint">First name is fine.</p>
+          <p class="ob-error" id="nameError" role="alert" hidden></p>
+        </form>
+      </main>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <footer class="ob-footer">
+        <a class="ob-btn ob-btn-secondary" href="welcome.html">Back</a>
+        <button
+          class="ob-btn ob-btn-primary"
+          id="continueButton"
+          type="submit"
+          form="nameForm"
+          disabled
+        >
+          Continue
+          <span class="icon" aria-hidden="true">arrow_forward</span>
+        </button>
+      </footer>
+    </div>
 
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/startup/onboarding.css">
-    <link rel="stylesheet" href="../css/startup/name.css">
-    
-</head>
-
-<body>
-
-    <!-- =====================================
-         NAME PAGE
-    ====================================== -->
-
-     <main class="startpage">
-        <!-- ==============================
-             PAGE HEADER
-        =============================== -->
-       
-        <!-- ==============================
-             HERO SECTION
-        =============================== -->
-        <header class="page-header">
-            <a href="./welcome.html"><button class="btn  back-btn" id="backButton">
-                <span class="material-symbols-outlined">
-                    arrow_back
-                </span>
-            </button></a>
-        </header>
-
-        <section class="hero">
-            
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    What's your name?
-                </h1>
-                <p class="hero-description">
-                    We'll use your name throughout your
-                    Growth OS journey.
-                </p>
-           </div>
-        </section>
-
-        <!-- ==============================
-             NAME INPUT
-        =============================== -->
-        <section class="name-section">
-            <label
-                class="input-label"
-                for="userName">
-                Your Name
-            </label>
-            <input
-                type="text"
-                id="userName"
-                class="text-input"
-                placeholder="e.g. Abdimalik"
-                autocomplete="off">
-        </section>
-
-
-        <!-- ==============================
-             PROGRESS INDICATOR
-        =============================== -->
-
-        <section class="progress-section">
-            <p class="progress-text">
-                Step 2 of 6
-            </p>
-            <div class="progress-bar">
-                <span class="progress-dot active"></span>
-                <span class="progress-dot active"></span>
-                <span class="progress-dot"></span>
-                <span class="progress-dot"></span>
-                <span class="progress-dot"></span>
-                <span class="progress-dot"></span>
-            </div>
-        </section>
-
-        <!-- ==============================
-             PAGE ACTIONS
-        =============================== -->
-
-        <section class="page-actions">
-            <button
-                class="btn btn-white continue-btn"
-                id="continueBtn">
-                <span>
-                Continue
-                </span>
-                <span class="material-symbols-outlined cta-arrow">
-                    arrow_forward
-                </span>
-            </button>
-            </a>
-        </section>
-    </main>
-
-    <!-- JavaScript -->
-    <script src="../js/storage.js"></script>
-    <script src="../js/onboarding.js"></script>
-</body>
-
+    <script src="../js/state.js"></script>
+    <script src="../js/onboardingPages/name.js"></script>
+  </body>
 </html>
