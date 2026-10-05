@@ -14,6 +14,8 @@ function defaultUser() {
     return {
         profile: {
             name: "",
+            area: "",        // "health", "money"... or "other"
+            areaLabel: "",   // what we display: "Health & Fitness", or the user's own text
             identity: "",
             createdAt: Date.now()
         },
@@ -219,6 +221,18 @@ function saveIdentity(identity) {
     const user = getUser();
     user.profile.identity = identity;
     saveUser(user);
+}
+function saveDirection({ area, areaLabel, identity }) {
+    const user = getUser();
+    user.profile.area = area;
+    user.profile.areaLabel = areaLabel;
+    user.profile.identity = identity;
+    saveUser(user);
+}
+
+function getDirection() {
+    const profile = getUser().profile;
+    return { area: profile.area, areaLabel: profile.areaLabel, identity: profile.identity };
 }
 
 function getName() { return getUser().profile.name; }
