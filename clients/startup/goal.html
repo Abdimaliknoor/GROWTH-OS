@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Growth OS | Goals</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/startup/onboarding.css">
+    <link rel="stylesheet" href="../css/startup/goal.css">
+</head>
+
+<body>
+
+<main class="goal-page">
+
+    <!-- ============================================
+         HEADER
+    ============================================= -->
+
+    <header class="goal-header">
+
+        <button
+            type="button"
+            class="goal-back"
+            id="backButton">
+
+            <span class="material-symbols-outlined">
+                arrow_back
+            </span>
+
+            <span>
+                Back
+            </span>
+
+        </button>
+
+    </header>
+
+
+    <!-- ============================================
+         INTRO
+    ============================================= -->
+
+    <section class="goal-intro">
+
+        <div class="goal-step">
+
+            <div class="goal-progress">
+
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span class="active"></span>
+                <span></span>
+
+            </div>
+
+            <p>
+                Step 5 of 6: Goal Calibration
+            </p>
+
+        </div>
+
+        <h1>
+            3-Month Milestones
+        </h1>
+
+        <p>
+            Goals are the measurable outcomes of your habits.
+            <h2>create 2-3 goals to anchor your daily focus.</h2> 
+        </p>
+
+    </section>
+
+
+    <!-- ============================================
+         GOALS SECTION
+    ============================================= -->
+
+    <section class="goal-section">
+
+        <div
+            class="goal-list"
+            id="goalList">
+
+            <div 
+                class="goal-card" 
+                data-goal-id="half_marathon" 
+                data-title="Run a Half-Marathon" 
+                data-desc="Build endurance and consistent physical resilience.">
+                <div class="goal-icon">
+                    <span class="material-symbols-outlined">directions_run</span>
+                </div>
+                <div class="goal-info">
+                    <span class="goal-name">Run a Half-Marathon</span>
+                    <span class="goal-desc">Build endurance and consistent physical resilience.</span>
+                </div>
+            </div>
+
+            <div 
+                class="goal-card" 
+                data-goal-id="launch_mvp" 
+                data-title="Launch MVP" 
+                data-desc="Ship the first version of the project to real users.">
+                <div class="goal-icon">
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                </div>
+                <div class="goal-info">
+                    <span class="goal-name">Launch MVP</span>
+                    <span class="goal-desc">Ship the first version of the project to real users.</span>
+                </div>
+            </div>
+
+            <div 
+                class="goal-card" 
+                data-goal-id="read_12_books" 
+                data-title="Read 12 Books" 
+                data-desc="Expand knowledge across philosophy and technical skills.">
+                <div class="goal-icon">
+                    <span class="material-symbols-outlined">menu_book</span>
+                </div>
+                <div class="goal-info">
+                    <span class="goal-name">Read 12 Books</span>
+                    <span class="goal-desc">Expand knowledge across philosophy and technical skills.</span>
+                </div>
+            </div>
+
+            <div 
+                class="goal-card" 
+                data-goal-id="mental_clarity" 
+                data-title="Improve Mental Clarity" 
+                data-desc="Build a calmer, more focused mind through reflection, rest, and intentional living.">
+
+                <div class="goal-icon">
+                    <span class="material-symbols-outlined">
+                        self_improvement
+                    </span>
+                </div>
+
+                <div class="goal-info">
+                    <span class="goal-name">
+                        Improve Mental Clarity
+                    </span>
+
+                    <span class="goal-desc">
+                        Build a calmer, more focused mind through reflection, rest, and intentional living.
+                    </span>
+                </div>
+
+            </div>
+
+            <div 
+                class="goal-card" 
+                data-goal-id="master_webdev" 
+                data-title="Master Web Development" 
+                data-desc="Build a portfolio of 5 production-ready projects.">
+                <div class="goal-icon">
+                    <span class="material-symbols-outlined">code</span>
+                </div>
+                <div class="goal-info">
+                    <span class="goal-name">Master Web Development</span>
+                    <span class="goal-desc">Build a portfolio of 5 production-ready projects.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             ADD GOAL BUTTON
+        ========================================= -->
+
+        <button
+            type="button"
+            class="add-goal-btn"
+            id="addGoalBtn">
+            <span class="material-symbols-outlined">
+                add
+            </span>
+            <span>
+                Create Custom Goal
+            </span>
+        </button>
+
+
+        <!-- ========================================
+             ADD GOAL FORM
+        ========================================= -->
+
+        <div
+            class="goal-form"
+            id="goalForm"
+            hidden>
+
+            <div class="goal-inputs-wrapper">
+
+                <input
+                    type="text"
+                    id="goalTitleInput"
+                    class="goal-input"
+                    placeholder="Goal Title (e.g., Save $5,000)..."
+                    autocomplete="off">
+
+                <input
+                    type="text"
+                    id="goalDescInput"
+                    class="goal-input"
+                    placeholder="Short description..."
+                    autocomplete="off">
+
+            </div>
+
+            <div class="goal-form-actions">
+
+                <button
+                    type="button"
+                    id="saveGoalBtn"
+                    class="save-goal-btn">
+
+                    Add
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================
+         FOOTER ACTIONS
+    ============================================= -->
+
+    <footer class="goal-footer">
+
+        <button
+            type="button"
+            class="goal-back-footer"
+            id="footerBackButton">
+
+            <span class="material-symbols-outlined">
+                arrow_back
+            </span>
+
+            Back
+
+        </button>
+
+        <button
+            type="button"
+            class="goal-continue"
+            id="continueBtn">
+
+            Continue
+
+            <span class="material-symbols-outlined">
+                arrow_forward
+            </span>
+
+        </button>
+
+    </footer>
+
+</main>
+
+
+<script src="../js/storage.js"></script>
+<script src="../js/onboarding.js"></script>
+
+</body>
+</html>

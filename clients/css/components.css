@@ -1,0 +1,503 @@
+/* =========================================================
+   COMPONENTS.CSS — pieces reused across the dashboard and
+   every other page in the app (sidebar, topbar, panels,
+   habit/routine/goal rows, focus session controls).
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   APP SHELL — the sidebar + main-content skeleton every
+   page in the app uses
+   --------------------------------------------------------- */
+
+.app-shell { min-height: 100vh; }
+
+.app-main {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.app-content {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--xl);
+}
+
+/* ---------------------------------------------------------
+   SIDEBAR NAVIGATION
+   --------------------------------------------------------- */
+
+.app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--surface-container-lowest);
+    border-right: 1px solid var(--outline-variant);
+    z-index: var(--z-sticky);
+}
+
+.sidebar-top { padding: var(--lg) var(--md); display: flex; flex-direction: column; gap: var(--lg); }
+
+.sidebar-brand { display: flex; align-items: center; gap: 10px; }
+
+.sidebar-brand-mark {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-sm);
+    background: var(--primary);
+}
+
+.sidebar-brand-name {
+    font-size: var(--fs-body-lg);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.sidebar-cta-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sm);
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    padding: 10px var(--sm);
+    font-size: var(--fs-body-sm);
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.sidebar-cta-button:hover { background: var(--surface-container-highest); }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: var(--lg); }
+
+.sidebar-nav-group { display: flex; flex-direction: column; gap: 2px; }
+
+.sidebar-nav-group-title {
+    display: block;
+    padding: 0 10px;
+    margin-bottom: var(--xs);
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 36px;
+    padding: 8px 10px;
+    color: var(--on-surface-variant);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: var(--fs-body-sm);
+    font-weight: 500;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-nav-link-left { display: flex; align-items: center; gap: var(--md); }
+
+.sidebar-nav-link-count { font-family: var(--font-family-mono); font-size: var(--fs-label); color: var(--dim); }
+
+.sidebar-nav-link:hover { background: var(--surface-container); color: var(--on-surface); }
+
+.sidebar-nav-link.is-active {
+    background: var(--surface-container-high);
+    color: var(--primary);
+    border-color: var(--outline);
+}
+
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--md);
+    background: var(--surface-container-lowest);
+    border-top: 1px solid var(--outline-variant);
+}
+
+.sidebar-profile-left { display: flex; align-items: center; gap: var(--sm); }
+
+.sidebar-profile-avatar {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    border: 1px solid var(--outline);
+    font-size: var(--fs-body-sm);
+    font-weight: 700;
+}
+
+.sidebar-profile-name { font-size: var(--fs-body-sm); font-weight: 600; }
+.sidebar-profile-role { font-family: var(--font-family-mono); font-size: var(--fs-label); color: var(--on-surface-variant); }
+
+/* ---------------------------------------------------------
+   TOPBAR
+   --------------------------------------------------------- */
+
+.app-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--md);
+    padding: var(--lg) var(--xl);
+    border-bottom: 1px solid var(--outline-variant);
+}
+
+.app-topbar-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+    margin-bottom: 6px;
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-label);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.app-topbar-eyebrow-dim { color: var(--dim); }
+
+.app-topbar-title { font-size: var(--fs-display-md); font-weight: 800; letter-spacing: -0.01em; }
+
+.app-topbar-subtitle { margin-top: 4px; color: var(--on-surface-variant); font-size: var(--fs-body-sm); font-weight: 500; }
+
+.app-topbar-actions { display: flex; align-items: center; gap: var(--sm); }
+
+.app-topbar-status {
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+    padding: 7px 12px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--surface-container-lowest);
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-body-sm);
+    font-weight: 500;
+}
+
+.icon-button {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    color: var(--on-surface);
+    transition: border-color var(--transition-fast);
+}
+
+.icon-button:hover { border-color: var(--outline); }
+
+/* ---------------------------------------------------------
+   BOTTOM NAV — mobile primary navigation
+   --------------------------------------------------------- */
+
+.app-bottom-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 64px;
+    display: none;
+    align-items: center;
+    justify-content: space-around;
+    background: var(--surface-container-lowest);
+    border-top: 1px solid var(--outline-variant);
+    z-index: var(--z-fixed);
+}
+
+.app-bottom-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    height: 100%;
+    color: var(--on-surface-variant);
+    font-size: var(--fs-label);
+    font-weight: 600;
+}
+
+.app-bottom-nav-link.is-active { color: var(--primary); }
+
+/* ---------------------------------------------------------
+   PANEL — the bordered/shadowed section block used in every
+   bento-style grid (dashboard, and future pages like it)
+   --------------------------------------------------------- */
+
+.panel {
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-lg);
+    padding: var(--lg);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+    margin-bottom: var(--lg);
+}
+
+.panel-title { display: flex; align-items: center; gap: var(--sm); color: var(--on-surface); }
+
+.panel-title-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    animation: pulse-dot 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.panel-count {
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-body-sm);
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    background: var(--surface-container-high);
+    border: 1px solid var(--outline);
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+}
+
+/* ---------------------------------------------------------
+   HABIT ROW — quantified habit progress (target vs. actual)
+   --------------------------------------------------------- */
+
+.habit-row {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+    padding: var(--sm) var(--md);
+    background: var(--surface-container);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast);
+}
+
+.habit-row:hover { border-color: var(--outline); }
+
+.habit-row-check {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--outline);
+    background: var(--surface-container-high);
+}
+
+.habit-row.is-done .habit-row-check {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--background);
+}
+
+.habit-row.is-done .habit-row-check .icon { font-size: 14px; }
+
+.habit-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.habit-row-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sm); }
+
+.habit-row-name { font-size: var(--fs-body-sm); font-weight: 600; }
+
+.habit-row.is-done .habit-row-name { text-decoration: line-through; opacity: 0.65; }
+
+.habit-row-percent { font-family: var(--font-family-mono); font-size: var(--fs-body-sm); color: var(--on-surface-variant); }
+
+.habit-row-meta { font-family: var(--font-family-mono); font-size: var(--fs-label); color: var(--dim); }
+
+.habit-row-log-button { flex-shrink: 0; width: 28px; height: 28px; }
+
+/* ---------------------------------------------------------
+   ROUTINE ROW — a flat scheduled item
+   --------------------------------------------------------- */
+
+.routine-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+}
+
+.routine-row-left { display: flex; align-items: center; gap: var(--md); }
+
+.routine-row-time { font-family: var(--font-family-mono); font-size: var(--fs-body-sm); color: var(--dim); }
+
+.routine-row-label { font-size: var(--fs-body-sm); color: var(--on-surface); }
+
+.routine-row-status { font-family: var(--font-family-mono); font-size: var(--fs-label); color: var(--dim); letter-spacing: 0.04em; }
+
+.routine-row.is-past .routine-row-time,
+.routine-row.is-past .routine-row-label { color: var(--dim); text-decoration: line-through; }
+
+.routine-row.is-now { background: var(--surface-container-high); border-color: var(--outline); }
+
+.routine-row.is-now .routine-row-time,
+.routine-row.is-now .routine-row-label { color: var(--on-surface); font-weight: 700; }
+
+/* ---------------------------------------------------------
+   GOAL CARD
+   --------------------------------------------------------- */
+
+.goal-card {
+    padding: 14px;
+    background: var(--surface-container);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast);
+}
+
+.goal-card:hover { border-color: var(--outline); }
+
+.goal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+    margin-bottom: var(--sm);
+}
+
+.goal-card-title { font-size: var(--fs-body-lg); font-weight: 700; }
+
+.goal-card-percent { font-family: var(--font-family-mono); font-size: var(--fs-body-sm); font-weight: 700; color: var(--on-surface); }
+
+.goal-card-focus-line { font-size: var(--fs-body-sm); color: var(--on-surface-variant); margin-top: var(--sm); }
+
+.goal-card-focus-line strong { color: var(--on-surface); font-weight: 600; }
+
+/* ---------------------------------------------------------
+   STAT TILE — small metric block ("This Week")
+   --------------------------------------------------------- */
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--sm);
+    padding: 14px;
+    background: var(--surface-container);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+}
+
+.stat-tile-label {
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-body-sm);
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.stat-tile-value-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sm); }
+
+.stat-tile-value { font-family: var(--font-family-mono); font-size: var(--fs-headline-md); font-weight: 700; }
+.stat-tile-value span { font-size: var(--fs-body-sm); color: var(--dim); font-weight: 400; }
+.stat-tile-unit { font-family: var(--font-family-mono); font-size: var(--fs-label); color: var(--dim); font-weight: 600; }
+
+/* ---------------------------------------------------------
+   FOCUS SESSION — pill selector between the session's habits,
+   plus the inline "start a session" setup form
+   --------------------------------------------------------- */
+
+.focus-pill-row { display: flex; flex-wrap: wrap; gap: var(--sm); }
+
+.focus-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--outline);
+    background: var(--surface-container);
+    color: var(--on-surface-variant);
+    font-size: var(--fs-body-sm);
+    font-weight: 600;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.focus-pill:hover { border-color: var(--on-surface); color: var(--on-surface); }
+
+.focus-pill.is-selected {
+    background: var(--primary);
+    color: var(--background);
+    border-color: var(--primary);
+}
+
+.focus-pill-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background: currentColor; }
+
+.focus-target-row { display: flex; align-items: center; justify-content: space-between; font-family: var(--font-family-mono); font-size: var(--fs-body-sm); }
+
+.focus-target-row .text-muted { font-weight: 500; }
+.focus-target-row .completed-label { font-weight: 700; color: var(--on-surface); }
+
+.focus-setup { display: flex; flex-direction: column; gap: var(--md); }
+
+/* ---------------------------------------------------------
+   FORM LAYOUT — generic add/edit form pieces, reused by any
+   page with a create/edit form (Habits, Routine, Goals, ...)
+   --------------------------------------------------------- */
+
+.form-panel { display: flex; flex-direction: column; gap: var(--lg); }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--lg);
+}
+
+.form-field { display: flex; flex-direction: column; gap: var(--xs); }
+
+.form-toggle-row { display: flex; gap: var(--sm); }
+
+.form-toggle-btn {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: var(--surface-container);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-body-sm);
+    font-weight: 600;
+    color: var(--on-surface-variant);
+}
+
+.form-toggle-btn.is-selected {
+    background: var(--surface-container-high);
+    color: var(--primary);
+    border-color: var(--outline);
+}
+
+.form-inline-row { display: flex; gap: var(--sm); }
+.form-inline-row input { width: 100px; }
+.form-inline-row select { flex: 1; }
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+}

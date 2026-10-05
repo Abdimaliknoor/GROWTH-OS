@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Growth OS | Habits</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="./css/habit/habit.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- ================= SIDEBAR (same on every page) ================= -->
+      <aside class="app-sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-brand">
+            <span class="sidebar-brand-mark"></span>
+            <span class="sidebar-brand-name">GROWTH OS</span>
+          </div>
+
+          <button class="sidebar-cta-button">
+            <span class="icon icon-sm">add</span>
+            Quick Entry
+          </button>
+
+          <nav class="sidebar-nav">
+            <div class="sidebar-nav-group">
+              <span class="sidebar-nav-group-title">Workspace</span>
+
+              <a class="sidebar-nav-link" href="./startup.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">dashboard</span> Dashboard
+                </span>
+              </a>
+              <a class="sidebar-nav-link" href="#">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">bolt</span> Focus
+                </span>
+              </a>
+              <a class="sidebar-nav-link" href="goals.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">flag</span> Goals
+                </span>
+                <span
+                  class="sidebar-nav-link-count"
+                  id="sidebarGoalsCount"
+                ></span>
+              </a>
+              <a class="sidebar-nav-link is-active" href="./habit.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm icon-filled">event_repeat</span>
+                  Habits
+                </span>
+                <span
+                  class="sidebar-nav-link-count"
+                  id="sidebarHabitsCount"
+                ></span>
+              </a>
+              <a class="sidebar-nav-link" href="routine.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">schedule</span> Routine
+                </span>
+              </a>
+            </div>
+
+            <div class="sidebar-nav-group">
+              <span class="sidebar-nav-group-title">Reflect &amp; Log</span>
+              <a class="sidebar-nav-link" href="journal.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">edit_note</span> Daily Log
+                </span>
+              </a>
+              <a class="sidebar-nav-link" href="analytics.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">query_stats</span> Weekly Analytics
+                </span>
+              </a>
+            </div>
+          </nav>
+        </div>
+
+        <div class="sidebar-profile">
+          <div class="sidebar-profile-left">
+            <div class="sidebar-profile-avatar" id="sidebarProfileAvatar">
+              ?
+            </div>
+            <div>
+              <div class="sidebar-profile-name" id="sidebarProfileName">
+                Guest
+              </div>
+              <div class="sidebar-profile-role" id="sidebarProfileRole"></div>
+            </div>
+          </div>
+          <div class="status status-active">
+            <span class="status-dot"></span>
+            <span>Optimal</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN ================= -->
+      <main class="app-main">
+        <header class="app-topbar">
+          <div>
+            <div class="app-topbar-eyebrow">
+              <span>Growth OS</span>
+              <span class="app-topbar-eyebrow-dim">•</span>
+              <span>Habit Architecture</span>
+            </div>
+            <h1 class="app-topbar-title">Habits</h1>
+            <p class="app-topbar-subtitle">
+              Disciplines repeated daily compound into real progress.
+            </p>
+          </div>
+        </header>
+
+        <div class="app-content">
+          <!-- STATS ROW -->
+          <div class="habits-stat-row">
+            <div class="stat-tile">
+              <span class="stat-tile-label">Active Habits</span>
+              <div class="stat-tile-value-row">
+                <span class="stat-tile-value" id="statActiveHabits">0</span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-tile-label">Today's Completion</span>
+              <div class="stat-tile-value-row">
+                <span class="stat-tile-value" id="statTodayPercent">0%</span>
+                <span class="stat-tile-unit" id="statTodayCount"></span>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-tile-label">This Week's Average</span>
+              <div class="stat-tile-value-row">
+                <span class="stat-tile-value" id="statWeekPercent">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- HABIT CARDS -->
+          <div class="habit-card-list" id="habitCardList"></div>
+          <div
+            id="habitCardsEmpty"
+            class="empty-state hidden"
+            style="margin-bottom: var(--xl)"
+          >
+            No habits yet. Use the form below to add your first one.
+          </div>
+
+          <!-- ARCHIVED HABITS (hidden if there are none) -->
+          <section
+            class="panel"
+            id="archivedSection"
+            style="margin-bottom: var(--xl)"
+          >
+            <div class="panel-header">
+              <span class="text-label">Archived Habits</span>
+            </div>
+            <div
+              id="archivedHabitList"
+              style="display: flex; flex-direction: column; gap: var(--sm)"
+            ></div>
+          </section>
+
+          <!-- ADD / EDIT FORM -->
+          <section class="panel habit-form-panel" id="habitFormPanel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="icon icon-sm">add_task</span>
+                <span class="text-label" id="habitFormTitle">Add a Habit</span>
+              </div>
+            </div>
+
+            <div class="habit-form-grid">
+              <div class="habit-form-field">
+                <label class="form-label" for="habitNameInput"
+                  >Habit name</label
+                >
+                <input
+                  class="input"
+                  id="habitNameInput"
+                  type="text"
+                  placeholder="e.g. Morning Run"
+                />
+              </div>
+
+              <div class="habit-form-field">
+                <label class="form-label" for="habitPurposeInput"
+                  >Why it matters (optional)</label
+                >
+                <input
+                  class="input"
+                  id="habitPurposeInput"
+                  type="text"
+                  placeholder="e.g. Improve stamina"
+                />
+              </div>
+
+              <div class="habit-form-field">
+                <label class="form-label" for="habitGoalSelect"
+                  >Linked goal (optional)</label
+                >
+                <select class="select" id="habitGoalSelect">
+                  <option value="">No goal</option>
+                </select>
+              </div>
+
+              <div class="habit-form-field">
+                <label class="form-label">How do you measure this?</label>
+                <div class="habit-form-freq-row">
+                  <button
+                    type="button"
+                    class="habit-form-freq-btn is-selected"
+                    id="typeQuantityBtn"
+                    data-type="quantity"
+                  >
+                    Quantity
+                  </button>
+                  <button
+                    type="button"
+                    class="habit-form-freq-btn"
+                    id="typeBinaryBtn"
+                    data-type="binary"
+                  >
+                    Complete / Not Complete
+                  </button>
+                </div>
+              </div>
+
+              <div class="habit-form-field" id="targetFieldWrap">
+                <label class="form-label">Target amount</label>
+                <div class="habit-form-quantity-row">
+                  <input
+                    class="input"
+                    id="habitTargetInput"
+                    type="number"
+                    min="1"
+                    placeholder="10"
+                  />
+                  <select class="select" id="habitUnitSelect">
+                    <option value="km">km</option>
+                    <option value="pages">pages</option>
+                    <option value="min">minutes</option>
+                    <option value="reps">reps</option>
+                    <option value="sessions">sessions</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="habit-form-field">
+                <label class="form-label">Frequency</label>
+                <div class="habit-form-freq-row">
+                  <button
+                    type="button"
+                    class="habit-form-freq-btn is-selected"
+                    id="freqEverydayBtn"
+                    data-frequency="everyday"
+                  >
+                    Every day
+                  </button>
+                  <button
+                    type="button"
+                    class="habit-form-freq-btn"
+                    id="freqWeekdaysBtn"
+                    data-frequency="weekdays"
+                  >
+                    Weekdays
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="habit-form-actions">
+              <button class="btn btn-primary" id="habitSaveBtn">
+                Add Habit
+              </button>
+              <button class="btn btn-ghost hidden" id="habitCancelEditBtn">
+                Cancel
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- ================= BOTTOM NAV (mobile / tablet) ================= -->
+    <nav class="app-bottom-nav">
+      <a class="app-bottom-nav-link" href="./startup.html">
+        <span class="icon icon-sm">home</span> Home
+      </a>
+      <a class="app-bottom-nav-link is-active" href="habits.html">
+        <span class="icon icon-filled icon-sm">check_circle</span> Habits
+      </a>
+      <a class="app-bottom-nav-link" href="analytics.html">
+        <span class="icon icon-sm">bar_chart</span> Stats
+      </a>
+      <a class="app-bottom-nav-link" href="settings.html">
+        <span class="icon icon-sm">person</span> Profile
+      </a>
+    </nav>
+
+    <script src="js/state.js"></script>
+    <script src="js/habit.js"></script>
+  </body>
+</html>

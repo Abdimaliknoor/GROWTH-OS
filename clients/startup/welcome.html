@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome | Growth OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/welcome.css" />
+  </head>
+  <body>
+    <main class="welcome">
+      <!-- Brand -->
+      <div class="brand">
+        <span class="brand-mark icon" aria-hidden="true">north_east</span>
+        <span class="brand-name">Growth OS</span>
+      </div>
+
+      <!-- Message -->
+      <h1 class="welcome-title">
+        Build the life you want through consistent action.
+      </h1>
+      <p class="welcome-subtitle">
+        Turn your goals into habits, your habits into routines, and your
+        routines into progress.
+      </p>
+
+      <!-- How Growth OS works -->
+      <ol class="growth-path" aria-label="How Growth OS works">
+        <li class="growth-step is-active">
+          <span class="growth-dot" aria-hidden="true"></span>
+          <span class="growth-label">Goal</span>
+        </li>
+        <li class="growth-step">
+          <span class="growth-dot" aria-hidden="true"></span>
+          <span class="growth-label">Habit</span>
+        </li>
+        <li class="growth-step">
+          <span class="growth-dot" aria-hidden="true"></span>
+          <span class="growth-label">Routine</span>
+        </li>
+        <li class="growth-step">
+          <span class="growth-dot growth-dot-star icon" aria-hidden="true"
+            >star</span
+          >
+          <span class="growth-label">Progress</span>
+        </li>
+      </ol>
+
+      <!-- Action -->
+      <div class="welcome-actions">
+        <button type="button" class="welcome-start" id="startButton">
+          Get Started
+          <span class="icon" aria-hidden="true">arrow_forward</span>
+        </button>
+        <p class="welcome-hint">
+          <span class="icon icon-sm" aria-hidden="true">schedule</span>
+          Takes about 3 minutes
+        </p>
+      </div>
+    </main>
+
+    <script src="../js/state.js"></script>
+    <script src="../js/onboardingPages/welcome.js"></script>
+  </body>
+</html>

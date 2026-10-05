@@ -1,0 +1,198 @@
+/* =========================================================
+   DASHBOARD.CSS — layout for dashboard.html ONLY.
+   Every reusable piece lives in components.css instead;
+   this file is just the page's grid and section placement.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   GRID — matches the reference design's proportions:
+   FOCUS(7) THIS WEEK(5)
+   HABITS(6) ROUTINE(6)
+   GOALS(7) REFLECT(5)
+   --------------------------------------------------------- */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--md);
+}
+
+.dashboard-focus-panel      { grid-column: span 7; }
+.dashboard-week-panel       { grid-column: span 5; }
+.dashboard-habits-panel     { grid-column: span 6; }
+.dashboard-routine-panel    { grid-column: span 6; }
+.dashboard-goals-panel      { grid-column: span 7; }
+.dashboard-reflection-panel { grid-column: span 5; }
+
+/* ---------------------------------------------------------
+   FOCUS PANEL — this exact composition (title, pill row,
+   target line, habit list) is specific to how the dashboard
+   presents a focus session
+   --------------------------------------------------------- */
+
+.dashboard-focus-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 300px;
+}
+
+.dashboard-focus-panel .focus-task {
+    font-size: var(--fs-display-md);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+.dashboard-focus-panel .focus-meta {
+    font-size: var(--fs-body-sm);
+    color: var(--on-surface-variant);
+}
+
+.dashboard-focus-panel .focus-body-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+}
+
+.focus-session-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--success);
+    margin-bottom: var(--sm);
+}
+
+.focus-session-badge .status-dot { animation: pulse-dot 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+.focus-timer {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+    flex-shrink: 0;
+}
+
+.focus-timer-ring {
+    width: 64px;
+    height: 64px;
+    transform: rotate(-90deg); /* so progress starts at the top, not the right */
+}
+
+.focus-timer-ring-track,
+.focus-timer-ring-progress {
+    fill: none;
+    stroke-width: 6;
+}
+
+.focus-timer-ring-track { stroke: var(--surface-container-high); }
+
+.focus-timer-ring-progress {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    /* 2 * PI * r(34) ≈ 213.6 — the ring's full circumference */
+    stroke-dasharray: 213.6;
+    stroke-dashoffset: 213.6;
+    transition: stroke-dashoffset 0.3s linear;
+}
+
+.focus-timer-info { display: flex; flex-direction: column; gap: 2px; }
+
+.focus-timer-remaining {
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-headline-sm);
+    font-weight: 700;
+}
+
+.focus-timer-elapsed {
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-label);
+    color: var(--dim);
+}
+
+.dashboard-focus-panel .focus-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+    margin-top: var(--xl);
+}
+
+/* ---------------------------------------------------------
+   HABITS / ROUTINE PANELS — list containers
+   --------------------------------------------------------- */
+
+.dashboard-habits-panel .habit-list,
+.dashboard-routine-panel .routine-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xs);
+}
+
+/* ---------------------------------------------------------
+   GOALS PANEL
+   --------------------------------------------------------- */
+
+.dashboard-goals-panel .goal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm);
+}
+
+/* ---------------------------------------------------------
+   THIS WEEK PANEL — 2x2 grid of real weekly habit totals
+   --------------------------------------------------------- */
+
+.dashboard-week-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-week-panel .week-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sm);
+    flex: 1;
+}
+
+/* ---------------------------------------------------------
+   REFLECTION PANEL
+   --------------------------------------------------------- */
+
+.dashboard-reflection-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-reflection-panel .reflection-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+    flex: 1;
+}
+
+.dashboard-reflection-panel .reflection-prompt {
+    font-size: var(--fs-body-lg);
+    font-weight: 700;
+}
+
+.dashboard-reflection-panel .reflection-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+    padding-top: var(--md);
+    margin-top: var(--xs);
+    border-top: 1px solid var(--outline-variant);
+}
+
+.dashboard-reflection-panel .reflection-last-saved {
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-label);
+    color: var(--dim);
+}

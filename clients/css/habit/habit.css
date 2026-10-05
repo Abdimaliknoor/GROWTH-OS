@@ -1,0 +1,119 @@
+/* =========================================================
+   HABITS.CSS — layout for habits.html ONLY.
+   Reusable pieces (panel, stat-tile, progress, badge, input)
+   come from components.css / base.css.
+   ========================================================= */
+
+.habits-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--lg);
+    margin-bottom: var(--xl);
+}
+
+.habits-page-title {
+    font-size: var(--fs-display-md);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: var(--xs) 0;
+}
+
+.habits-page-subtitle {
+    color: var(--on-surface-variant);
+    font-size: var(--fs-body-sm);
+    max-width: 480px;
+}
+
+/* Stats row */
+
+.habits-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--md);
+    margin-bottom: var(--xl);
+}
+
+/* Habit cards */
+
+.habit-card-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--md);
+    margin-bottom: var(--xl);
+}
+
+.habit-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+    padding: var(--lg);
+}
+
+.habit-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sm);
+}
+
+.habit-card-goal-line {
+    font-size: var(--fs-label);
+    color: var(--dim);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.habit-card-name {
+    font-size: var(--fs-headline-sm);
+    font-weight: 700;
+}
+
+.habit-card-progress-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-family: var(--font-family-mono);
+    font-size: var(--fs-body-sm);
+}
+
+.habit-card-progress-row .completed-label { font-weight: 700; color: var(--on-surface); }
+
+/* Trailing 7-day grid */
+
+.habit-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.habit-week-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 0;
+    border-radius: var(--radius-sm);
+    background: var(--surface-container);
+    font-family: var(--font-family-mono);
+    font-size: 9px;
+    color: var(--dim);
+}
+
+.habit-week-day.is-hit { background: var(--surface-container-high); color: var(--primary); }
+
+/* Card action row */
+
+.habit-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+    padding-top: var(--sm);
+    border-top: 1px solid var(--outline-variant);
+}
+
+/* Add / Edit form — generic layout classes (.form-*) live in
+   components.css since Routine and other pages reuse them */

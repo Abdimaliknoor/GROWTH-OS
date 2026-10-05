@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- =====================================
+         META DATA
+    ====================================== -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Growth OS | Your Name</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/startup/onboarding.css">
+    <link rel="stylesheet" href="../css/startup/name.css">
+    
+</head>
+
+<body>
+
+    <!-- =====================================
+         NAME PAGE
+    ====================================== -->
+
+     <main class="startpage">
+        <!-- ==============================
+             PAGE HEADER
+        =============================== -->
+       
+        <!-- ==============================
+             HERO SECTION
+        =============================== -->
+        <header class="page-header">
+            <a href="./welcome.html"><button class="btn  back-btn" id="backButton">
+                <span class="material-symbols-outlined">
+                    arrow_back
+                </span>
+            </button></a>
+        </header>
+
+        <section class="hero">
+            
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    What's your name?
+                </h1>
+                <p class="hero-description">
+                    We'll use your name throughout your
+                    Growth OS journey.
+                </p>
+           </div>
+        </section>
+
+        <!-- ==============================
+             NAME INPUT
+        =============================== -->
+        <section class="name-section">
+            <label
+                class="input-label"
+                for="userName">
+                Your Name
+            </label>
+            <input
+                type="text"
+                id="userName"
+                class="text-input"
+                placeholder="e.g. Abdimalik"
+                autocomplete="off">
+        </section>
+
+
+        <!-- ==============================
+             PROGRESS INDICATOR
+        =============================== -->
+
+        <section class="progress-section">
+            <p class="progress-text">
+                Step 2 of 6
+            </p>
+            <div class="progress-bar">
+                <span class="progress-dot active"></span>
+                <span class="progress-dot active"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+            </div>
+        </section>
+
+        <!-- ==============================
+             PAGE ACTIONS
+        =============================== -->
+
+        <section class="page-actions">
+            <button
+                class="btn btn-white continue-btn"
+                id="continueBtn">
+                <span>
+                Continue
+                </span>
+                <span class="material-symbols-outlined cta-arrow">
+                    arrow_forward
+                </span>
+            </button>
+            </a>
+        </section>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="../js/storage.js"></script>
+    <script src="../js/onboarding.js"></script>
+</body>
+
+</html>

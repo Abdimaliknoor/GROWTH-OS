@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Character Encoding -->
+    <meta charset="UTF-8" />
+    <!-- Responsive Design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Website Title -->
+    <title>
+      <img src="./assets/icons/unnamed.png" alt="Growth OS" class="logo-img" />
+      Growth OS | Build Your Future
+    </title>
+    <!-- Google Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Geist Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="./css/testing.css" />
+  </head>
+  <body>
+    <!-- PRIMARY HEADER -->
+    <header class="nav" id="nav">
+      <div class="nav-inner">
+        <span class="logo">Growth OS</span>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#about" class="nav-link">About</a>
+          <a href="./startup/welcome.html" class="nav-link nav-signin"
+            >Sign In</a
+          >
+        </nav>
+        <a href="./startup/welcome.html" class="btn btn-white nav-cta"
+          >Get Started</a
+        >
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <span class="material-symbols-outlined" style="font-size: 24px"
+            >menu</span
+          >
+        </button>
+      </div>
+    </header>
+
+    <!-- MOBILE OVERLAY MENU -->
+    <div class="mobile-menu" id="mobile-menu">
+      <div class="mobile-menu-head">
+        <span class="logo">Growth OS</span>
+        <button id="menu-close" aria-label="Close menu">
+          <span
+            class="material-symbols-outlined"
+            style="font-size: 24px; color: #fff"
+            >close</span
+          >
+        </button>
+      </div>
+      <a href="#features" class="mobile-link" id="m-features">Features</a>
+      <a href="#about" class="mobile-link" id="m-about">About</a>
+      <a href="./startup/welcome.html" class="mobile-link">Sign In</a>
+      <a href="./startup/welcome.html" class="btn btn-white mobile-cta"
+        >Get Started</a
+      >
+    </div>
+
+    <!-- MAIN LANDING CONTENT -->
+    <main id="main-content">
+      <!-- HERO SECTION -->
+      <section class="hero reveal" id="hero" aria-labelledby="hero-title">
+        <div class="hero-grid" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <span class="badge">
+            <span class="badge-dot"></span>
+            Growth Operating System
+          </span>
+          <h1 class="hero-title" id="hero-title">
+            Build Discipline.<br />
+            Build Focus.<br />
+            Build Your Future.
+          </h1>
+          <p class="hero-sub">
+            Growth OS helps you track habits, deepen focus, journal your
+            progress, and become the person you want to be — one intentional day
+            at a time.
+          </p>
+          <div class="hero-actions">
+            <a href="./startup/welcome.html" class="btn btn-white">
+              Start My Journey
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+            <a href="#features" class="btn btn-ghost">
+              Learn More
+              <span class="material-symbols-outlined">expand_more</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES SECTION -->
+      <section id="features">
+        <div class="wrap">
+          <!-- SECTION HEADER -->
+          <div class="section-head reveal">
+            <span class="section-eye">Core Disciplines</span>
+            <h2 class="section-title">Everything you need to grow.</h2>
+            <p class="section-sub">Minimalist tools for maximal output.</p>
+          </div>
+
+          <!-- FEATURES GRID -->
+          <div class="features-grid">
+            <!-- HABIT TRACKING -->
+            <article class="feature-card reveal">
+              <div class="feature-preview">
+                <div class="habit-preview">
+                  <div class="habit-row completed">
+                    <span class="material-symbols-outlined habit-icon"
+                      >menu_book</span
+                    >
+                    <span class="habit-name">Quran Revision</span>
+                    <span class="material-symbols-outlined habit-status"
+                      >check_circle</span
+                    >
+                  </div>
+                  <div class="habit-row completed">
+                    <span class="material-symbols-outlined habit-icon"
+                      >directions_run</span
+                    >
+                    <span class="habit-name">Morning Run</span>
+                    <span class="material-symbols-outlined habit-status"
+                      >check_circle</span
+                    >
+                  </div>
+                  <div class="habit-row">
+                    <span class="material-symbols-outlined habit-icon"
+                      >auto_stories</span
+                    >
+                    <span class="habit-name">Read 20 Pages</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Habit Tracking</h3>
+                <p class="feature-body">
+                  Build lasting habits through simple daily routines and visual
+                  progress.
+                </p>
+              </div>
+            </article>
+
+            <!-- DEEP FOCUS -->
+            <article class="feature-card reveal">
+              <div class="feature-preview">
+                <div class="focus-preview">
+                  <p class="focus-label">Focus Session</p>
+                  <h3 class="focus-time">23:57</h3>
+                  <div class="focus-progress">
+                    <div class="focus-progress-fill"></div>
+                  </div>
+                  <p class="focus-status">Deep Work</p>
+                </div>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Deep Focus</h3>
+                <p class="feature-body">
+                  Enter distraction-free work sessions and protect your
+                  attention.
+                </p>
+              </div>
+            </article>
+
+            <!-- DAILY JOURNAL -->
+            <article class="feature-card reveal">
+              <div class="feature-preview">
+                <div class="journal-preview">
+                  <span class="journal-day">Today</span>
+                  <div class="journal-line"></div>
+                  <div class="journal-line"></div>
+                  <div class="journal-line short"></div>
+                </div>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Daily Journal</h3>
+                <p class="feature-body">
+                  Capture lessons, thoughts and reflections every single day.
+                </p>
+              </div>
+            </article>
+
+            <!-- AI INSIGHTS -->
+            <article class="feature-card reveal">
+              <div class="feature-preview">
+                <div class="ai-preview">
+                  <div class="ai-tag">
+                    <span class="material-symbols-outlined">auto_awesome</span>
+                    AI Insight
+                  </div>
+                  <p class="ai-text">
+                    You focus 18% longer after completing your morning workout.
+                  </p>
+                </div>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">AI Insights</h3>
+                <p class="feature-body">
+                  Discover hidden patterns from your habits, focus and journal
+                  data.
+                </p>
+              </div>
+            </article>
+
+            <!-- ANALYTICS -->
+            <article class="feature-card reveal">
+              <div class="feature-preview">
+                <div class="analytics-preview">
+                  <div class="analytics-bars">
+                    <span class="bar one"></span>
+                    <span class="bar two"></span>
+                    <span class="bar three"></span>
+                    <span class="bar four"></span>
+                    <span class="bar five"></span>
+                  </div>
+                  <div class="analytics-footer">
+                    <span>Weekly Growth</span>
+                    <strong>+18%</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Analytics</h3>
+                <p class="feature-body">
+                  Understand your long-term progress through meaningful visual
+                  insights.
+                </p>
+              </div>
+            </article>
+
+            <!-- RESET MODE -->
+            <article class="feature-card reveal">
+              <div class="feature-preview">
+                <div class="reset-preview">
+                  <div class="reset-circle">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                  </div>
+                  <h4 class="reset-title">Day 1</h4>
+                  <p class="reset-subtitle">Start Fresh</p>
+                </div>
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">Reset Mode</h3>
+                <p class="feature-body">
+                  Recover from setbacks quickly and rebuild momentum without
+                  guilt.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCT SHOWCASE SECTION -->
+      <section class="product-showcase wrap" id="about">
+        <header class="product-header">
+          <span class="section-tag">PRODUCT SHOWCASE</span>
+          <h2 class="product-title">
+            Everything You Need.<br />Nothing You Don't.
+          </h2>
+          <p class="product-description">
+            Growth OS combines habits, focus sessions, journaling, goals, and
+            long-term progress into one intentional workspace designed for
+            students, athletes, and anyone committed to building discipline.
+          </p>
+        </header>
+
+        <div class="product-showcase-main">
+          <!-- Problem Panel -->
+          <div class="problem-panel">
+            <span class="problem-tag">WHY GROWTH OS?</span>
+            <h3 class="problem-title">
+              Most people don't fail because they lack potential.
+            </h3>
+            <p class="problem-description">
+              They struggle because their daily system works against them
+              instead of for them.
+            </p>
+            <ul class="problem-list">
+              <li class="problem-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                Poor consistency in building habits.
+              </li>
+              <li class="problem-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                Difficulty maintaining focus.
+              </li>
+              <li class="problem-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                Lack of self-reflection.
+              </li>
+              <li class="problem-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                Goals, notes and tasks scattered across multiple apps.
+              </li>
+              <li class="problem-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                Limited understanding of long-term progress.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Dashboard Previews -->
+          <div class="dashboard-preview">
+            <!-- Desktop Layout View -->
+            <div class="dashboard-preview-desktop">
+              <img
+                src="./assets/product imge.png"
+                alt="Growth OS Dashboard"
+                class="dashboard-image"
+              />
+            </div>
+            <!-- Mobile Layout Simulation -->
+            <div class="dashboard-preview-mobile">
+              <div class="dashboard">
+                <div class="dashboard-topbar">
+                  <div class="browser-controls">
+                    <span class="browser-dot"></span>
+                    <span class="browser-dot"></span>
+                    <span class="browser-dot"></span>
+                  </div>
+                  <p class="dashboard-brand">Growth OS</p>
+                </div>
+                <div class="dashboard-content">
+                  <div class="dashboard-header">
+                    <h3 class="dashboard-title">Good Morning 👋</h3>
+                    <p class="dashboard-subtitle">
+                      Let's build discipline today.
+                    </p>
+                  </div>
+                  <article class="dashboard-card focus-card">
+                    <div class="card-top">
+                      <span class="material-symbols-outlined">timer</span>
+                      <p class="card-label">Focus Session</p>
+                    </div>
+                    <h2 class="focus-time">23:57</h2>
+                    <p class="focus-status">Stay locked in.</p>
+                  </article>
+                  <article class="dashboard-card">
+                    <div class="card-top">
+                      <span class="material-symbols-outlined">task_alt</span>
+                      <p class="card-label">Today's Habits</p>
+                    </div>
+                    <ul class="habit-list">
+                      <li class="habit-item completed">
+                        <div class="habit-icon quran">
+                          <span class="material-symbols-outlined"
+                            >menu_book</span
+                          >
+                        </div>
+                        <div class="habit-content">
+                          <h4 class="habit-title">Quran Revision</h4>
+                          <p class="habit-subtitle">Completed</p>
+                        </div>
+                        <span class="material-symbols-outlined habit-check"
+                          >check_circle</span
+                        >
+                      </li>
+                      <li class="habit-item completed">
+                        <div class="habit-icon run">
+                          <span class="material-symbols-outlined"
+                            >directions_run</span
+                          >
+                        </div>
+                        <div class="habit-content">
+                          <h4 class="habit-title">Morning Run</h4>
+                          <p class="habit-subtitle">8 km completed</p>
+                        </div>
+                        <span class="material-symbols-outlined habit-check"
+                          >check_circle</span
+                        >
+                      </li>
+                      <li class="habit-item">
+                        <div class="habit-icon read">
+                          <span class="material-symbols-outlined"
+                            >auto_stories</span
+                          >
+                        </div>
+                        <div class="habit-content">
+                          <h4 class="habit-title">Read 20 Pages</h4>
+                          <p class="habit-subtitle">In Progress</p>
+                        </div>
+                      </li>
+                      <li class="habit-item">
+                        <div class="habit-icon journal">
+                          <span class="material-symbols-outlined"
+                            >edit_note</span
+                          >
+                        </div>
+                        <div class="habit-content">
+                          <h4 class="habit-title">Journal</h4>
+                          <p class="habit-subtitle">Not Started</p>
+                        </div>
+                      </li>
+                    </ul>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Core Benefits Grid -->
+        <div class="benefits-grid">
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">dashboard</span>
+            <h3 class="benefit-title">Everything Together</h3>
+            <p class="benefit-description">
+              Habits, journal, goals and focus sessions live in one organized
+              workspace.
+            </p>
+          </article>
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">center_focus_strong</span>
+            <h3 class="benefit-title">Built for Focus</h3>
+            <p class="benefit-description">
+              A clean interface that removes distractions and keeps your
+              attention on what matters.
+            </p>
+          </article>
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">monitoring</span>
+            <h3 class="benefit-title">Track Your Growth</h3>
+            <p class="benefit-description">
+              Measure consistency, streaks and long-term progress instead of
+              relying on memory.
+            </p>
+          </article>
+          <article class="benefit-card">
+            <span class="material-symbols-outlined">military_tech</span>
+            <h3 class="benefit-title">Built for Discipline</h3>
+            <p class="benefit-description">
+              Designed for students, athletes and ambitious people striving to
+              become better every day.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- CTA SECTION -->
+      <section class="cta-section">
+        <div class="wrap reveal">
+          <div class="cta-card">
+            <div class="cta-glow"></div>
+            <span class="section-tag">START YOUR JOURNEY</span>
+            <h2 class="cta-title">
+              Build Your Future.<br />One Intentional Day at a Time.
+            </h2>
+            <p class="cta-sub">
+              Join Growth OS and build better habits, deeper focus, and lasting
+              discipline through one simple workspace.
+            </p>
+            <a href="./startup/welcome.html" class="btn btn-dark cta-btn">
+              Get Started Free
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+            <p class="cta-note">
+              Free to get started • No credit card required
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="wrap">
+        <div class="footer-inner">
+          <div>
+            <span class="logo">Growth OS</span>
+            <p class="footer-tagline">Intentional Progress</p>
+          </div>
+          <nav class="footer-links" aria-label="Footer">
+            <a href="#" class="footer-link">Privacy</a>
+            <a href="#" class="footer-link">Terms</a>
+            <a href="#" class="footer-link">Twitter</a>
+            <a href="#" class="footer-link">Support</a>
+          </nav>
+        </div>
+        <p class="footer-copy">© 2026 Growth OS. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- SCRIPT LINKING -->
+    <script src="./js/main.js"></script>
+  </body>
+</html>

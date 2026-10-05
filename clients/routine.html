@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Growth OS | Routine</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/routine/routine.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- ================= SIDEBAR (same on every page) ================= -->
+      <aside class="app-sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-brand">
+            <span class="sidebar-brand-mark"></span>
+            <span class="sidebar-brand-name">GROWTH OS</span>
+          </div>
+
+          <button class="sidebar-cta-button">
+            <span class="icon icon-sm">add</span>
+            Quick Entry
+          </button>
+
+          <nav class="sidebar-nav">
+            <div class="sidebar-nav-group">
+              <span class="sidebar-nav-group-title">Workspace</span>
+
+              <a class="sidebar-nav-link" href="./startup.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">dashboard</span> Dashboard
+                </span>
+              </a>
+              <a class="sidebar-nav-link" href="#">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">bolt</span> Focus
+                </span>
+              </a>
+              <a class="sidebar-nav-link" href="goals.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">flag</span> Goals
+                </span>
+                <span
+                  class="sidebar-nav-link-count"
+                  id="sidebarGoalsCount"
+                ></span>
+              </a>
+              <a class="sidebar-nav-link" href="./habit.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">event_repeat</span> Habits
+                </span>
+                <span
+                  class="sidebar-nav-link-count"
+                  id="sidebarHabitsCount"
+                ></span>
+              </a>
+              <a class="sidebar-nav-link is-active" href="routine.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm icon-filled">schedule</span> Routine
+                </span>
+              </a>
+            </div>
+
+            <div class="sidebar-nav-group">
+              <span class="sidebar-nav-group-title">Reflect &amp; Log</span>
+              <a class="sidebar-nav-link" href="journal.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">edit_note</span> Daily Log
+                </span>
+              </a>
+              <a class="sidebar-nav-link" href="analytics.html">
+                <span class="sidebar-nav-link-left">
+                  <span class="icon icon-sm">query_stats</span> Weekly Analytics
+                </span>
+              </a>
+            </div>
+          </nav>
+        </div>
+
+        <div class="sidebar-profile">
+          <div class="sidebar-profile-left">
+            <div class="sidebar-profile-avatar" id="sidebarProfileAvatar">
+              ?
+            </div>
+            <div>
+              <div class="sidebar-profile-name" id="sidebarProfileName">
+                Guest
+              </div>
+              <div class="sidebar-profile-role" id="sidebarProfileRole"></div>
+            </div>
+          </div>
+          <div class="status status-active">
+            <span class="status-dot"></span>
+            <span>Optimal</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN ================= -->
+      <main class="app-main">
+        <header class="app-topbar">
+          <div>
+            <div class="app-topbar-eyebrow">
+              <span>Growth OS</span>
+              <span class="app-topbar-eyebrow-dim">•</span>
+              <span>Daily Schedule</span>
+            </div>
+            <h1 class="app-topbar-title">Routine</h1>
+            <p class="app-topbar-subtitle">
+              When you do things, and which habit each slot is for.
+            </p>
+          </div>
+        </header>
+
+        <div class="app-content">
+          <!-- ROUTINE LIST -->
+          <section class="panel" style="margin-bottom: var(--xl)">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="icon icon-sm">schedule</span>
+                <span class="text-label">Today's Schedule</span>
+              </div>
+              <span class="panel-count" id="routineCount">0</span>
+            </div>
+
+            <div class="routine-page-list" id="routineList"></div>
+            <div id="routineEmpty" class="empty-state hidden">
+              Nothing scheduled yet. Add your first time slot below.
+            </div>
+          </section>
+
+          <!-- ADD / EDIT FORM -->
+          <section class="panel form-panel" id="routineFormPanel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="icon icon-sm">add_task</span>
+                <span class="text-label" id="routineFormTitle"
+                  >Add a Time Slot</span
+                >
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-label" for="routineTimeInput">Time</label>
+                <input class="input" id="routineTimeInput" type="time" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="routineLabelInput"
+                  >What happens then</label
+                >
+                <input
+                  class="input"
+                  id="routineLabelInput"
+                  type="text"
+                  placeholder="e.g. Morning Run"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="routineHabitSelect"
+                  >Linked habit (optional)</label
+                >
+                <select class="select" id="routineHabitSelect">
+                  <option value="">No habit</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" id="routineSaveBtn">
+                Add to Routine
+              </button>
+              <button class="btn btn-ghost hidden" id="routineCancelEditBtn">
+                Cancel
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- ================= BOTTOM NAV (mobile / tablet) ================= -->
+    <nav class="app-bottom-nav">
+      <a class="app-bottom-nav-link" href="dashboard.html">
+        <span class="icon icon-sm">home</span> Home
+      </a>
+      <a class="app-bottom-nav-link" href="habits.html">
+        <span class="icon icon-sm">check_circle</span> Habits
+      </a>
+      <a class="app-bottom-nav-link" href="analytics.html">
+        <span class="icon icon-sm">bar_chart</span> Stats
+      </a>
+      <a class="app-bottom-nav-link" href="settings.html">
+        <span class="icon icon-sm">person</span> Profile
+      </a>
+    </nav>
+
+    <script src="js/state.js"></script>
+    <script src="js/routine.js"></script>
+  </body>
+</html>

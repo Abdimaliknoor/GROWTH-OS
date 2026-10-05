@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Growth OS | Protocol Complete</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/startup/onboarding.css">
+    <link rel="stylesheet" href="../css/startup/complete.css">
+</head>
+
+<body>
+
+<main class="setup-page">
+
+    <!-- Back Button Header -->
+    <header class="setup-header">
+        <button type="button" class="setup-back" id="backButton">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span>Back</span>
+        </button>
+    </header>
+
+    <!-- Centered Hero / Big Icon Section -->
+    <section class="setup-hero">
+
+        <div class="hero-icon-wrapper">
+            <span class="material-symbols-outlined hero-icon">verified</span>
+        </div>
+
+        <div class="setup-progress-pills">
+            <span class="pill active"></span>
+            <span class="pill active"></span>
+            <span class="pill active"></span>
+            <span class="pill active"></span>
+            <span class="pill active"></span>
+            <span class="pill active"></span>
+        </div>
+
+        <p class="step-label">Step 6 of 6: Protocol Ready</p>
+
+        <h1 class="hero-title">Your System is Calibrated</h1>
+        <p class="hero-subtitle">Review your initial operating setup below before launching Growth OS.</p>
+
+    </section>
+
+    <!-- Collected Data Summary Cards -->
+    <section class="setup-summary-cards">
+
+        <!-- User & Identity Banner -->
+        <div class="summary-tile identity-tile">
+            <div class="tile-left">
+                <span class="material-symbols-outlined tile-icon">person</span>
+                <div class="tile-text">
+                    <span class="tile-title" id="userName">User</span>
+                    <span class="tile-sub" id="userIdentity">Selected Archetype</span>
+                </div>
+            </div>
+            <span class="badge">Active</span>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="summary-metrics-grid">
+
+            <div class="metric-tile">
+                <span class="material-symbols-outlined metric-icon">check_circle</span>
+                <div class="metric-data">
+                    <span class="metric-number" id="statHabits">0</span>
+                    <span class="metric-name">Habits Tracked</span>
+                </div>
+            </div>
+
+            <div class="metric-tile">
+                <span class="material-symbols-outlined metric-icon">flag</span>
+                <div class="metric-data">
+                    <span class="metric-number" id="statGoals">0</span>
+                    <span class="metric-name">3-Mo Milestones</span>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Bottom Actions -->
+    <footer class="setup-footer">
+       
+        <button type="button" class="setup-launch-btn" id="completeSetupBtn">
+            Launch Growth OS
+            <span class="material-symbols-outlined">rocket_launch</span>
+        </button>
+    </footer>
+
+</main>
+
+<script src="../js/storage.js"></script>
+<script src="../js/onboarding.js"></script>
+
+</body>
+</html>

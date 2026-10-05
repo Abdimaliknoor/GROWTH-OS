@@ -1,0 +1,198 @@
+/* =========================================================
+   WELCOME PAGE
+   Mobile-first: base styles are for phones,
+   the media query at the bottom adjusts for bigger screens.
+   ========================================================= */
+
+.welcome {
+    min-height: 100vh;
+    max-width: 640px;
+    margin-inline: auto;
+    padding: var(--xl) var(--margin-mobile);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* ---------- Brand ---------- */
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm);
+    padding: 4px 16px 4px 4px;
+    margin-bottom: var(--lg);
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+}
+
+.brand-mark {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    color: var(--background);
+    font-size: 15px;
+}
+
+.brand-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* ---------- Message ---------- */
+
+.welcome-title {
+    margin-bottom: var(--md);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    color: var(--primary);
+}
+
+.welcome-subtitle {
+    max-width: 500px;
+    margin-bottom: var(--xl);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+}
+
+/* ---------- Growth path ---------- */
+
+.growth-path {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: var(--lg) var(--md);
+    margin-bottom: var(--xl);
+    list-style: none;
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+}
+
+/* The line connecting the dots. It sits behind them (z-index)
+   and its top = card padding (24px) + half a dot box (12px). */
+.growth-path::before {
+    content: "";
+    position: absolute;
+    top: 36px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 2px;
+    background: var(--surface-container-highest);
+}
+
+.growth-step {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.growth-dot {
+    width: 12px;
+    height: 12px;
+    margin: 6px;  /* 12px dot + 6px each side = a 24px box, same as the star */
+    border-radius: var(--radius-full);
+    background: var(--surface-container-highest);
+}
+
+.growth-step.is-active .growth-dot {
+    background: var(--primary);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.12),
+                0 0 16px rgba(255, 255, 255, 0.5);
+    animation: glow 2.4s ease-in-out infinite;
+}
+
+.growth-dot-star {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    font-size: 16px;
+    background: var(--surface-container);
+    color: var(--on-surface-variant);
+}
+
+.growth-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--outline);
+}
+
+.growth-step.is-active .growth-label {
+    color: var(--primary);
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 0 6px rgba(255,255,255,.12), 0 0 16px rgba(255,255,255,.5); }
+    50%      { box-shadow: 0 0 0 9px rgba(255,255,255,.06), 0 0 24px rgba(255,255,255,.3); }
+}
+
+/* ---------- Action ---------- */
+
+.welcome-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sm);
+}
+
+.welcome-start {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sm);
+    padding: 16px 36px;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    color: var(--background);
+    font-size: 16px;
+    font-weight: 600;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.welcome-start:hover { opacity: 0.9; }
+.welcome-start:active { transform: scale(0.98); }
+
+.welcome-start:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+}
+
+.welcome-start .icon { transition: transform var(--transition-fast); }
+.welcome-start:hover .icon { transform: translateX(4px); }
+
+.welcome-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--outline);
+}
+
+/* ---------- Accessibility: respect "reduce motion" ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .growth-step.is-active .growth-dot { animation: none; }
+}
+
+/* ---------- Bigger screens ---------- */
+
+@media (min-width: 768px) {
+    .welcome-title { font-size: 50px; }
+    .welcome-subtitle { font-size: 18px; }
+    .welcome-start { width: auto; }
+}
