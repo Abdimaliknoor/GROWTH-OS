@@ -1,280 +1,302 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Goal | Growth OS</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
 
-    <title>Growth OS | Goals</title>
+    <!-- Order matters: base (tokens) → onboarding (shared shell) → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/onboarding.css" />
+    <link rel="stylesheet" href="../css/startup/goal.css" />
+  </head>
+  <body>
+    <div class="ob-page">
+      <header class="ob-topbar">
+        <span class="ob-brand">
+          <span class="ob-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </span>
+        <p class="ob-step">Step 02 of 04</p>
+      </header>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <!-- Progress: Direction is done, Goal is where we are -->
+      <nav class="ob-progress" aria-label="Onboarding progress">
+        <ol>
+          <li class="is-done">Direction</li>
+          <li class="is-current" aria-current="step">Goal</li>
+          <li>Habit</li>
+          <li>Routine</li>
+        </ol>
+      </nav>
 
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/startup/onboarding.css">
-    <link rel="stylesheet" href="../css/startup/goal.css">
-</head>
-
-<body>
-
-<main class="goal-page">
-
-    <!-- ============================================
-         HEADER
-    ============================================= -->
-
-    <header class="goal-header">
-
-        <button
-            type="button"
-            class="goal-back"
-            id="backButton">
-
-            <span class="material-symbols-outlined">
-                arrow_back
-            </span>
-
-            <span>
-                Back
-            </span>
-
-        </button>
-
-    </header>
-
-
-    <!-- ============================================
-         INTRO
-    ============================================= -->
-
-    <section class="goal-intro">
-
-        <div class="goal-step">
-
-            <div class="goal-progress">
-
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span class="active"></span>
-                <span></span>
-
-            </div>
-
-            <p>
-                Step 5 of 6: Goal Calibration
-            </p>
-
+      <main class="ob-content ob-content-top">
+        <!-- The previous step, shown above this one: Direction → Goal.
+                 goal.js fills the three empty spans from state.js. -->
+        <div class="chain-card">
+          <span
+            class="icon chain-icon"
+            id="directionIcon"
+            aria-hidden="true"
+          ></span>
+          <div class="chain-text">
+            <span class="chain-label"
+              >Direction · <span id="directionArea"></span
+            ></span>
+            <span class="chain-value" id="directionIdentity"></span>
+          </div>
+          <a class="chain-edit" href="identity.html">Edit</a>
         </div>
+        <div class="chain-line" aria-hidden="true"></div>
 
-        <h1>
-            3-Month Milestones
-        </h1>
-
-        <p>
-            Goals are the measurable outcomes of your habits.
-            <h2>create 2-3 goals to anchor your daily focus.</h2> 
+        <h1 class="ob-title">What do you want to achieve?</h1>
+        <p class="ob-subtitle">
+          Your direction gives you a path. A goal gives you something specific
+          to work toward.
         </p>
 
-    </section>
+        <!-- novalidate: we show our own friendly messages instead of
+                 the browser's default popups. -->
+        <form class="goal-form" id="goalForm" novalidate>
+          <!-- 1. The goal itself. goal.js draws the suggestion chips. -->
+          <div class="goal-field">
+            <label class="ob-label" for="goalTitle">Your goal</label>
+            <input
+              class="ob-input goal-title-input"
+              id="goalTitle"
+              type="text"
+              maxlength="80"
+              placeholder="e.g. Memorize a new juz"
+              autocomplete="off"
+            />
+            <p class="goal-note">e.g.</p>
+            <div
+              class="goal-chips"
+              id="goalChips"
+              aria-label="Suggested goals"
+            ></div>
+          </div>
 
-
-    <!-- ============================================
-         GOALS SECTION
-    ============================================= -->
-
-    <section class="goal-section">
-
-        <div
-            class="goal-list"
-            id="goalList">
-
-            <div 
-                class="goal-card" 
-                data-goal-id="half_marathon" 
-                data-title="Run a Half-Marathon" 
-                data-desc="Build endurance and consistent physical resilience.">
-                <div class="goal-icon">
-                    <span class="material-symbols-outlined">directions_run</span>
-                </div>
-                <div class="goal-info">
-                    <span class="goal-name">Run a Half-Marathon</span>
-                    <span class="goal-desc">Build endurance and consistent physical resilience.</span>
-                </div>
-            </div>
-
-            <div 
-                class="goal-card" 
-                data-goal-id="launch_mvp" 
-                data-title="Launch MVP" 
-                data-desc="Ship the first version of the project to real users.">
-                <div class="goal-icon">
-                    <span class="material-symbols-outlined">rocket_launch</span>
-                </div>
-                <div class="goal-info">
-                    <span class="goal-name">Launch MVP</span>
-                    <span class="goal-desc">Ship the first version of the project to real users.</span>
-                </div>
-            </div>
-
-            <div 
-                class="goal-card" 
-                data-goal-id="read_12_books" 
-                data-title="Read 12 Books" 
-                data-desc="Expand knowledge across philosophy and technical skills.">
-                <div class="goal-icon">
-                    <span class="material-symbols-outlined">menu_book</span>
-                </div>
-                <div class="goal-info">
-                    <span class="goal-name">Read 12 Books</span>
-                    <span class="goal-desc">Expand knowledge across philosophy and technical skills.</span>
-                </div>
-            </div>
-
-            <div 
-                class="goal-card" 
-                data-goal-id="mental_clarity" 
-                data-title="Improve Mental Clarity" 
-                data-desc="Build a calmer, more focused mind through reflection, rest, and intentional living.">
-
-                <div class="goal-icon">
-                    <span class="material-symbols-outlined">
-                        self_improvement
-                    </span>
-                </div>
-
-                <div class="goal-info">
-                    <span class="goal-name">
-                        Improve Mental Clarity
-                    </span>
-
-                    <span class="goal-desc">
-                        Build a calmer, more focused mind through reflection, rest, and intentional living.
-                    </span>
-                </div>
-
-            </div>
-
-            <div 
-                class="goal-card" 
-                data-goal-id="master_webdev" 
-                data-title="Master Web Development" 
-                data-desc="Build a portfolio of 5 production-ready projects.">
-                <div class="goal-icon">
-                    <span class="material-symbols-outlined">code</span>
-                </div>
-                <div class="goal-info">
-                    <span class="goal-name">Master Web Development</span>
-                    <span class="goal-desc">Build a portfolio of 5 production-ready projects.</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================
-             ADD GOAL BUTTON
-        ========================================= -->
-
-        <button
-            type="button"
-            class="add-goal-btn"
-            id="addGoalBtn">
-            <span class="material-symbols-outlined">
-                add
-            </span>
-            <span>
-                Create Custom Goal
-            </span>
-        </button>
-
-
-        <!-- ========================================
-             ADD GOAL FORM
-        ========================================= -->
-
-        <div
-            class="goal-form"
-            id="goalForm"
-            hidden>
-
-            <div class="goal-inputs-wrapper">
-
+          <!-- 2. What "done" looks like.
+                     Real radio buttons (hidden) inside labels styled as cards:
+                     selection, keyboard arrows and screen readers come for free.
+                     "consistency" is checked, so the simplest path needs no numbers. -->
+          <fieldset class="goal-field measure-fieldset">
+            <legend class="ob-label">What does "done" look like?</legend>
+            <div class="measure-grid">
+              <label class="measure-card">
                 <input
-                    type="text"
-                    id="goalTitleInput"
-                    class="goal-input"
-                    placeholder="Goal Title (e.g., Save $5,000)..."
-                    autocomplete="off">
-
+                  class="visually-hidden"
+                  type="radio"
+                  name="measure"
+                  value="consistency"
+                  checked
+                />
+                <span class="icon measure-icon" aria-hidden="true"
+                  >event_repeat</span
+                >
+                <span class="measure-text">
+                  <span class="measure-name">Stay consistent</span>
+                  <span class="measure-example"
+                    >Progress = doing my habits</span
+                  >
+                </span>
+              </label>
+              <label class="measure-card">
                 <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="measure"
+                  value="total"
+                />
+                <span class="icon measure-icon" aria-hidden="true"
+                  >add_circle</span
+                >
+                <span class="measure-text">
+                  <span class="measure-name">Reach a total</span>
+                  <span class="measure-example">e.g. 20 pages, 12 books</span>
+                </span>
+              </label>
+              <label class="measure-card">
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="measure"
+                  value="level"
+                />
+                <span class="icon measure-icon" aria-hidden="true"
+                  >trending_up</span
+                >
+                <span class="measure-text">
+                  <span class="measure-name">Reach a level</span>
+                  <span class="measure-example">e.g. run 10 km, score 80%</span>
+                </span>
+              </label>
+              <label class="measure-card">
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="measure"
+                  value="milestones"
+                />
+                <span class="icon measure-icon" aria-hidden="true"
+                  >checklist</span
+                >
+                <span class="measure-text">
+                  <span class="measure-name">Complete steps</span>
+                  <span class="measure-example"
+                    >e.g. plan → build → launch</span
+                  >
+                </span>
+              </label>
+            </div>
+
+            <!-- 2a. Total / Level. Reads as one sentence:
+                         "Done when I've reached [20] [pages] in total".
+                         The sentence is the visible label; the hidden labels
+                         and aria-describedby are for screen readers. -->
+            <div class="measure-details" id="numberDetails" hidden>
+              <p class="finish-lead" id="finishLead">Done when I've reached</p>
+              <div class="number-row">
+                <div class="number-field">
+                  <label class="visually-hidden" for="targetInput"
+                    >Finish line amount</label
+                  >
+                  <input
+                    class="ob-input finish-number"
+                    id="targetInput"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="20"
+                    aria-describedby="finishLead"
+                  />
+                </div>
+                <div class="unit-field">
+                  <label class="visually-hidden" for="unitInput">Unit</label>
+                  <input
+                    class="ob-input"
+                    id="unitInput"
                     type="text"
-                    id="goalDescInput"
-                    class="goal-input"
-                    placeholder="Short description..."
-                    autocomplete="off">
+                    maxlength="20"
+                    placeholder="pages"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+              <p class="finish-tail" id="finishTail">in total</p>
+              <div
+                class="unit-chips"
+                id="unitChips"
+                aria-label="Common units"
+              ></div>
 
+              <!-- Only for "level": where they start from -->
+              <div class="number-field current-field" id="currentField" hidden>
+                <label class="field-label" for="currentInput"
+                  >Where are you now?
+                  <span class="optional">Optional</span></label
+                >
+                <input
+                  class="ob-input"
+                  id="currentInput"
+                  type="number"
+                  min="0"
+                  step="any"
+                  inputmode="decimal"
+                  placeholder="e.g. 3"
+                />
+              </div>
             </div>
 
-            <div class="goal-form-actions">
-
-                <button
-                    type="button"
-                    id="saveGoalBtn"
-                    class="save-goal-btn">
-
-                    Add
-
-                </button>
-
+            <!-- 2b. Milestones. goal.js adds the step rows. -->
+            <div class="measure-details" id="stepsDetails" hidden>
+              <p class="finish-lead">Done when I've completed these steps</p>
+              <ol class="steps-list" id="stepsList"></ol>
+              <button type="button" class="add-step" id="addStepButton">
+                <span class="icon icon-sm" aria-hidden="true">add</span>
+                Add a step
+              </button>
             </div>
 
-        </div>
+            <!-- 2c. Consistency: nothing to fill in, just an explanation -->
+            <p class="measure-note" id="consistencyNote">
+              No finish number. "Done" means doing your habits consistently, and
+              Growth OS tracks that for you. You'll set the habits next.
+            </p>
+          </fieldset>
 
-    </section>
+          <!-- 3. Optional context -->
+          <div class="goal-field">
+            <label class="ob-label" for="whyInput"
+              >Why does this matter to you?
+              <span class="optional">Optional</span></label
+            >
+            <textarea
+              class="ob-input goal-textarea"
+              id="whyInput"
+              rows="2"
+              maxlength="200"
+              placeholder="What will achieving this change for you?"
+            ></textarea>
+          </div>
 
+          <div class="goal-field">
+            <label class="ob-label" for="deadlineInput"
+              >Target date <span class="optional">Optional</span></label
+            >
+            <input class="ob-input" id="deadlineInput" type="date" />
+          </div>
 
-    <!-- ============================================
-         FOOTER ACTIONS
-    ============================================= -->
+          <!-- What's still missing. role="alert" = read out loud when it changes -->
+          <p class="ob-error" id="goalError" role="alert" hidden></p>
+        </form>
 
-    <footer class="goal-footer">
+        <!-- 4. Live preview. aria-live="polite" = screen readers announce
+                 updates when the user pauses, without interrupting. -->
+        <aside class="goal-preview" id="goalPreview" aria-live="polite" hidden>
+          <p class="ob-eyebrow">
+            <span class="icon icon-sm" aria-hidden="true">flag</span>
+            Your goal
+          </p>
+          <p class="preview-title" id="previewTitle"></p>
+          <p class="preview-measure" id="previewMeasure"></p>
+          <p class="preview-why" id="previewWhy"></p>
+          <p class="preview-date" id="previewDate"></p>
+        </aside>
+      </main>
 
+      <!-- Continue is outside the form; form="goalForm" connects it anyway -->
+      <footer class="ob-footer">
+        <a class="ob-btn ob-btn-secondary" href="identity.html">Back</a>
         <button
-            type="button"
-            class="goal-back-footer"
-            id="footerBackButton">
-
-            <span class="material-symbols-outlined">
-                arrow_back
-            </span>
-
-            Back
-
+          class="ob-btn ob-btn-primary"
+          id="continueButton"
+          type="submit"
+          form="goalForm"
+          disabled
+        >
+          Continue
+          <span class="icon" aria-hidden="true">arrow_forward</span>
         </button>
+      </footer>
+    </div>
 
-        <button
-            type="button"
-            class="goal-continue"
-            id="continueBtn">
-
-            Continue
-
-            <span class="material-symbols-outlined">
-                arrow_forward
-            </span>
-
-        </button>
-
-    </footer>
-
-</main>
-
-
-<script src="../js/storage.js"></script>
-<script src="../js/onboarding.js"></script>
-
-</body>
+    <!-- Order matters: state.js and areas.js define functions goal.js uses -->
+    <script src="../js/state.js"></script>
+    <script src="../js/onboardingPages/areas.js"></script>
+    <script src="../js/onboardingPages/goal.js"></script>
+  </body>
 </html>

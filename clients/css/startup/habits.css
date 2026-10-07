@@ -1,525 +1,356 @@
-/* ============================================
-   RESET & ROOT VARIABLES
-============================================ */
+/* =========================================================
+   HABIT PAGE  (startup/habit.html)
+   Only what's unique to this page. The shell, chain card
+   and unit chips live in onboarding.css.
+   ========================================================= */
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+/* ---------- Habit builder card ---------- */
 
-:root {
-    --bg-main: #131313;
-    --card-bg: #1c1b1b;
-    --card-hover-bg: #242323;
-    --border-subtle: #333333;
-    --border-hover: #555555;
-    --text-primary: #ffffff;
-    --text-secondary: #c4c7c8;
-    --text-muted: #8e9192;
-    --accent-primary: #ffffff;
-    --accent-active: #e2e2e2;
-}
-
-
-/* ============================================
-   BODY & AMBIENT GLOW
-============================================ */
-
-body {
-    min-height: 100vh;
-    width: 100%;
-    font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg-main);
-    color: #e5e2e1;
-    padding: 48px 24px;
-    overflow-x: hidden;
-}
-
-.ambient-glow {
-    position: fixed;
-    top: -100px;
-    left: 50%;
-    width: 800px;
-    height: 600px;
-    transform: translateX(-50%);
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.12) 0%,
-        transparent 70%
-    );
-    opacity: 0.25;
-    pointer-events: none;
-    z-index: 0;
-}
-
-
-/* ============================================
-   MAIN CONTAINER
-============================================ */
-
-.habit-page {
-    width: 100%;
-    max-width: 820px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-}
-
-
-/* ============================================
-   HEADER & NAVIGATION
-============================================ */
-
-.page-header {
+.habit-builder {
+    margin-top: var(--lg);
+    padding: var(--md);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 40px;
+    gap: var(--lg);
 }
 
-.back-button {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 24px;
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    background: var(--card-bg);
-    color: var(--text-primary);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
+/* Inputs one shade darker than the card, so they stand out */
+.habit-builder .ob-input { background: var(--surface-container-lowest); }
 
-.back-button:hover {
-    background: #2a2a2a;
-    border-color: var(--border-hover);
-    transform: translateX(-2px);
-}
-
-.back-button:active {
-    transform: scale(0.95);
-}
-
-.step-label {
-    font-size: 13px;
-    line-height: 16px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
-
-.page-header h1 {
-    margin-top: 6px;
-    font-size: 2.75rem;
-    line-height: 1.15;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--text-primary);
-}
-
-.page-header p {
-    margin-top: 8px;
-    font-size: 18px;
-    line-height: 28px;
-    color: var(--text-secondary);
-}
-
-
-/* ============================================
-   HABITS SECTION
-============================================ */
-
-.habits-section {
-    width: 100%;
-}
-
-.habits-section h2 {
-    margin-bottom: 16px;
-    font-size: 22px;
-    line-height: 30px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--text-primary);
-}
-
-.habit-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-
-/* ============================================
-   PROMINENT HABIT CARDS
-============================================ */
-
-.habit-card {
-    width: 100%;
-    padding: 20px 24px;
-    border: 1.5px solid var(--border-subtle);
-    border-radius: 14px;
-    background: var(--card-bg);
-    cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.habit-card:hover {
-    border-color: var(--border-hover);
-    background: var(--card-hover-bg);
-    transform: translateY(-2px);
-}
-
-.habit-card.selected {
-    border-color: var(--accent-primary);
-    background: #222121;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-}
-
-.habit-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.habit-main {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    min-width: 0;
-}
-
-.habit-icon {
-    color: var(--text-muted);
-    font-size: 28px;
-    flex-shrink: 0;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.habit-card:hover .habit-icon,
-.habit-card.selected .habit-icon {
-    color: var(--text-primary);
-    transform: scale(1.08);
-}
-
-.habit-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.habit-label {
-    font-size: 18px;
-    line-height: 26px;
+.builder-heading {
+    font-size: 12px;
     font-weight: 600;
-    color: var(--text-secondary);
-    transition: color 0.2s ease, font-weight 0.2s ease;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--outline);
 }
 
-.habit-card.selected .habit-label {
-    font-weight: 700;
-    color: var(--text-primary);
-}
+/* While editing an existing habit, the heading turns white
+   so the user notices they're changing, not adding */
+.habit-builder.is-editing .builder-heading { color: var(--primary); }
+.habit-builder.is-editing { border-color: var(--outline); }
 
-.habit-info p {
-    font-size: 14px;
-    line-height: 20px;
-    color: var(--text-muted);
-}
+/* ---------- Habit suggestion chips ---------- */
 
-
-/* ============================================
-   CHECKBOX & INDICATORS
-============================================ */
-
-.habit-checkbox {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    border: 2px solid var(--text-muted);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.check-icon {
-    display: none;
-    font-size: 18px;
-    color: #131313;
-    font-variation-settings: "FILL" 1, "wght" 700;
-}
-
-.habit-card.selected .habit-checkbox {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    transform: scale(1.05);
-}
-
-.habit-card.selected .check-icon {
-    display: block;
-}
-
-
-/* ============================================
-   EXPANDABLE CONFIGURATION
-============================================ */
-
-.habit-config {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.25s ease,
-                margin-top 0.3s ease,
-                padding-top 0.3s ease;
-}
-
-.habit-card.selected .habit-config {
-    max-height: 220px;
-    opacity: 1;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-subtle);
-}
-
-.config-row {
+.habit-chips {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
 }
 
-.form-group {
-    flex: 1;
+.habit-chips:empty { display: none; }   /* "Something else" has no suggestions */
+
+.habit-chip {
+    padding: 8px 14px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-full);
+    color: var(--on-surface-variant);
+    font-size: 14px;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.habit-chip:hover { border-color: var(--outline); color: var(--on-surface); }
+.habit-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* A suggestion that's already in the list: shown, but can't be added twice */
+.habit-chip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* ---------- Type cards (Amount / Time / Done) ---------- */
+
+/* Same fieldset fix as the other pages: stops sideways scroll on phones */
+.type-fieldset,
+.days-fieldset {
+    min-width: 0;
+    border: none;
+}
+
+.type-fieldset legend,
+.days-fieldset legend { padding: 0; }
+
+.type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.type-card {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 12px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-lowest);
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.type-card:hover { border-color: var(--outline); }
+
+/* "A card that contains a checked radio" → selected look. No JS. */
+.type-card:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--surface-container-high);
+    color: var(--primary);
+}
+
+.type-card:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.type-icon {
+    width: 22px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    font-size: 22px;
+}
+
+.type-card:has(input:checked) .type-icon { font-variation-settings: 'FILL' 1; }
+
+.type-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.type-example {
+    font-size: 12px;
+    color: var(--outline);
+}
+
+/* ---------- Daily amount ---------- */
+
+/* Number box narrower than the unit box (1 : 1.4) */
+.amount-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 10px;
+}
+
+.amount-number {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* ---------- Days ---------- */
+
+.day-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: -4px 0 10px;
+}
+
+.day-preset {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.day-preset:hover { color: var(--primary); background: var(--surface-container-high); }
+.day-preset:focus-visible { outline: 2px solid var(--primary); }
+
+/* 7 equal columns. minmax(0, 1fr) lets them shrink on small phones */
+.days-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 6px;
 }
 
-.form-group label {
-    font-size: 13px;
-    line-height: 18px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.target-group {
-    display: flex;
-    gap: 8px;
-}
-
-.form-input,
-.form-select {
-    height: 44px;
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    background: var(--bg-main);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 15px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.target-input {
-    width: 80px;
-    text-align: center;
-}
-
-.form-select {
-    width: 100%;
-    cursor: pointer;
-}
-
-.target-group .unit-input {
-    flex: 1;
-}
-
-.form-input:focus,
-.form-select:focus {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
-}
-
-
-
-/* ============================================
-   CUSTOM HABIT BUTTON
-============================================ */
-
-.custom-habit-button {
-    width: 100%;
-    min-height: 56px;
-    margin-top: 16px;
-    border: 1.5px dashed var(--border-hover);
-    border-radius: 14px;
-    background: transparent;
-    color: var(--text-secondary);
+.day-toggle {
+    aspect-ratio: 1;             /* always a perfect circle, whatever the width */
+    max-width: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    font-family: inherit;
-    font-size: 16px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-full);
+    background: var(--surface-container-lowest);
+    color: var(--outline);
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.custom-habit-button:hover {
-    color: var(--text-primary);
-    border-color: var(--text-primary);
-    background: var(--card-bg);
-    transform: translateY(-1px);
+/* Checked day = solid white circle */
+.day-toggle:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--background);
 }
 
+.day-toggle:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* ============================================
-   FOOTER & PROGRESS
-============================================ */
+/* ---------- Builder buttons ---------- */
 
-.page-footer {
-    margin-top: 56px;
-    padding-top: 32px;
-    border-top: 1px solid var(--border-subtle);
+.builder-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.builder-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-highest);
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 600;
+    transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.builder-add:hover:not(:disabled) { background: var(--surface-bright); }
+.builder-add:disabled { opacity: 0.35; cursor: not-allowed; }
+.builder-add:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.builder-cancel {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-full);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.builder-cancel:hover { color: var(--primary); }
+.builder-cancel:focus-visible { outline: 2px solid var(--primary); }
+
+/* ---------- Habits list ---------- */
+
+.habit-list-section { margin-top: var(--md); }
+
+.supports-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: var(--md);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--outline);
+}
+
+.habit-list-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.habit-count {
+    font-size: 13px;
+    color: var(--outline);
+}
+
+.habit-list {
+    list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 8px;
 }
 
-.progress-dots {
+.habit-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    gap: 12px;
+    padding: 12px 8px 12px 14px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
 }
 
-.dot {
-    width: 10px;
-    height: 10px;
-    border: 1px solid var(--border-hover);
-    border-radius: 50%;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+/* The one being edited gets a white edge */
+.habit-item.is-editing { box-shadow: inset 3px 0 0 var(--primary); }
+
+.habit-item-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    color: var(--primary);
+    font-size: 18px;
 }
 
-.dot.active {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    transform: scale(1.2);
-}
-
-.navigation-buttons {
-    display: flex;
-    gap: 16px;
-}
-
-.footer-back {
-    width: 110px;
-    min-height: 52px;
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    background: var(--card-bg);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.footer-back:hover {
-    background: #2a2a2a;
-    border-color: var(--border-hover);
-}
-
-.footer-back:active {
-    transform: scale(0.98);
-}
-
-.continue-button {
+/* min-width: 0 so long names get "..." instead of pushing buttons off screen */
+.habit-item-text {
     flex: 1;
-    min-height: 52px;
-    border: none;
-    border-radius: 12px;
-    background: var(--accent-primary);
-    color: #131313;
+    min-width: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    flex-direction: column;
 }
 
-.continue-button:hover {
-    background: var(--accent-active);
-    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+.habit-item-name,
+.habit-item-detail {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.continue-button:active {
-    transform: scale(0.98);
+.habit-item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary);
 }
 
+.habit-item-detail {
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
 
-/* ============================================
-   RESPONSIVE (MOBILE)
-============================================ */
+.habit-item-button {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    color: var(--outline);
+}
 
-@media (max-width: 600px) {
-    body {
-        padding: 24px 16px 36px;
-    }
+.habit-item-button:hover { color: var(--primary); background: var(--surface-container-high); }
+.habit-item-button.is-remove:hover { color: var(--error); }
+.habit-item-button:focus-visible { outline: 2px solid var(--primary); }
 
-    .habit-page {
-        max-width: 100%;
-    }
+.habit-empty {
+    padding: var(--md);
+    border: 1px dashed var(--outline-variant);
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    text-align: center;
+    color: var(--outline);
+}
 
-    .page-header {
-        margin-bottom: 32px;
-    }
+/* ---------- Projection: "you'll reach 20 pages in about 4 weeks" ---------- */
 
-    .page-header h1 {
-        font-size: 2.25rem;
-    }
+.projection {
+    margin-top: var(--md);
+    padding: var(--md);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-md);
+    background: var(--surface-container-low);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--on-surface);
+}
 
-    .page-header p {
-        font-size: 16px;
-        line-height: 24px;
-    }
+.projection strong { color: var(--primary); }
 
-    .habit-card {
-        padding: 16px;
-    }
+/* ---------- Bigger screens ---------- */
 
-    .config-row {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .habit-main {
-        gap: 12px;
-    }
-
-    .navigation-buttons {
-        flex-direction: column-reverse;
-        gap: 12px;
-    }
-
-    .footer-back {
-        width: 100%;
-        min-height: 52px;
-    }
-
-    .continue-button {
-        width: 100%;
-    }
+@media (min-width: 600px) {
+    .habit-builder { padding: var(--lg); }
 }

@@ -1,757 +1,321 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Habits | Growth OS</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Growth OS - Habits</title>
-
-    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-    >
-
-    <!-- Material Icons -->
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        rel="stylesheet"
-    >
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="../css/startup/habits.css">
-</head>
+    <!-- Order matters: base (tokens) → onboarding (shared shell) → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/onboarding.css" />
+    <link rel="stylesheet" href="../css/startup/habits.css" />
+  </head>
+  <body>
+    <div class="ob-page">
+      <header class="ob-topbar">
+        <span class="ob-brand">
+          <span class="ob-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </span>
+        <p class="ob-step">Step 03 of 04</p>
+      </header>
 
-<body>
+      <nav class="ob-progress" aria-label="Onboarding progress">
+        <ol>
+          <li class="is-done">Direction</li>
+          <li class="is-done">Goal</li>
+          <li class="is-current" aria-current="step">Habit</li>
+          <li>Routine</li>
+        </ol>
+      </nav>
 
-    <!-- =====================================
-         BACKGROUND EFFECT
-    ====================================== -->
+      <main class="ob-content ob-content-top">
+        <!-- The goal these habits serve, pinned at the top as a FINISH LINE.
+                 habit.js fills the empty spans from state.js. -->
+        <div class="chain-card">
+          <span class="icon chain-icon" aria-hidden="true">flag</span>
+          <div class="chain-text">
+            <span class="chain-label"
+              >Goal · <span id="goalFinish"></span
+            ></span>
+            <span class="chain-value" id="goalName"></span>
+          </div>
+          <a class="chain-edit" href="goal.html">Edit</a>
+        </div>
+        <div class="chain-line" aria-hidden="true"></div>
 
-    <div class="ambient-glow"></div>
+        <h1 class="ob-title">What will you do each day?</h1>
+        <p class="ob-subtitle">
+          Your goal is the finish line. Habits are the daily steps that get you
+          there.
+        </p>
 
+        <!-- ============ HABIT BUILDER ============
+                 Its own form: pressing Enter or "Add habit" adds a habit to
+                 the list below. It does NOT leave the page. -->
+        <form class="habit-builder" id="habitForm" novalidate>
+          <p class="builder-heading" id="builderHeading">New habit</p>
 
-    <!-- =====================================
-         MAIN PAGE
-    ====================================== -->
+          <!-- 1. Name + suggestions (habit.js draws the chips) -->
+          <div class="builder-field">
+            <label class="ob-label" for="habitName">What will you do?</label>
+            <input
+              class="ob-input"
+              id="habitName"
+              type="text"
+              maxlength="40"
+              placeholder="e.g. Memorize new"
+              autocomplete="off"
+            />
+            <div
+              class="habit-chips"
+              id="habitChips"
+              aria-label="Suggested habits"
+            ></div>
+          </div>
 
-    <main class="habit-page">
-
-
-        <!-- =================================
-             HEADER
-        ================================== -->
-
-        <header class="page-header">
-
-            <button
-                type="button"
-                class="back-button"
-                id="backButton"
-            >
-                <span class="material-symbols-outlined">
-                    arrow_back
-                </span>
-            </button>
-
-            <div class="step-label">
-                Step 2 of 6
+          <!-- 2. How it's measured. Same trick as the Goal page:
+                     real radios, hidden, inside labels styled as cards. -->
+          <fieldset class="builder-field type-fieldset">
+            <legend class="ob-label">How will you measure it?</legend>
+            <div class="type-grid">
+              <label class="type-card">
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="habitType"
+                  value="quantity"
+                  checked
+                />
+                <span class="icon type-icon" aria-hidden="true"
+                  >straighten</span
+                >
+                <span class="type-name">Amount</span>
+                <span class="type-example">e.g. 1 page</span>
+              </label>
+              <label class="type-card">
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="habitType"
+                  value="time"
+                />
+                <span class="icon type-icon" aria-hidden="true">timer</span>
+                <span class="type-name">Time</span>
+                <span class="type-example">e.g. 30 min</span>
+              </label>
+              <label class="type-card">
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="habitType"
+                  value="completion"
+                />
+                <span class="icon type-icon" aria-hidden="true">task_alt</span>
+                <span class="type-name">Done / not</span>
+                <span class="type-example">e.g. Pray on time</span>
+              </label>
             </div>
-
-            <h1>
-                What habits do you want to build?
-            </h1>
-
-            <p>
-                Choose a few that support your identity.
-            </p>
-
-        </header>
-
-
-        <!-- =================================
-             HABIT SECTION
-        ================================== -->
-
-        <section class="habits-section">
-
-            <h2>
-                Suggested habits
-            </h2>
-
-
-            <div class="habit-list" id="habitList">
-
-
-                <!-- =========================
-                     MORNING RUN
-                ========================== -->
-
-                <article
-                    class="habit-card selected"
-                    data-habit-id="run"
-                >
-
-                    <!-- Habit Header -->
-
-                    <div class="habit-header">
-
-                        <div class="habit-main">
-
-                            <span class="material-symbols-outlined habit-icon">
-                                directions_run
-                            </span>
-
-                            <div class="habit-info">
-
-                                <h3 class="habit-label">
-                                    Morning Run
-                                </h3>
-
-                                <p>
-                                    Build endurance
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="habit-checkbox">
-
-                            <span class="material-symbols-outlined check-icon">
-                                check
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- Habit Configuration -->
-
-                    <div class="habit-config">
-
-                        <div class="config-row">
-
-
-                            <!-- TARGET -->
-
-                            <div class="form-group">
-
-                                <label>
-                                    Target
-                                </label>
-
-                                <div class="target-group">
-
-                                    <input
-                                        type="number"
-                                        class="form-input target-input"
-                                        value="5"
-                                        min="1"
-                                    >
-
-                                    <select class="form-select unit-input">
-
-                                        <option value="km">
-                                            km
-                                        </option>
-
-                                        <option value="min">
-                                            min
-                                        </option>
-
-                                        <option value="miles">
-                                            miles
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- FREQUENCY -->
-
-                            <div class="form-group">
-
-                                <label>
-                                    Frequency
-                                </label>
-
-                                <select class="form-select frequency-input">
-
-                                    <option value="everyday">
-                                        Every day
-                                    </option>
-
-                                    <option value="weekdays">
-                                        Weekdays
-                                    </option>
-
-                                    <option value="weekends">
-                                        Weekends
-                                    </option>
-
-                                    <option value="custom">
-                                        Custom...
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- =========================
-                     QURAN
-                ========================== -->
-
-                <article
-                    class="habit-card"
-                    data-habit-id="quran"
-                >
-
-                    <div class="habit-header">
-
-                        <div class="habit-main">
-
-                            <span class="material-symbols-outlined habit-icon">
-                                menu_book
-                            </span>
-
-                            <div class="habit-info">
-
-                                <h3 class="habit-label">
-                                    Quran Revision
-                                </h3>
-
-                                <p>
-                                    Maintain connection
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="habit-checkbox">
-
-                            <span class="material-symbols-outlined check-icon">
-                                check
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="habit-config">
-
-                        <div class="config-row">
-
-                            <div class="form-group">
-
-                                <label>
-                                    Target
-                                </label>
-
-                                <div class="target-group">
-
-                                    <input
-                                        type="number"
-                                        class="form-input target-input"
-                                        value="10"
-                                        min="1"
-                                    >
-
-                                    <select class="form-select unit-input">
-
-                                        <option value="pages">
-                                            pages
-                                        </option>
-
-                                        <option value="ayahs">
-                                            ayahs
-                                        </option>
-
-                                        <option value="min">
-                                            min
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>
-                                    Frequency
-                                </label>
-
-                                <select class="form-select frequency-input">
-
-                                    <option value="everyday">
-                                        Every day
-                                    </option>
-
-                                    <option value="weekdays">
-                                        Weekdays
-                                    </option>
-
-                                    <option value="weekends">
-                                        Weekends
-                                    </option>
-
-                                    <option value="custom">
-                                        Custom...
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- =========================
-                     DEEP WORK
-                ========================== -->
-
-                <article
-                    class="habit-card"
-                    data-habit-id="deepwork"
-                >
-
-                    <div class="habit-header">
-
-                        <div class="habit-main">
-
-                            <span class="material-symbols-outlined habit-icon">
-                                computer
-                            </span>
-
-                            <div class="habit-info">
-
-                                <h3 class="habit-label">
-                                    Deep Work
-                                </h3>
-
-                                <p>
-                                    Master your craft
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="habit-checkbox">
-
-                            <span class="material-symbols-outlined check-icon">
-                                check
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="habit-config">
-
-                        <div class="config-row">
-
-                            <div class="form-group">
-
-                                <label>
-                                    Target
-                                </label>
-
-                                <div class="target-group">
-
-                                    <input
-                                        type="number"
-                                        class="form-input target-input"
-                                        value="90"
-                                        min="1"
-                                    >
-
-                                    <select class="form-select unit-input">
-
-                                        <option value="min">
-                                            min
-                                        </option>
-
-                                        <option value="hours">
-                                            hours
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>
-                                    Frequency
-                                </label>
-
-                                <select class="form-select frequency-input">
-
-                                    <option value="weekdays">
-                                        Weekdays
-                                    </option>
-
-                                    <option value="everyday">
-                                        Every day
-                                    </option>
-
-                                    <option value="weekends">
-                                        Weekends
-                                    </option>
-
-                                    <option value="custom">
-                                        Custom...
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- =========================
-                     READING
-                ========================== -->
-
-                <article
-                    class="habit-card"
-                    data-habit-id="reading"
-                >
-
-                    <div class="habit-header">
-
-                        <div class="habit-main">
-
-                            <span class="material-symbols-outlined habit-icon">
-                                book
-                            </span>
-
-                            <div class="habit-info">
-
-                                <h3 class="habit-label">
-                                    Reading
-                                </h3>
-
-                                <p>
-                                    Expand perspective
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="habit-checkbox">
-
-                            <span class="material-symbols-outlined check-icon">
-                                check
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="habit-config">
-
-                        <div class="config-row">
-
-                            <div class="form-group">
-
-                                <label>
-                                    Target
-                                </label>
-
-                                <div class="target-group">
-
-                                    <input
-                                        type="number"
-                                        class="form-input target-input"
-                                        value="20"
-                                        min="1"
-                                    >
-
-                                    <select class="form-select unit-input">
-
-                                        <option value="pages">
-                                            pages
-                                        </option>
-
-                                        <option value="min">
-                                            min
-                                        </option>
-
-                                        <option value="chapters">
-                                            chapters
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>
-                                    Frequency
-                                </label>
-
-                                <select class="form-select frequency-input">
-
-                                    <option value="everyday">
-                                        Every day
-                                    </option>
-
-                                    <option value="weekdays">
-                                        Weekdays
-                                    </option>
-
-                                    <option value="weekends">
-                                        Weekends
-                                    </option>
-
-                                    <option value="custom">
-                                        Custom...
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- =========================
-                     MEDITATION
-                ========================== -->
-
-                <article
-                    class="habit-card"
-                    data-habit-id="meditation"
-                >
-
-                    <div class="habit-header">
-
-                        <div class="habit-main">
-
-                            <span class="material-symbols-outlined habit-icon">
-                                self_improvement
-                            </span>
-
-                            <div class="habit-info">
-
-                                <h3 class="habit-label">
-                                    Meditation
-                                </h3>
-
-                                <p>
-                                    Clarify the mind
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div class="habit-checkbox">
-
-                            <span class="material-symbols-outlined check-icon">
-                                check
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="habit-config">
-
-                        <div class="config-row">
-
-                            <div class="form-group">
-
-                                <label>
-                                    Target
-                                </label>
-
-                                <div class="target-group">
-
-                                    <input
-                                        type="number"
-                                        class="form-input target-input"
-                                        value="10"
-                                        min="1"
-                                    >
-
-                                    <select class="form-select unit-input">
-
-                                        <option value="min">
-                                            min
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>
-                                    Frequency
-                                </label>
-
-                                <select class="form-select frequency-input">
-
-                                    <option value="everyday">
-                                        Every day
-                                    </option>
-
-                                    <option value="weekdays">
-                                        Weekdays
-                                    </option>
-
-                                    <option value="weekends">
-                                        Weekends
-                                    </option>
-
-                                    <option value="custom">
-                                        Custom...
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </article>
-
+          </fieldset>
+
+          <!-- 3. Daily amount. Hidden for "Done / not" habits. -->
+          <div class="builder-field" id="amountField">
+            <p class="ob-label" id="amountLabel">How much each day?</p>
+            <div class="amount-row">
+              <label class="visually-hidden" for="habitTarget"
+                >Daily amount</label
+              >
+              <input
+                class="ob-input amount-number"
+                id="habitTarget"
+                type="number"
+                min="0"
+                step="any"
+                inputmode="decimal"
+                placeholder="1"
+                aria-describedby="amountLabel"
+              />
+              <label class="visually-hidden" for="habitUnit">Unit</label>
+              <input
+                class="ob-input"
+                id="habitUnit"
+                type="text"
+                maxlength="20"
+                placeholder="pages"
+                autocomplete="off"
+              />
             </div>
+            <div
+              class="unit-chips"
+              id="habitUnitChips"
+              aria-label="Common units"
+            ></div>
+          </div>
 
+          <!-- 4. Days. Real checkboxes (hidden) inside round labels.
+                     A <legend> must be the FIRST child of its <fieldset>. -->
+          <fieldset class="builder-field days-fieldset">
+            <legend class="ob-label">Which days?</legend>
+            <div class="day-presets">
+              <button type="button" class="day-preset" data-preset="every">
+                Every day
+              </button>
+              <button type="button" class="day-preset" data-preset="weekdays">
+                Weekdays
+              </button>
+              <button type="button" class="day-preset" data-preset="weekend">
+                Weekends
+              </button>
+            </div>
+            <div class="days-row" id="daysRow">
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="mon"
+                  checked
+                /><span aria-hidden="true">M</span
+                ><span class="visually-hidden">Monday</span></label
+              >
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="tue"
+                  checked
+                /><span aria-hidden="true">T</span
+                ><span class="visually-hidden">Tuesday</span></label
+              >
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="wed"
+                  checked
+                /><span aria-hidden="true">W</span
+                ><span class="visually-hidden">Wednesday</span></label
+              >
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="thu"
+                  checked
+                /><span aria-hidden="true">T</span
+                ><span class="visually-hidden">Thursday</span></label
+              >
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="fri"
+                  checked
+                /><span aria-hidden="true">F</span
+                ><span class="visually-hidden">Friday</span></label
+              >
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="sat"
+                  checked
+                /><span aria-hidden="true">S</span
+                ><span class="visually-hidden">Saturday</span></label
+              >
+              <label class="day-toggle"
+                ><input
+                  class="visually-hidden"
+                  type="checkbox"
+                  name="days"
+                  value="sun"
+                  checked
+                /><span aria-hidden="true">S</span
+                ><span class="visually-hidden">Sunday</span></label
+              >
+            </div>
+          </fieldset>
 
-            <!-- =========================
-                 CUSTOM HABIT
-            ========================== -->
+          <p class="ob-error" id="habitError" role="alert" hidden></p>
 
+          <div class="builder-actions">
             <button
-                type="button"
-                class="custom-habit-button"
+              type="button"
+              class="builder-cancel"
+              id="cancelEditButton"
+              hidden
             >
-
-                <span class="material-symbols-outlined">
-                    add
-                </span>
-
-                Create a custom habit
-
+              Cancel
             </button>
+            <button
+              type="submit"
+              class="builder-add"
+              id="addHabitButton"
+              disabled
+            >
+              <span class="icon icon-sm" aria-hidden="true" id="addHabitIcon"
+                >add</span
+              >
+              <span id="addHabitText">Add habit</span>
+            </button>
+          </div>
+        </form>
 
+        <!-- ============ HABITS LIST ============ -->
+        <section class="habit-list-section" aria-labelledby="habitListTitle">
+          <div class="supports-line" aria-hidden="true">
+            <span class="icon icon-sm">north</span> supports your goal
+          </div>
+          <div class="habit-list-header">
+            <h2 class="ob-eyebrow" id="habitListTitle">Your habits</h2>
+            <span class="habit-count" id="habitCount">0 / 3</span>
+          </div>
+
+          <!-- aria-live: screen readers announce habits being added or removed -->
+          <ul class="habit-list" id="habitList" aria-live="polite"></ul>
+          <p class="habit-empty" id="habitEmpty">
+            No habits yet. Add one above, one is enough to start.
+          </p>
+
+          <!-- "At 1 page a day, you'll reach 20 pages in about 4 weeks" -->
+          <p class="projection" id="projection" hidden></p>
         </section>
+      </main>
 
+      <footer class="ob-footer">
+        <a class="ob-btn ob-btn-secondary" href="goal.html">Back</a>
+        <!-- type="button": this is NOT the builder form's submit button -->
+        <button
+          class="ob-btn ob-btn-primary"
+          id="continueButton"
+          type="button"
+          disabled
+        >
+          Continue
+          <span class="icon" aria-hidden="true">arrow_forward</span>
+        </button>
+      </footer>
+    </div>
 
-
-        <!-- =================================
-             FOOTER
-        ================================== -->
-
-        <footer class="page-footer">
-
-
-            <!-- Progress -->
-
-            <div class="progress-dots">
-
-                <span class="dot active"></span>
-                <span class="dot active"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-
-            </div>
-
-
-            <!-- Navigation -->
-
-            <div class="navigation-buttons">
-
-                <button
-                    type="button"
-                    class="footer-back"
-                    id="footerBackButton"
-                >
-                    Back
-                </button>
-
-
-                <button
-                    type="button"
-                    class="continue-button"
-                    id="continueButton"
-                >
-
-                    Continue
-
-                    <span class="material-symbols-outlined">
-                        arrow_forward
-                    </span>
-
-                </button>
-
-            </div>
-
-        </footer>
-
-    </main>
-
-
-    <!-- JavaScript -->
-   <script src="../js/storage.js"></script>
-    <script src="../js/onboarding.js"></script>
-
-</body>
+    <!-- Order matters: state.js and areas.js define functions habit.js uses -->
+    <script src="../js/state.js"></script>
+    <script src="../js/onboardingPages/areas.js"></script>
+    <script src="../js/onboardingPages/habit.js"></script>
+  </body>
 </html>

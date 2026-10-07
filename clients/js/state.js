@@ -50,7 +50,6 @@ function defaultUser() {
         version: 1
     };
 }
-
 /* ------------------------------------------------------------
    CORE READ / WRITE
    ------------------------------------------------------------
@@ -134,43 +133,82 @@ function humanizeFrequency(frequency) {
     return frequency.charAt(0).toUpperCase() + frequency.slice(1);
 }
 
+/* ---------- Days of the week ----------
+   Stored as short lowercase names, always in this order.
+   (Not numbers: "mon" is readable in localStorage and in a database.) */
+const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri"];
+const WEEKEND = ["sat", "sun"];
+
+// Old onboarding saved "everyday" / "weekdays" / "weekends".
+// Turn that into the new days array.
+function frequencyToDays(frequency) {
+    if (frequency === "weekdays") return WEEKDAYS.slice();
+    if (frequency === "weekends") return WEEKEND.slice();
+    return WEEK_DAYS.slice();   // everyday, custom or unknown → every day
+}
+
+// ["mon","wed","fri"] → "Mon, Wed, Fri". Used by Habit, Routine and Dashboard.
+function describeDays(days) {
+    const sameAs = (list) => days.length === list.length && list.every(day => days.includes(day));
+    if (sameAs(WEEK_DAYS)) return "Every day";
+    if (sameAs(WEEKDAYS)) return "Weekdays";
+    if (sameAs(WEEKEND)) return "Weekends";
+    return WEEK_DAYS
+        .filter(day => days.includes(day))                      // keep Mon→Sun order
+        .map(day => day.charAt(0).toUpperCase() + day.slice(1)) // "mon" → "Mon"
+        .join(", ");
+}
+
+// A habit's daily amount as text: "1 pages", "30 min", or "Done" for completion habits.
+function describeHabitAmount(habit) {
+    if (habit.type === "completion") return "Done";
+    return `${habit.target} ${habit.unit}`.trim();
+}
+
+// Takes a habit in ANY old or new shape and returns the CURRENT shape.
+// Like normalizeGoal: every page reads habits through getHabits(),
+// so no page has to worry about old saved data.
 function normalizeHabit(item, index) {
     if (typeof item === "string") {
-        return {
-            id: "habit-" + index, name: item, detail: "",
-            goalId: null, target: null, unit: "", frequency: "",
-            purpose: "", archived: false, isBinary: false,
-            todayAmount: 0, completedToday: false
-        };
+        item = { name: item };                 // very old saves were plain text
     }
 
-    const detailParts = [];
-    if (item.target && item.unit) detailParts.push(`${item.target} ${item.unit}`);
-    if (item.frequency) detailParts.push(humanizeFrequency(item.frequency));
+    const TYPES = ["time", "quantity", "completion"];
+    const target = typeof item.target === "number" ? item.target : null;
+
+    // Old habits have no type: target 1 with no unit was a done/not-done habit.
+    let type = TYPES.includes(item.type) ? item.type : "quantity";
+    if (!item.type && target === 1 && !item.unit) type = "completion";
+
+    const days = Array.isArray(item.days) && item.days.length
+        ? WEEK_DAYS.filter(day => item.days.includes(day))      // clean + sorted
+        : frequencyToDays(item.frequency);
 
     const log = item.log || {};
     const todayAmount = log[todayDateString()] || 0;
 
-    // A "binary" habit (complete / not complete, like "Pray Fajr") is just
-    // a habit with target 1 and no unit — no separate data structure needed.
-    const isBinary = item.target === 1 && !item.unit;
-
-    return {
+    const habit = {
         id: item.id || "habit-" + index,
-        name: item.name || item.title || humanizeHabitId(item.id),
-        detail: detailParts.join(" · "),
         goalId: item.goalId || null,
-        target: typeof item.target === "number" ? item.target : null,
-        unit: item.unit || "",
+        name: item.name || item.title || humanizeHabitId(item.id),
+        type: type,
+        target: type === "completion" ? 1 : target,
+        unit: type === "completion" ? "" : (item.unit || ""),
+        days: days,
+        log: log,
+        archived: !!item.archived,
+        createdAt: item.createdAt || Date.now(),
+        // Older fields the dashboard still reads:
         frequency: item.frequency || "",
         purpose: item.purpose || "",
-        archived: !!item.archived,
-        isBinary,
-        todayAmount,
-        completedToday: typeof item.target === "number" ? todayAmount >= item.target : false
+        isBinary: type === "completion",
+        todayAmount: todayAmount
     };
+    habit.detail = `${describeHabitAmount(habit)} · ${describeDays(habit.days)}`;
+    habit.completedToday = typeof habit.target === "number" ? todayAmount >= habit.target : false;
+    return habit;
 }
-
 function normalizeRoutineItem(item, index) {
     if (typeof item === "string") {
         const parts = item.split(/\s+/);
@@ -190,13 +228,29 @@ function normalizeRoutineItem(item, index) {
     };
 }
 
+// Takes a goal in ANY old or new shape and returns the CURRENT shape.
+// Every page reads goals through getGoals(), which runs this first,
+// so no page ever has to worry about old saved data.
 function normalizeGoal(item, index) {
     if (typeof item === "string") {
-        return { id: "goal-" + index, title: item, currentFocus: "", progress: null };
+        item = { title: item };              // very old saves were plain text
     }
+    const MEASURES = ["consistency", "total", "level", "milestones"];
     return {
         id: item.id || "goal-" + index,
         title: item.title || item.name || "Untitled goal",
+        why: item.why || "",
+        deadline: item.deadline || "",                       // "2027-03-31" or ""
+        // Unknown or missing measure → the safe default. This line is
+        // exactly what was missing and caused your crash.
+        measure: MEASURES.includes(item.measure) ? item.measure : "consistency",
+        target: typeof item.target === "number" ? item.target : null,
+        unit: item.unit || "",
+        current: typeof item.current === "number" ? item.current : null,   // "level" only
+        milestones: Array.isArray(item.milestones) ? item.milestones : [], // [{ id, title, done }]
+        area: item.area || "",
+        createdAt: item.createdAt || Date.now(),
+        // Older fields the dashboard still reads:
         currentFocus: item.currentFocus || "",
         progress: typeof item.progress === "number" ? item.progress : null
     };
@@ -421,6 +475,7 @@ function getGoalProgress(goalId) {
         }));
 }
 
+
 // A single completion percentage for a goal card's badge — the average
 // of each linked habit's (weeklyTotal / weeklyTarget), so it's a real
 // derived number, not an invented one. Returns null if no linked habit
@@ -507,6 +562,20 @@ function saveLifestyle(lifestyle) {
     const user = getUser();
     user.lifestyle = lifestyle;
     saveUser(user);
+}
+
+/* ------------------------------------------------------------
+   GOALS
+   ------------------------------------------------------------ */
+   function replaceGoalHabits(goalId, habits) {
+    const user = getUser();
+    const otherHabits = user.habits.filter(habit => habit.goalId !== goalId);
+    user.habits = otherHabits.concat(habits);
+    saveUser(user);
+}
+
+function getHabitsForGoal(goalId) {
+    return getHabits().filter(habit => habit.goalId === goalId && !habit.archived);
 }
 
 /* ------------------------------------------------------------
