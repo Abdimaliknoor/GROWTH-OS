@@ -72,16 +72,25 @@ function getUser() {
     return filled;
 }
 
+// Lists (goals, habits...) MUST be arrays, because every page calls
+// .map / .filter / .push on them. If a list was saved wrong (one object
+// instead of an array of objects), repair it here, once, for every page.
+function toList(value) {
+    if (Array.isArray(value)) return value;                  // correct: keep it
+    if (value && typeof value === "object") return [value];  // one object → wrap it in a list
+    return [];                                                // missing or broken → empty list
+}
+
 function fillMissingFields(user) {
     const fresh = defaultUser();
 
     return {
         profile: { ...fresh.profile, ...user.profile },
-        habits: user.habits || fresh.habits,
-        routine: user.routine || fresh.routine,
+        habits: toList(user.habits),
+        routine: toList(user.routine),
         lifestyle: { ...fresh.lifestyle, ...user.lifestyle },
-        goals: user.goals || fresh.goals,
-        journal: user.journal || fresh.journal,
+        goals: toList(user.goals),
+        journal: toList(user.journal),
         focus: { ...fresh.focus, ...user.focus },
         stats: { ...fresh.stats, ...user.stats },
         onboarding: { ...fresh.onboarding, ...user.onboarding },
