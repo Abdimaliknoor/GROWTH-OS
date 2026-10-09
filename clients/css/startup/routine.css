@@ -1,588 +1,304 @@
-/* ============================================
-   ROUTINE PAGE LAYOUT
-============================================ */
+/* =========================================================
+   ROUTINE PAGE  (startup/routine.html)
+   Only what's unique to this page. The shell and the
+   chain card live in onboarding.css.
+   ========================================================= */
 
-.routine-page {
-    min-height: 100vh;
-    width: 100%;
+/* ---------- Plan cards (Wake up, each habit, Sleep) ---------- */
+
+.plan-list {
+    margin-top: var(--lg);
     display: flex;
     flex-direction: column;
+    gap: 12px;
+}
+
+.plan-card {
+    padding: var(--md);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+}
+
+/* Habits stand out; Wake up and Sleep (anchors) are quieter */
+.plan-card.is-anchor {
+    border-color: transparent;
+    background: var(--surface-container-lowest);
+}
+
+.plan-head {
+    display: flex;
     align-items: center;
-    padding: 40px 24px 48px;
-    background: var(--background);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.plan-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    overflow: hidden;              /* icon text can't stretch it before the font loads */
+    border-radius: var(--radius-md);
+    background: var(--surface-container-high);
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.plan-title {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+.plan-detail {
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+.plan-question {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+
+/* ---------- Time slots: [time]  M T W T F S S  [×] ---------- */
+
+.slot-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Phones: [time] ............ [×]
+           [M][T][W][T][F][S][S]     ← days get their own full-width line,
+                                       so the circles are big enough to tap */
+.slot-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-container);
+}
+
+.slot-time {
+    width: 140px;                  /* room for "06:00 AM" on 12-hour phones */
+    min-height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--surface-container-lowest);
     color: var(--on-surface);
+    font-size: 16px;
+    font-weight: 600;
+    color-scheme: dark;            /* dark clock popup + dark icon */
+    outline: none;
 }
 
+.slot-time:focus { border-color: var(--outline); }
 
-/* ============================================
-   HEADER
-============================================ */
+/* A time box still empty, after the user has touched this card */
+.slot-time.is-missing { border-color: var(--error); }
 
-.routine-header {
-    width: 100%;
-    max-width: 900px;
-    margin-bottom: 36px;
+.slot-days {
+    flex-basis: 100%;              /* a full line of its own on phones */
+    order: 3;                      /* after the time AND the × button */
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
 }
 
-.routine-back {
+.slot-day {
+    aspect-ratio: 1;
+    max-width: 40px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--outline);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* This day happens at THIS time */
+.slot-day[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--background);
+}
+
+/* Not a day this habit happens at all: can't be picked */
+.slot-day:disabled {
+    border-style: dashed;
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.slot-day:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.slot-remove {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    margin-left: auto;             /* pushes × to the right end of the time line */
+    border-radius: var(--radius-md);
+    color: var(--outline);
+}
+
+.slot-remove:hover { color: var(--error); background: var(--surface-container-high); }
+.slot-remove:focus-visible { outline: 2px solid var(--primary); }
+
+.add-slot {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    margin-left: -12px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--on-surface-variant);
-    font-family: inherit;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-}
-
-.routine-back:hover {
-    color: var(--primary);
-    background: var(--surface-container-low);
-    transform: translateX(-3px);
-}
-
-.routine-back .material-symbols-outlined {
-    font-size: 20px;
-}
-
-
-/* ============================================
-   INTRO & PROGRESS
-============================================ */
-
-.routine-intro {
-    width: 100%;
-    max-width: 680px;
-    text-align: center;
-    margin-bottom: 48px;
-}
-
-.routine-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.routine-step p {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
     color: var(--on-surface-variant);
 }
 
-.routine-progress {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+.add-slot:hover { color: var(--primary); background: var(--surface-container-high); }
+.add-slot:focus-visible { outline: 2px solid var(--primary); }
 
-.routine-progress span {
-    width: 28px;
-    height: 4px;
-    border-radius: 99px;
-    background: var(--outline-variant);
-    transition: background 0.3s ease;
-}
-
-.routine-progress span.active {
-    background: var(--primary);
-}
-
-.routine-intro h1 {
-    margin: 0 0 16px;
-    font-size: clamp(36px, 5vw, 48px);
-    line-height: 1.15;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--primary);
-}
-
-.routine-intro > p {
-    max-width: 580px;
-    margin: 0 auto;
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--on-surface-variant);
-}
-
-
-/* ============================================
-   ROUTINE SECTION & LIST
-============================================ */
-
-.routine-section {
-    width: 100%;
-    max-width: 900px;
-    margin-bottom: 48px;
-}
-
-.routine-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-
-/* ============================================
-   ROUTINE ITEM CARD
-============================================ */
-
-.routine-item {
-    width: 100%;
-    min-height: 80px;
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    align-items: center;
-    gap: 20px;
-    padding: 16px 20px;
-    border: 1px solid var(--outline-variant);
-    border-radius: 14px;
-    background: var(--surface-container-lowest);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.routine-item:hover {
-    border-color: var(--outline);
-    background: var(--surface-container-low);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-}
-
-
-/* ============================================
-   ROUTINE INFO & TYPOGRAPHY
-============================================ */
-
-.routine-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    min-width: 0;
-}
-
-.routine-icon {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: var(--surface-container-high);
-    color: var(--primary);
-    transition: transform 0.2s ease;
-}
-
-.routine-item:hover .routine-icon {
-    transform: scale(1.05);
-}
-
-.routine-icon .material-symbols-outlined {
-    font-size: 24px;
-}
-
-.routine-name {
-    font-size: 17px;
-    font-weight: bold;
-    color: var(--primary);
-    font-family: inherit;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.routine-type {
-    margin-top: 4px;
+.plan-error {
+    margin-top: 8px;
     font-size: 13px;
-    font-weight: 500;
+    color: var(--error);
+}
+
+/* ---------- Status line ---------- */
+
+.routine-status {
+    margin-top: var(--md);
+    font-size: 14px;
     color: var(--on-surface-variant);
 }
 
+.routine-status.is-done { color: var(--success); }
 
-/* ============================================
-   ENHANCED TIME INPUT
-============================================ */
+/* ---------- Preview: your day ---------- */
 
-.routine-time {
-    width: 124px;
-    height: 44px;
-    padding: 0 12px;
-    border: 1.5px solid var(--outline-variant);
-    border-radius: 10px;
-    background: var(--surface-container-lowest);
-    color: var(--primary);
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.routine-time:hover {
-    border-color: var(--outline);
-    background: var(--surface-container-high);
-}
-
-.routine-time:focus {
-    border-color: var(--primary);
-    background: var(--surface-container-lowest);
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
-}
-
-.routine-time::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
-}
-
-.routine-time::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-}
-
-
-/* ============================================
-   REMOVE BUTTON
-============================================ */
-
-.remove-routine {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--on-surface-variant);
-    cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease;
-}
-
-.remove-routine:hover {
-    color: #ef4444;
-    background: var(--surface-container-high);
-}
-
-.remove-routine .material-symbols-outlined {
-    font-size: 20px;
-}
-
-
-/* ============================================
-   ADD ROUTINE BUTTON
-============================================ */
-
-.add-routine-btn {
-    width: 100%;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 18px;
-    padding: 0 20px;
-    border: 2px dashed var(--outline-variant);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--on-surface-variant);
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
-}
-
-.add-routine-btn:hover {
-    border-color: var(--primary);
-    border-style: solid;
-    color: var(--primary);
+.day-preview {
+    margin-top: var(--lg);
+    padding: var(--md);
+    border-radius: var(--radius-xl);
     background: var(--surface-container-low);
 }
 
-.add-routine-btn .material-symbols-outlined {
-    font-size: 22px;
-}
-
-
-/* ============================================
-   ACTIVITY FORM
-============================================ */
-
-.activity-form {
+.preview-days {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    margin-top: 18px;
-    padding: 18px;
-    border: 1px solid var(--outline-variant);
-    border-radius: 14px;
-    background: var(--surface-container-low);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    margin-bottom: var(--md);
 }
 
-.activity-name-wrapper {
-    min-width: 0;
+.preview-day {
+    min-height: 36px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface-variant);
 }
 
-.activity-name-input {
-    width: 100%;
-    height: 44px;
-    padding: 0 16px;
-    border: 1.5px solid var(--outline-variant);
-    border-radius: 10px;
-    background: var(--surface-container-high);
-    color: var(--primary);
-    font-family: inherit;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
-}
+.preview-day:hover { background: var(--surface-container-high); }
+.preview-day[aria-pressed="true"] { background: var(--primary); color: var(--background); }
+.preview-day:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-.activity-name-input:focus {
-    border-color: var(--primary);
-    background: var(--surface-container-lowest);
-}
-
-.activity-form-actions {
+/* The vertical line is the list's left border; each item's dot sits on it */
+.timeline {
+    list-style: none;
+    margin-left: 6px;
+    padding-left: 18px;
+    border-left: 2px solid var(--surface-container-highest);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 10px;
 }
 
-.save-activity-btn {
-    height: 44px;
-    padding: 0 22px;
-    border: none;
-    border-radius: 10px;
-    background: var(--primary);
-    color: var(--background);
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.15s ease;
-}
-
-.save-activity-btn:hover {
-    opacity: 0.92;
-}
-
-.save-activity-btn:active {
-    transform: scale(0.97);
-}
-/* Container layout fix */
-.time-input-container {
+.timeline-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-/* Adjusted time input container */
-input[type="time"] {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: var(--surface-container-high, #1e1e1e);
-    color: var(--on-surface, #ffffff);
-    border: 1px solid var(--outline-variant, #444);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-family: inherit;
-    font-size: 15px;            /* Increased slightly for better baseline readability */
-    font-weight: 500;
-    text-align: center;         /* Centers placeholder and time values */
-    letter-spacing: 0.05em;     /* Adds breathing space to the placeholders and digits */
-    outline: none;
-    cursor: pointer;
-    width: 150px;               /* Keeps consistent footprint regardless of state */
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+/* The dot on the line: 10px circle, pulled left onto the border */
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -25px;                   /* padding 18 + half the border + half the dot */
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    background: var(--outline-variant);
 }
 
-/* Fix blank/empty placeholder sizing and spacing in WebKit browsers (Chrome, Safari, Edge) */
-input[type="time"]::-webkit-datetime-edit {
-    display: inline-flex;
-    justify-content: center;
-    padding: 0;
-}
-
-input[type="time"]::-webkit-datetime-edit-fields-wrapper {
-    display: inline-flex;
-}
-
-/* Gives the dash placeholders and time segments explicit sizing */
-input[type="time"]::-webkit-datetime-edit-text {
-    padding: 0 2px;
-    color: var(--on-surface-variant, #888);
-}
-
-input[type="time"]::-webkit-datetime-edit-hour-field,
-input[type="time"]::-webkit-datetime-edit-minute-field,
-input[type="time"]::-webkit-datetime-edit-ampm-field {
-    padding: 0 2px;
-    color: var(--on-surface, #ffffff);
-}
-
-/* Brightens native clock icon in dark mode */
-input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-
-input[type="time"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-}
-
-
-/* ============================================
-   FOOTER ACTIONS
-============================================ */
-
-.routine-footer {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: auto;
-    padding-top: 24px;
-    border-top: 1px solid var(--outline-variant);
-}
-
-.routine-back-footer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    margin-left: -16px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
+.timeline-time {
+    width: 48px;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;   /* all digits the same width, so times line up */
     color: var(--on-surface-variant);
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
-.routine-back-footer:hover {
+.timeline-label {
+    min-width: 0;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    overflow-wrap: anywhere;
+}
+
+/* Habits are the important part of the day: brighter, in a box, white dot */
+.timeline-item.is-habit::before { background: var(--primary); }
+.timeline-item.is-habit .timeline-time { color: var(--primary); font-weight: 600; }
+
+.timeline-item.is-habit .timeline-label {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    background: var(--surface-container-high);
     color: var(--primary);
-    background: var(--surface-container-low);
-    transform: translateX(-3px);
-}
-
-.routine-back-footer .material-symbols-outlined {
-    font-size: 20px;
-}
-
-.routine-continue {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-width: 190px;
-    height: 50px;
-    padding: 0 24px;
-    border: none;
-    border-radius: 12px;
-    background: var(--primary);
-    color: var(--background);
-    font-family: inherit;
-    font-size: 15px;
     font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-.routine-continue:hover {
-    opacity: 0.92;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.timeline-detail {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--on-surface-variant);
 }
 
-.routine-continue:active {
-    transform: scale(0.97);
+/* A habit with no time yet: listed at the end, dashed */
+.timeline-item.is-unscheduled .timeline-label {
+    border: 1px dashed var(--outline-variant);
+    background: none;
+    color: var(--on-surface-variant);
 }
 
-.routine-continue .material-symbols-outlined {
-    font-size: 20px;
-}
+/* ---------- Bigger screens ---------- */
 
+@media (min-width: 600px) {
+    .plan-card { padding: var(--lg); }
 
-/* ============================================
-   RESPONSIVE / MOBILE DESIGN
-============================================ */
-
-@media (max-width: 650px) {
-    .routine-page {
-        padding: 24px 16px 32px;
-    }
-
-    .routine-header {
-        margin-bottom: 24px;
-    }
-
-    .routine-intro {
-        margin-bottom: 36px;
-    }
-
-    .routine-intro h1 {
-        font-size: 32px;
-    }
-
-    .routine-item {
-        grid-template-columns: 1fr auto;
-        gap: 12px;
-        padding: 14px;
-    }
-
-    .routine-time {
-        width: 110px;
-        height: 40px;
-        font-size: 14px;
-    }
-
-    .remove-routine {
-        grid-column: 2;
-        grid-row: 2;
-        justify-self: end;
-    }
-
-    .activity-form {
-        grid-template-columns: 1fr;
-    }
-
-    .activity-form-actions {
-        width: 100%;
-    }
-
-    .activity-form-actions .routine-time {
+    /* Wide screens: time and days fit on ONE line */
+    .slot-days {
         flex: 1;
+        flex-basis: auto;
+        order: 0;
     }
 
-    .save-activity-btn {
-        min-width: 90px;
-    }
-
-    .routine-footer {
-        padding-top: 16px;
-    }
-
-    .routine-continue {
-        min-width: 140px;
-        height: 46px;
-    }
+    .slot-remove { margin-left: 0; }
+    .day-preview { padding: var(--lg); }
 }

@@ -1,207 +1,104 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Routine | Growth OS</title>
 
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
 
-<title>Growth OS | Routine</title>
+    <!-- Order matters: base (tokens) → onboarding (shared shell) → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/onboarding.css" />
+    <link rel="stylesheet" href="../css/startup/routine.css" />
+  </head>
+  <body>
+    <div class="ob-page">
+      <header class="ob-topbar">
+        <span class="ob-brand">
+          <span class="ob-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </span>
+        <p class="ob-step">Step 04 of 04</p>
+      </header>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <nav class="ob-progress" aria-label="Onboarding progress">
+        <ol>
+          <li class="is-done">Direction</li>
+          <li class="is-done">Goal</li>
+          <li class="is-done">Habit</li>
+          <li class="is-current" aria-current="step">Routine</li>
+        </ol>
+      </nav>
 
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="../css/startup/onboarding.css">
-<link rel="stylesheet" href="../css/startup/routine.css">
-</head>
-
-<body>
-
-<main class="routine-page">
-
-    <!-- ============================================
-         HEADER
-    ============================================= -->
-
-    <header class="routine-header">
-
-        <button
-            type="button"
-            class="routine-back"
-            id="backButton">
-
-            <span class="material-symbols-outlined">
-                arrow_back
-            </span>
-
-            <span>
-                Back
-            </span>
-
-        </button>
-
-    </header>
-
-
-    <!-- ============================================
-         INTRO
-    ============================================= -->
-
-    <section class="routine-intro">
-
-        <div class="routine-step">
-
-            <div class="routine-progress">
-
-                <span></span>
-                <span></span>
-                <span></span>
-                <span class="active"></span>
-                <span></span>
-                <span></span>
-
-            </div>
-
-            <p>
-                Step 4 of 6: Routine Architecture
-            </p>
-
+      <main class="ob-content ob-content-top">
+        <!-- The habits being scheduled: Habits → Routine.
+                 routine.js fills the empty spans. -->
+        <div class="chain-card">
+          <span class="icon chain-icon" aria-hidden="true">checklist</span>
+          <div class="chain-text">
+            <span class="chain-label"
+              >Habits · <span id="goalTitle"></span
+            ></span>
+            <span class="chain-value" id="habitNames"></span>
+          </div>
+          <a class="chain-edit" href="habit.html">Edit</a>
         </div>
+        <div class="chain-line" aria-hidden="true"></div>
 
-        <h1>
-            Architect Your Day
-        </h1>
-
-        <p>
-            Bridge your practices with your schedule.
-            Habits define what you do; routine defines when.
+        <h1 class="ob-title">Give your habits a place in your day</h1>
+        <p class="ob-subtitle">
+          A habit tells you what to do. A routine tells you when.
         </p>
 
-    </section>
+        <!-- One card per item to schedule: Wake up, each habit, Sleep.
+                 Built by routine.js from the habits you saved. -->
+        <div class="plan-list" id="planList"></div>
 
+        <!-- What's still missing, in one sentence -->
+        <p class="routine-status" id="routineStatus" role="status"></p>
 
-    <!-- ============================================
-         ROUTINE LIST
-    ============================================= -->
+        <!-- ============ PREVIEW: YOUR DAY ============ -->
+        <section class="day-preview" aria-labelledby="previewTitle">
+          <h2 class="ob-eyebrow" id="previewTitle">Your day</h2>
 
-    <section class="routine-section">
+          <!-- Pick which day to preview. Buttons with aria-pressed:
+                     a screen reader says "Monday, pressed". -->
+          <div
+            class="preview-days"
+            id="previewDays"
+            aria-label="Day to preview"
+          ></div>
 
-        <div
-            class="routine-list"
-            id="routineList">
+          <ol class="timeline" id="timeline"></ol>
+        </section>
+      </main>
 
-            <!-- JavaScript inserts routine items here -->
-
-        </div>
-
-
-        <!-- ========================================
-             ADD ACTIVITY BUTTON
-        ========================================= -->
-
+      <footer class="ob-footer">
+        <a class="ob-btn ob-btn-secondary" href="habit.html">Back</a>
         <button
-            type="button"
-            class="add-routine-btn"
-            id="addRoutineBtn">
-
-            <span class="material-symbols-outlined">
-                add
-            </span>
-
-            <span>
-                Add Activity
-            </span>
-
+          class="ob-btn ob-btn-primary"
+          id="finishButton"
+          type="button"
+          disabled
+        >
+          Finish setup
+          <span class="icon" aria-hidden="true">check</span>
         </button>
+      </footer>
+    </div>
 
-
-        <!-- ========================================
-             ADD ACTIVITY FORM
-        ========================================= -->
-
-        <div
-            class="activity-form"
-            id="activityForm"
-            hidden>
-
-            <div class="activity-name-wrapper">
-
-                <input
-                    type="text"
-                    id="activityName"
-                    class="activity-name-input"
-                    placeholder="Activity Name..."
-                    autocomplete="off">
-
-            </div>
-
-            <div class="activity-form-actions">
-
-                <input
-                    type="time"
-                    id="activityTime"
-                    class="routine-time">
-
-                <button
-                    type="button"
-                    id="saveActivityBtn"
-                    class="save-activity-btn">
-
-                    Add
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ============================================
-         FOOTER ACTIONS
-    ============================================= -->
-
-    <footer class="routine-footer">
-
-        <button
-            type="button"
-            class="routine-back-footer"
-            id="footerBackButton">
-
-            <span class="material-symbols-outlined">
-                arrow_back
-            </span>
-
-            Back
-
-        </button>
-
-
-        <button
-            type="button"
-            class="routine-continue"
-            id="continueBtn">
-
-            Continue
-
-            <span class="material-symbols-outlined">
-                arrow_forward
-            </span>
-
-        </button>
-
-    </footer>
-
-</main>
-
-
-<script src="../js/storage.js"></script>
-<script src="../js/onboarding.js"></script>
-
-</body>
+    <!-- Order matters: state.js defines the functions routine.js uses -->
+    <script src="../js/state.js"></script>
+    <script src="../js/onboardingPages/routine.js"></script>
+  </body>
 </html>

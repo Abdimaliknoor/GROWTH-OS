@@ -218,25 +218,44 @@ function normalizeHabit(item, index) {
     habit.completedToday = typeof habit.target === "number" ? todayAmount >= habit.target : false;
     return habit;
 }
+// Takes a routine item in ANY old or new shape and returns the CURRENT shape:
+// { id, kind: "wake" | "sleep" | "habit" | "activity", habitId, label, time, days }
+// One habit can have SEVERAL items: "06:00 on weekdays" + "09:00 on weekends".
 function normalizeRoutineItem(item, index) {
-    if (typeof item === "string") {
+    if (typeof item === "string") {                    // very old: "06:00 Run"
         const parts = item.split(/\s+/);
         const looksLikeTime = /^\d{1,2}:\d{2}$/.test(parts[0]);
-        return {
-            id: "routine-" + index,
+        item = {
             time: looksLikeTime ? parts[0] : "",
-            label: looksLikeTime ? parts.slice(1).join(" ") : item,
-            habitId: null
+            label: looksLikeTime ? parts.slice(1).join(" ") : item
         };
     }
+
+    const label = item.label || item.name || item.activity || "Untitled";
+    const KINDS = ["wake", "sleep", "habit", "activity"];
+
+    // Old saves have no kind: work it out from what we do know.
+    let kind = KINDS.includes(item.kind) ? item.kind : "activity";
+    if (!item.kind) {
+        if (item.habitId) kind = "habit";
+        else if (/wake/i.test(label)) kind = "wake";
+        else if (/sleep/i.test(label)) kind = "sleep";
+    }
+
+    const days = Array.isArray(item.days) && item.days.length
+        ? WEEK_DAYS.filter(day => item.days.includes(day))
+        : WEEK_DAYS.slice();                           // no days saved → every day
+
     return {
         id: item.id || "routine-" + index,
+        kind: kind,
+        habitId: item.habitId || null,
+        label: label,
         time: item.time || "",
-        label: item.label || item.name || item.activity || "Untitled",
-        habitId: item.habitId || null
+        days: days
     };
 }
-
+console.log(normalizeRoutineItem({ time: "06:00", label: "Run" }, 0));
 // Takes a goal in ANY old or new shape and returns the CURRENT shape.
 // Every page reads goals through getGoals(), which runs this first,
 // so no page ever has to worry about old saved data.
