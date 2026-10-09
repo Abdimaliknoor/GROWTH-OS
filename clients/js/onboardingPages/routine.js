@@ -75,7 +75,7 @@ const QUESTIONS = {
 
 /* ---------- 4. Page state ---------- */
 
-let plans = [];                          // everything being scheduled (see top comment)
+let plans = [];                         // everything being scheduled (see top comment)
 let previewDay = todayKey();             // which day "Your day" shows; starts on today
 
 

@@ -1,109 +1,171 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Setup complete | Growth OS</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
 
-    <title>Growth OS | Protocol Complete</title>
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/onboarding.css" />
+    <link rel="stylesheet" href="../css/startup/complete.css" />
+  </head>
+  <body>
+    <!-- The flowing light behind everything (energy-bg.js draws it).
+         Only decoration, so screen readers skip it. -->
+    <canvas class="energy-bg" id="energyBg" aria-hidden="true"></canvas>
+    <!-- Soft light behind everything. Only decoration, so screen readers skip it. -->
+    <div class="glow" aria-hidden="true"></div>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <div class="ob-page">
+      <header class="ob-topbar">
+        <span class="ob-brand">
+          <span class="ob-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </span>
+        <p class="ob-step">All steps done</p>
+      </header>
 
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+      <!-- All 4 bars are done. The CSS fills them one after another. -->
+      <nav class="ob-progress" aria-label="Onboarding progress">
+        <ol>
+          <li class="is-done">Direction</li>
+          <li class="is-done">Goal</li>
+          <li class="is-done">Habit</li>
+          <li class="is-done">Routine</li>
+        </ol>
+      </nav>
 
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/startup/onboarding.css">
-    <link rel="stylesheet" href="../css/startup/complete.css">
-</head>
+      <main class="ob-content ob-content-top">
+        <!-- ============ 1. THE MOMENT ============ -->
+        <section class="hero">
+          <!-- The badge: a circle and a tick that DRAW themselves (SVG).
+                     complete.js adds the little sparks around it. -->
+          <div class="done-badge" id="doneBadge" aria-hidden="true">
+            <span class="done-badge-ring"></span>
+            <span class="done-badge-ring done-badge-ring-late"></span>
+            <svg class="done-badge-svg" viewBox="0 0 80 80">
+              <circle class="done-badge-circle" cx="40" cy="40" r="36" />
+              <path class="done-badge-check" d="M25 41 L35 51 L56 30" />
+            </svg>
+          </div>
 
-<body>
+          <p class="pill reveal">
+            <span class="pill-dot" aria-hidden="true"></span>
+            Setup complete
+          </p>
 
-<main class="setup-page">
+          <!-- complete.js puts the name in. Fallback text if there's no name. -->
+          <h1 class="ob-title hero-title reveal" id="heroTitle">
+            Your growth system is ready
+          </h1>
+          <p class="ob-subtitle hero-subtitle reveal">
+            Here's the system you just built. Every day, Growth OS shows you
+            what to do and helps you track what really happened.
+          </p>
+        </section>
 
-    <!-- Back Button Header -->
-    <header class="setup-header">
-        <button type="button" class="setup-back" id="backButton">
-            <span class="material-symbols-outlined">arrow_back</span>
-            <span>Back</span>
+        <!-- ============ 2. THE SYSTEM YOU BUILT ============ -->
+        <!-- An ordered list: Direction → Goal → Habits → Routine is a sequence. -->
+        <ol class="system" aria-label="Your system">
+          <li class="system-step reveal-card">
+            <div class="system-head">
+              <span
+                class="icon system-icon"
+                id="directionIcon"
+                aria-hidden="true"
+                >explore</span
+              >
+              <span class="system-label">Direction</span>
+              <a class="system-edit" href="identity.html"
+                >Edit<span class="visually-hidden"> direction</span></a
+              >
+            </div>
+            <p class="system-title" id="directionArea"></p>
+            <p class="system-detail" id="directionIdentity"></p>
+          </li>
+
+          <li class="system-step reveal-card">
+            <div class="system-head">
+              <span class="icon system-icon" aria-hidden="true">flag</span>
+              <span class="system-label">Goal</span>
+              <a class="system-edit" href="goal.html"
+                >Edit<span class="visually-hidden"> goal</span></a
+              >
+            </div>
+            <p class="system-title" id="goalTitle"></p>
+            <p class="system-detail" id="goalFinish"></p>
+          </li>
+
+          <li class="system-step reveal-card">
+            <div class="system-head">
+              <span class="icon system-icon" aria-hidden="true">repeat</span>
+              <span class="system-label">Habits</span>
+              <a class="system-edit" href="habit.html"
+                >Edit<span class="visually-hidden"> habits</span></a
+              >
+            </div>
+            <ul class="row-list" id="habitList"></ul>
+          </li>
+
+          <li class="system-step reveal-card">
+            <div class="system-head">
+              <span class="icon system-icon" aria-hidden="true">schedule</span>
+              <span class="system-label">Routine</span>
+              <a class="system-edit" href="routine.html"
+                >Edit<span class="visually-hidden"> routine</span></a
+              >
+            </div>
+            <ul class="row-list" id="routineList"></ul>
+          </li>
+        </ol>
+
+        <!-- ============ 3. NUMBERS ============ -->
+        <!-- <dl> = a list of "name: value" pairs. Good for stats. -->
+        <dl class="stats reveal-card">
+          <div class="stat">
+            <dt>Habits</dt>
+            <dd id="statHabits">0</dd>
+          </div>
+          <div class="stat">
+            <dt>Check-ins a week</dt>
+            <dd id="statWeek">0</dd>
+          </div>
+          <div class="stat">
+            <dt>Wake up today</dt>
+            <dd id="statWake">--:--</dd>
+          </div>
+        </dl>
+      </main>
+
+      <footer class="ob-footer">
+        <a class="ob-btn ob-btn-secondary" href="routine.html">Back</a>
+        <button
+          class="ob-btn ob-btn-primary enter-btn"
+          id="enterButton"
+          type="button"
+        >
+          Enter Growth OS
+          <span class="icon" aria-hidden="true">arrow_forward</span>
         </button>
-    </header>
+      </footer>
+    </div>
 
-    <!-- Centered Hero / Big Icon Section -->
-    <section class="setup-hero">
-
-        <div class="hero-icon-wrapper">
-            <span class="material-symbols-outlined hero-icon">verified</span>
-        </div>
-
-        <div class="setup-progress-pills">
-            <span class="pill active"></span>
-            <span class="pill active"></span>
-            <span class="pill active"></span>
-            <span class="pill active"></span>
-            <span class="pill active"></span>
-            <span class="pill active"></span>
-        </div>
-
-        <p class="step-label">Step 6 of 6: Protocol Ready</p>
-
-        <h1 class="hero-title">Your System is Calibrated</h1>
-        <p class="hero-subtitle">Review your initial operating setup below before launching Growth OS.</p>
-
-    </section>
-
-    <!-- Collected Data Summary Cards -->
-    <section class="setup-summary-cards">
-
-        <!-- User & Identity Banner -->
-        <div class="summary-tile identity-tile">
-            <div class="tile-left">
-                <span class="material-symbols-outlined tile-icon">person</span>
-                <div class="tile-text">
-                    <span class="tile-title" id="userName">User</span>
-                    <span class="tile-sub" id="userIdentity">Selected Archetype</span>
-                </div>
-            </div>
-            <span class="badge">Active</span>
-        </div>
-
-        <!-- Metrics Row -->
-        <div class="summary-metrics-grid">
-
-            <div class="metric-tile">
-                <span class="material-symbols-outlined metric-icon">check_circle</span>
-                <div class="metric-data">
-                    <span class="metric-number" id="statHabits">0</span>
-                    <span class="metric-name">Habits Tracked</span>
-                </div>
-            </div>
-
-            <div class="metric-tile">
-                <span class="material-symbols-outlined metric-icon">flag</span>
-                <div class="metric-data">
-                    <span class="metric-number" id="statGoals">0</span>
-                    <span class="metric-name">3-Mo Milestones</span>
-                </div>
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- Bottom Actions -->
-    <footer class="setup-footer">
-       
-        <button type="button" class="setup-launch-btn" id="completeSetupBtn">
-            Launch Growth OS
-            <span class="material-symbols-outlined">rocket_launch</span>
-        </button>
-    </footer>
-
-</main>
-
-<script src="../js/storage.js"></script>
-<script src="../js/onboarding.js"></script>
-
-</body>
+    <!-- Order matters: data first, then areas (for the icon), then this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/onboardingPages/areas.js"></script>
+    <script src="../js/onboardingPages/complete.js"></script>
+    <script src="../js/onboardingPages/energy-bg.js"></script>
+  </body>
 </html>

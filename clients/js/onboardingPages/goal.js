@@ -423,7 +423,7 @@ goalForm.addEventListener("submit", (event) => {
     event.preventDefault();                     // stop the browser reloading the page
     if (getProblem()) return;                   // safety net: never save a broken goal
 
-    saveGoals(buildGoal());                      // state.js does the saving
+    saveGoal(buildGoal());                      // state.js does the saving
     setCurrentStep(4);
     window.location.href = "habit.html";
 });
