@@ -1,6 +1,7 @@
 // state.js
-// Every function pages use to read and change data.
+// FACTS: read and save what the user told us (goals, habits, routine, logs).
 // Pages never touch localStorage. They call these functions.
+// Anything CALCULATED from the facts (today's plan, progress) lives in insights.js.
 
 
 /* ---------- 1. The shape of a new user ---------- */
@@ -41,10 +42,7 @@ function generateId(prefix) {
 
 // Today as "2026-10-09", in LOCAL time (toISOString would give the UTC date).
 function todayDate() {
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    return `${now.getFullYear()}-${month}-${day}`;
+    return dateOf(Date.now());
 }
 
 const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
@@ -56,6 +54,18 @@ function weekdayOf(date) {
     const [year, month, day] = date.split("-").map(Number);
     const sundayFirst = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     return sundayFirst[new Date(year, month - 1, day).getDay()];
+}
+
+// A timestamp (Date.now()) → its LOCAL date: 1760000000000 → "2025-10-09"
+function dateOf(timestamp) {
+    const d = new Date(timestamp);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// "2026-10-10" + (-3) → "2026-10-07". Uses local dates, handles month ends.
+function addDaysTo(date, amount) {
+    const [year, month, day] = date.split("-").map(Number);
+    return dateOf(new Date(year, month - 1, day + amount).getTime());
 }
 
 // ["mon","wed"] → "Mon, Wed"   (or "Every day" / "Weekdays" / "Weekends")
@@ -219,15 +229,39 @@ function getRoutineForDay(date) {
 
 /* ---------- 10. Logs (the actual result) ---------- */
 
-// Record progress: addLog("h1", 7) → 7 pages today.
-function addLog(habitId, amount, date = todayDate()) {
-    saveItem("logs", { id: generateId("log"), habitId, amount, date });
+// A log = one record of what really happened.
+//   { id, habitId, date: "2026-10-10", amount: 1, status: "done" }
+//   { id, habitId, date: "2026-10-10", amount: 0, status: "skipped", reason: "travel" }
+// Reading logs as totals ("how much today?") is a calculation, so it lives in insights.js.
+
+function getLogs() {
+    return getData().logs;
 }
 
-// Total done on a day: two logs of 7 and 3 → 10.
-function getDayAmount(habitId, date = todayDate()) {
-    return getData().logs
-        .filter(log => log.habitId === habitId && log.date === date)
-        .reduce((sum, log) => sum + log.amount, 0);
+// Record progress: addLog("h1", 1) → 1 page today.
+// Returns the log, so the page can offer "Undo" (removeItem("logs", log.id)).
+function addLog(habitId, amount, date = todayDate()) {
+    const log = { id: generateId("log"), habitId, amount, date, status: "done" };
+    saveItem("logs", log);
+    return log;
 }
-getData()                          // see everything
+
+// Set a day's total to an exact number (Record sheet "fix it", or untick).
+// Removes that day's logs for the habit, then saves one log with the new total.
+function setDayAmount(habitId, amount, date = todayDate()) {
+    const data = getData();
+    data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
+    if (amount > 0) {
+        data.logs.push({ id: generateId("log"), habitId, amount, date, status: "done" });
+    }
+    writeStorage(data);
+}
+
+// Skip a habit for a day, with a reason ("sick", "travel", "forgot").
+// Same idea: that day's logs are replaced by one "skipped" log.
+function skipHabit(habitId, reason, date = todayDate()) {
+    const data = getData();
+    data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
+    data.logs.push({ id: generateId("log"), habitId, amount: 0, date, status: "skipped", reason });
+    writeStorage(data);
+}

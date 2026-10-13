@@ -1,0 +1,284 @@
+/* =========================================================
+   APP SHELL  (app/*.html: Today, Plan, Journal, Progress, Me)
+
+   Everything the 5 app tabs SHARE:
+     1. Page layout       phone: one column · desktop: sidebar + column
+     2. Navigation        phone: bottom bar · desktop: left sidebar
+     3. Shared pieces     buttons, tag, progress bar, toast, confetti
+
+   Mobile first: the normal rules are for phones.
+   @media (min-width: 900px) changes them for desktop.
+   ========================================================= */
+
+:root {
+    --font-time: 'Geist Mono', ui-monospace, monospace;   /* times: 05:30 lines up with 16:00 */
+    --nav-height: 64px;                                    /* the phone's bottom bar */
+}
+
+
+/* ---------- 1. Page layout ---------- */
+
+    .app-main {
+        max-width: 720px;                /* wider on desktop (phone stays 600px) */
+        padding: var(--xl) var(--margin-desktop) var(--xxl);
+    }
+
+
+/* ---------- 2. Navigation: phone = bottom bar ---------- */
+
+.app-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-fixed);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(19, 19, 19, 0.92);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--outline-variant);
+}
+
+.app-brand {
+    display: none;                        /* only on desktop */
+}
+
+.app-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);   /* 5 equal tabs */
+    height: var(--nav-height);
+}
+
+.app-tab {
+    display: flex;
+    flex-direction: column;               /* icon on top, word below */
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 100%;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.app-tab .icon { font-size: 22px; }
+
+/* The page you're on. aria-current="page" is in the HTML, so CSS and
+   screen readers both use the same signal. */
+.app-tab[aria-current="page"] {
+    color: var(--primary);
+}
+.app-tab[aria-current="page"] .icon {
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;   /* filled icon */
+}
+
+/* Not built yet: quieter, not clickable */
+.app-tab.is-soon {
+    color: var(--outline);
+    cursor: default;
+}
+
+.app-tab:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -4px;
+    border-radius: var(--radius-md);
+}
+/* 1200px+: wider page, room for Today's right column */
+@media (min-width: 1200px) {
+    .app-main { max-width: 1040px; }
+}
+
+/* ---------- 2b. Navigation: desktop = left sidebar ---------- */
+
+@media (min-width: 900px) {
+    /* Two columns: a 240px sidebar, then the page */
+    .app {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+    }
+
+    .app-nav {
+        position: sticky;                 /* stays put while the page scrolls */
+        top: 0;
+        height: 100vh;
+        padding: var(--lg) var(--md);
+        background: var(--surface-container-lowest);
+        backdrop-filter: none;
+        border-top: none;
+        border-right: 1px solid var(--outline-variant);
+    }
+
+    .app-brand {
+        display: flex;
+        align-items: center;
+        gap: var(--sm);
+        margin: 0 var(--sm) var(--xl);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .app-brand-mark {
+        width: 26px;
+        height: 26px;
+        border-radius: var(--radius-full);
+        background: var(--primary);
+        color: var(--background);
+        font-size: 16px;
+    }
+
+    .app-tabs {
+        display: flex;
+        flex-direction: column;           /* tabs stacked */
+        gap: 4px;
+        height: auto;
+    }
+
+    .app-tab {
+        flex-direction: row;              /* icon left, word right */
+        justify-content: flex-start;
+        gap: 12px;
+        height: 44px;
+        padding: 0 12px;
+        border-radius: var(--radius-md);
+        font-size: 15px;
+    }
+
+    .app-tab:not(.is-soon):hover { background: var(--surface-container); color: var(--on-surface); }
+    .app-tab[aria-current="page"] { background: var(--surface-container-high); }
+
+    .app-main {
+        padding: var(--xl) var(--margin-desktop) var(--xxl);
+        margin: auto;
+    }
+}
+
+
+/* ---------- 3. Shared pieces ---------- */
+
+/* base.css has .btn and .btn-primary. These complete the set. */
+.btn-secondary {
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+    border-color: var(--outline-variant);
+}
+.btn-secondary:hover { background: var(--surface-container-highest); }
+
+/* Not available yet (e.g. Start focus before Focus exists): clearly quieter, but still readable */
+.btn:disabled {
+    background: var(--surface-container-high);
+    border-color: var(--outline-variant);
+    color: var(--on-surface-variant);
+    cursor: not-allowed;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* Small label like "+1 extra" */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--on-surface);
+    white-space: nowrap;
+}
+
+/* display: inline-flex above would beat the hidden attribute. This puts hidden back in charge. */
+.tag[hidden] { display: none; }
+
+/* Progress bar: a grey track with a white fill.
+   JS sets the fill's width (style.width = "60%"). */
+.bar {
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-highest);
+    overflow: hidden;                     /* the fill's rounded end stays inside */
+}
+
+.bar-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+    transition: width 400ms ease-out;     /* the bar grows smoothly after a +1 */
+}
+
+/* Toast: "Added 1 page · Undo", floating just above the tab bar */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 12px);
+    z-index: calc(var(--z-fixed) + 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+    max-width: calc(100% - 2 * var(--margin-mobile));
+    padding: 10px 10px 10px 14px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+    font-size: 14px;
+    transform: translateX(-50%);           /* centre it: left 50%, then back by half its width */
+    animation: toast-in 200ms ease-out;
+}
+
+.toast[hidden] { display: none; }          /* display:flex above would beat the hidden attribute */
+
+.toast-undo {
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.toast-undo:hover { background: var(--surface-container-highest); }
+.toast-undo:focus-visible { outline: 2px solid var(--primary); }
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translate(-50%, 8px); }
+}
+
+@media (min-width: 900px) {
+    .toast { bottom: var(--lg); }          /* no bottom bar on desktop */
+}
+
+/* Confetti: JS adds small pieces here, each falls and fades, then JS removes them.
+   Each piece gets its own --x (sideways drift) and --turn (spin) from JS. */
+.confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;                  /* clicks go straight through */
+    z-index: calc(var(--z-fixed) + 2);
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 6px;
+    height: 10px;
+    border-radius: 1px;
+    background: var(--primary);
+    animation: confetti-fall 1100ms ease-out forwards;
+}
+
+@keyframes confetti-fall {
+    from { opacity: 1; transform: translate(0, 0) rotate(0); }
+    to   { opacity: 0; transform: translate(var(--x), 160px) rotate(var(--turn)); }
+}
+
+/* Animations off for people who turned them off on their device */
+@media (prefers-reduced-motion: reduce) {
+    .toast, .bar-fill { animation: none; transition: none; }
+    .confetti { display: none; }
+}

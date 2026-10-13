@@ -234,5 +234,5 @@ if (!missingStep) {
 enterButton.addEventListener("click", () => {
     enterButton.disabled = true;             // no double clicks
     completeOnboarding();
-    window.location.replace("../startup.html");   // the dashboard; Back won't return to setup
+    window.location.replace("../app/today.html");   // the dashboard; Back won't return to setup
 });

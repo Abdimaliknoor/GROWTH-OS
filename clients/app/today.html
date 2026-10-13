@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#131313" />
+    <!-- colours the phone's top bar -->
+    <title>Today | Growth OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Geist for text, Geist Mono for times (05:30 lines up with 16:00) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Order matters: tokens → the shell every app tab shares → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/today.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ============ NAVIGATION ============
+             One list, two looks (CSS decides):
+               phone   → a bar fixed at the bottom
+               desktop → a sidebar on the left
+             Tabs not built yet have no href (so they can't be clicked)
+             and a hidden "(soon)" so a screen reader explains why. -->
+      <nav class="app-nav" aria-label="Main">
+        <p class="app-brand">
+          <img
+            class="app-brand-mark"
+            src="../assets/icons/unnamed.png"
+            alt=""
+          />
+          <span class="app-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </p>
+        <ul class="app-tabs">
+          <li>
+            <a class="app-tab" href="today.html" aria-current="page">
+              <span class="icon" aria-hidden="true">today</span>
+              Today
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">checklist</span>
+              Plan<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">edit_note</span>
+              Journal<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">trending_up</span>
+              Progress<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">person</span>
+              Me<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <main class="app-main today">
+        <!-- ============ 1. HEADER ============
+                 today.js fills the date, the greeting and the count. -->
+        <header class="today-header">
+          <div class="today-hello">
+            <p class="today-date" id="todayDate"></p>
+            <h1 class="today-greeting" id="greeting">Good morning</h1>
+          </div>
+
+          <!-- The small ring + "2 of 5 done".
+                     The ring is an SVG circle; today.js sets how much of it is drawn. -->
+          <div class="day-count">
+            <svg class="day-ring" viewBox="0 0 36 36" aria-hidden="true">
+              <circle class="day-ring-track" cx="18" cy="18" r="15" />
+              <circle
+                class="day-ring-fill"
+                id="dayRing"
+                cx="18"
+                cy="18"
+                r="15"
+              />
+            </svg>
+            <p class="day-count-text" id="dayCount">0 of 0 done</p>
+          </div>
+        </header>
+
+        <!-- ============ 2. GOAL STRIP ============
+                 A <section> for now. When the Plan tab exists, it becomes a link to the goal.
+                 role="progressbar" + aria-value* = a screen reader says "60 percent". -->
+        <!-- ============ 2. SIDE: goal + this week ============
+                 Phone / small laptop: sits between the header and the day line.
+                 Big screens (1200px+): CSS moves it to a column on the right.
+                 Same HTML, two places. Only CSS decides where it goes. -->
+        <aside class="today-side" aria-label="Your progress">
+          <!-- The goal (same as before, just moved inside the aside) -->
+          <section class="goal-strip" id="goalStrip" aria-label="Your goal">
+            <div class="goal-strip-top">
+              <span class="icon goal-strip-icon" aria-hidden="true">flag</span>
+              <span class="goal-strip-title" id="goalTitle"></span>
+              <span class="goal-strip-days" id="goalDays"></span>
+            </div>
+            <div
+              class="bar"
+              id="goalBar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Goal progress"
+            >
+              <span class="bar-fill" id="goalBarFill"></span>
+            </div>
+            <p class="goal-strip-numbers" id="goalNumbers"></p>
+          </section>
+
+          <!-- This week: one dot per day, Monday → Sunday, and the streak.
+                     Only on big screens for now (CSS hides it on smaller ones). -->
+          <section class="week-card" aria-labelledby="weekTitle">
+            <div class="week-top">
+              <h2 class="week-title" id="weekTitle">This week</h2>
+              <p class="week-count" id="weekCount"></p>
+            </div>
+            <!-- today.js adds 7 <li>: a letter (M T W...) and a dot -->
+            <ol class="week-days" id="weekDays"></ol>
+            <p class="week-streak">
+              <span class="icon" aria-hidden="true">local_fire_department</span>
+              <span id="weekStreak"></span>
+            </p>
+          </section>
+        </aside>
+
+        <!-- ============ 3. THE DAY LINE ============
+                 An ordered list: the day IS a sequence, 05:30 before 07:00.
+                 today.js builds one <li> per item from the templates below. -->
+        <section class="day" aria-labelledby="dayTitle">
+          <h2 class="visually-hidden" id="dayTitle">Your day</h2>
+          <ol class="day-line" id="dayLine"></ol>
+
+          <!-- Shown instead of the line when no habits are planned today -->
+          <div class="rest-day" id="restDay" hidden>
+            <span class="icon rest-day-icon" aria-hidden="true"
+              >self_improvement</span
+            >
+            <p class="rest-day-title">Rest day</p>
+            <p class="rest-day-text">
+              Nothing planned today. Rest is part of growing.
+            </p>
+          </div>
+        </section>
+
+        <!-- ============ 4. EVENING CARD ============
+                 today.js shows it from 18:00. The daily review page comes later,
+                 so the button is disabled for now. -->
+        <section
+          class="review-card"
+          id="reviewCard"
+          aria-labelledby="reviewTitle"
+          hidden
+        >
+          <span class="icon review-card-icon" aria-hidden="true">bedtime</span>
+          <div class="review-card-text">
+            <h2 class="review-card-title" id="reviewTitle">Review your day</h2>
+            <p class="review-card-sub">
+              How did today go? Takes under a minute.
+            </p>
+          </div>
+          <button class="btn btn-secondary" type="button" disabled>Soon</button>
+        </section>
+      </main>
+    </div>
+
+    <!-- ============ TOAST ============
+         "Added 1 page · Undo". role="status" + aria-live: a screen reader
+         reads it out when the text changes, without moving the focus. -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span class="icon" aria-hidden="true">check_circle</span>
+      <span class="toast-text" id="toastText"></span>
+      <button class="toast-undo" id="undoButton" type="button">Undo</button>
+    </div>
+
+    <!-- Confetti pieces are added here by today.js, then removed. Decoration only. -->
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+    <!-- ============ TEMPLATES ============
+         A <template> is HTML the browser keeps but never shows.
+         today.js copies one (cloneNode), fills in the text, and adds it to the line.
+         So the markup stays HERE in the HTML, not inside JS strings. -->
+
+    <!-- Wake up / Sleep: a thin marker on the line -->
+    <template id="markerTemplate">
+      <li class="line-item line-marker">
+        <span class="line-dot icon" aria-hidden="true"></span>
+        <span class="item-time"></span>
+        <span class="marker-label"></span>
+      </li>
+    </template>
+
+    <!-- A habit as a small row: done, partly done, skipped, later, late -->
+    <template id="rowTemplate">
+      <li class="line-item habit-row">
+        <span class="line-dot" aria-hidden="true"></span>
+        <div class="row-text">
+          <span class="row-name"></span>
+          <span class="row-detail">
+            <span class="item-time"></span>
+            <span class="row-status"></span>
+          </span>
+        </div>
+        <span class="tag row-extra" hidden></span>
+        <button class="row-button" type="button" data-action="add"></button>
+      </li>
+    </template>
+
+    <!-- The NOW habit: the big card on the line -->
+    <template id="nowTemplate">
+      <li class="line-item now-item">
+        <span class="line-dot" aria-hidden="true"></span>
+        <article class="now-card">
+          <p class="now-label">
+            <span class="now-badge"></span>
+            <span class="item-time"></span>
+          </p>
+          <h2 class="now-name"></h2>
+          <div class="now-progress">
+            <p class="now-amount"></p>
+            <div
+              class="bar"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="bar-fill"></span>
+            </div>
+          </div>
+          <div class="now-actions">
+            <!-- Focus is built later, so this button is disabled for now -->
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-action="focus"
+              disabled
+            >
+              <span class="icon" aria-hidden="true">play_arrow</span>
+              Start focus
+            </button>
+            <button
+              class="btn btn-secondary now-add"
+              type="button"
+              data-action="add"
+            ></button>
+          </div>
+        </article>
+      </li>
+    </template>
+
+    <!-- Everything done: the big card turns into this -->
+    <template id="allDoneTemplate">
+      <li class="line-item now-item all-done">
+        <span class="line-dot icon" aria-hidden="true">check</span>
+        <article class="now-card">
+          <p class="now-label"><span class="now-badge">Done</span></p>
+          <h2 class="now-name">All done today</h2>
+          <p class="all-done-text"></p>
+        </article>
+      </li>
+    </template>
+
+    <!-- Order matters: storage → state (facts) → insights (calculations) → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/insight.js"></script>
+    <script src="../js/app/today.js"></script>
+  </body>
+</html>

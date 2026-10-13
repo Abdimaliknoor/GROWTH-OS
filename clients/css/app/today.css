@@ -1,0 +1,565 @@
+/* =========================================================
+   TODAY  (app/today.html)
+
+   1. Header        greeting + "2 of 5 done" ring
+   2. Goal strip    the goal and its bar
+   3. Day line      one vertical line, a dot per item
+        markers     Wake up / Sleep
+        rows        small habits (done, partial, skipped, late, later)
+        now card    the big one
+   4. Rest day, evening card
+
+   The state classes (is-done, is-partial, is-skipped, is-late) are set by today.js.
+   ========================================================= */
+
+
+/* ---------- 1. Header ---------- */
+
+.today-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--md);
+    margin-bottom: var(--lg);
+}
+
+.today-hello { min-width: 0; }            /* lets a long name wrap instead of pushing the ring out */
+
+.today-date {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.today-greeting {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    overflow-wrap: anywhere;              /* a long name wraps, never gets cut with "…" */
+}
+
+.day-count {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 6px 12px 6px 6px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+}
+
+/* The ring. A circle of radius 15 is 2 × π × 15 ≈ 94.25 long.
+   stroke-dasharray: 94.25 = one dash as long as the whole circle.
+   today.js sets stroke-dashoffset: 94.25 = nothing drawn, 0 = full circle. */
+.day-ring {
+    width: 32px;
+    height: 32px;
+    transform: rotate(-90deg);            /* start drawing at 12 o'clock, not 3 o'clock */
+}
+
+.day-ring-track,
+.day-ring-fill {
+    fill: none;
+    stroke-width: 3;
+}
+
+.day-ring-track { stroke: var(--surface-container-highest); }
+
+.day-ring-fill {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    stroke-dasharray: 94.25;
+    stroke-dashoffset: 94.25;
+    transition: stroke-dashoffset 400ms ease-out;
+}
+
+.day-count-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface);
+    white-space: nowrap;
+}
+
+
+/* ---------- 2. Goal strip ---------- */
+
+.goal-strip {
+    display: block;
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+.goal-strip-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;                 /* was 12px: a little tighter */
+}
+.goal-strip-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--surface-container-high);
+    font-size: 16px;
+    color: var(--primary);
+}
+
+.goal-strip-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--on-surface);
+    overflow-wrap: anywhere;
+}
+
+.goal-strip-days {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--on-surface-variant);
+}
+
+.goal-strip-numbers {
+    margin-top: 6px;                     /* was 8px */
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+
+/* ---------- 3. The day line ---------- */
+
+/* Every item is a grid: [24px dot] [text] [tag] [button].
+   The vertical line is ONE ::before on the list, running behind all the dots. */
+.day-line {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.day-line::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 11.5px;                          /* centre of the 24px dot column */
+    width: 1px;
+    background: var(--outline-variant);
+}
+
+.line-item {
+    position: relative;                    /* sits above the line */
+    display: grid;
+    grid-template-columns: 24px 1fr auto auto;
+    align-items: center;
+    column-gap: 12px;
+    min-height: 44px;                      /* 44px = comfortable to tap */
+}
+
+/* The dot. Its background colour covers the line behind it. */
+.line-dot {
+    justify-self: center;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--outline);
+    border-radius: 50%;
+    background: var(--background);
+}
+
+.item-time {
+    font-family: var(--font-time);
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+
+/* --- Markers: Wake up / Sleep --- */
+
+/* 3 columns here: [dot] [time] [label] */
+.line-marker {
+    grid-template-columns: 24px auto 1fr;
+    min-height: 36px;
+}
+
+.line-marker .line-dot {
+    width: 24px;
+    height: 24px;
+    border: none;
+    font-size: 16px;
+    color: var(--on-surface-variant);
+}
+
+.marker-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+
+/* --- Rows: small habits --- */
+
+.row-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 8px 0;
+}
+
+.row-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--on-surface);
+    overflow-wrap: anywhere;
+}
+
+.row-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 8px;
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+.row-detail .item-time:empty { display: none; }   /* "Anytime" habits have no time */
+
+.row-extra { margin-left: 4px; }
+
+/* The small round button on the right: "+", or a tick circle for done/not-done habits */
+.row-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--outline-variant);
+    border-radius: 50%;
+    font-family: 'Material Symbols Outlined';
+    font-size: 20px;
+    color: var(--on-surface);
+}
+.row-button:hover { background: var(--surface-container-high); }
+.row-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.row-button[hidden] { display: none; }
+
+/* Done: filled white dot with a tick feel, quieter text. No strikethrough:
+   a line through text reads as "cancelled", and this was DONE. */
+.habit-row.is-done .line-dot {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+.habit-row.is-done .row-name { color: var(--on-surface-variant); }
+
+/* Partly done: half-filled dot (left half white) */
+.habit-row.is-partial .line-dot {
+    border-color: var(--primary);
+    background: linear-gradient(90deg, var(--primary) 50%, var(--background) 50%);
+}
+
+/* Skipped: dashed dot, quiet text */
+.habit-row.is-skipped .line-dot { border-style: dashed; }
+.habit-row.is-skipped .row-name { color: var(--on-surface-variant); }
+
+/* Late, not logged: bright outlined dot so it gets noticed */
+.habit-row.is-late .line-dot { border-color: var(--primary); }
+.habit-row.is-late .row-status { color: var(--on-surface); }
+
+
+/* --- The NOW card --- */
+
+.now-item {
+    align-items: start;                    /* the dot sits at the card's top, not its middle */
+    margin: 10px 0;
+}
+
+.now-item .line-dot {
+    width: 16px;
+    height: 16px;
+    margin-top: 22px;
+    border: none;
+    background: var(--primary);
+    box-shadow: 0 0 0 5px var(--background), 0 0 0 6px var(--outline);   /* a ring around the dot */
+}
+
+.now-card {
+    grid-column: 2 / -1;                   /* the card takes all the content columns */
+    padding: 20px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+}
+
+.now-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.now-badge {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    color: var(--background);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.now-name {
+    margin-bottom: 16px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+.now-amount {
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: var(--on-surface);
+}
+
+.now-progress { margin-bottom: 20px; }
+
+.now-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.now-actions .btn {
+    min-height: 48px;
+    font-size: 15px;
+}
+
+.now-actions .btn-primary { flex: 1; }     /* Start focus takes the space, +1 stays compact */
+
+.now-add { min-width: 72px; }
+
+/* All done: the same card, a tick in the dot */
+.all-done .line-dot {
+    width: 24px;
+    height: 24px;
+    margin-top: 18px;
+    font-size: 16px;
+    color: var(--background);
+}
+
+.all-done-text {
+    margin-top: -8px;
+    font-size: 15px;
+    color: var(--on-surface-variant);
+}
+
+
+/* ---------- 4. Rest day + evening card ---------- */
+
+.rest-day {
+    padding: var(--xl) var(--lg);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+    text-align: center;
+}
+
+.rest-day-icon {
+    margin-bottom: 12px;
+    font-size: 32px;
+    color: var(--on-surface-variant);
+}
+
+.rest-day-title {
+    margin-bottom: 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.rest-day-text {
+    font-size: 15px;
+    color: var(--on-surface-variant);
+}
+
+.review-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: var(--xl);
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+
+.review-card[hidden] { display: none; }
+
+.review-card-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--surface-container-high);
+    color: var(--primary);
+}
+
+.review-card-text { flex: 1; min-width: 0; }
+
+.review-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+
+.review-card-sub {
+    font-size: 13px;
+    color: var(--on-surface-variant);   /* wraps normally: no "…" cut-off */
+}
+
+/* ---------- 5. Side: goal + this week ---------- */
+
+/* The goal strip and the week card stacked, 16px apart */
+.today-side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+    margin-bottom: var(--lg);
+}
+
+/* Hidden on phones and small laptops: there the day line comes first.
+   It shows from 1200px (see the bottom of this file). */
+.week-card {
+    display: none;
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+
+.week-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sm);
+    margin-bottom: 14px;
+}
+
+.week-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+
+.week-count {
+    font-size: 12px;
+    color: var(--on-surface-variant);
+}
+
+/* 7 equal columns: M T W T F S S */
+.week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 14px;
+}
+
+.week-day {
+    display: flex;
+    flex-direction: column;              /* letter on top, dot below */
+    align-items: center;
+    gap: 8px;
+}
+
+.week-letter {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+}
+
+/* The dot. Same idea as the day line: filled = done, half = partly, outline = not yet. */
+.week-dot {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--outline-variant);
+    border-radius: 50%;
+}
+
+.week-day.is-done .week-dot    { border-color: var(--primary); background: var(--primary); }
+.week-day.is-partial .week-dot { border-color: var(--primary); background: linear-gradient(90deg, var(--primary) 50%, transparent 50%); }
+.week-day.is-missed .week-dot  { border-color: var(--outline); }
+.week-day.is-none .week-dot    { border-color: var(--primary); }          /* today, nothing yet */
+
+/* Rest day, before you started, or still to come: just a small quiet dot */
+.week-day.is-rest .week-dot,
+.week-day.is-before .week-dot,
+.week-day.is-future .week-dot {
+    width: 6px;
+    height: 6px;
+    margin-block: 4px;                    /* keeps the row the same height as a 14px dot */
+    border: none;
+    background: var(--outline-variant);
+}
+
+/* Today: a white letter */
+.week-day.is-today .week-letter { color: var(--primary); }
+
+.week-streak {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--outline-variant);
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+.week-streak .icon { font-size: 18px; color: var(--primary); }
+
+
+/* ---------- Bigger screens ---------- */
+
+@media (min-width: 900px) {
+    .today-greeting { font-size: 36px; }
+}
+
+/* 1200px+: two columns. Left = your day, right = goal + week.
+   grid-template-areas draws the layout with words:
+
+       header  side
+       day     side
+       review  side
+
+   The last row is 1fr, so extra height goes there and the top rows stay tight. */
+@media (min-width: 1200px) {
+    .today {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;   /* minmax(0, …): long names wrap instead of stretching the column */
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+            "header side"
+            "day    side"
+            "review side";
+        column-gap: var(--xl);
+        align-items: start;
+    }
+
+    .today-header { grid-area: header; }
+    .day          { grid-area: day; }
+    .review-card  { grid-area: review; }
+
+    .today-side {
+        grid-area: side;
+        position: sticky;                 /* stays in view while the day line scrolls */
+        top: var(--xl);
+        margin-bottom: 0;
+    }
+
+    .week-card { display: block; }
+}
