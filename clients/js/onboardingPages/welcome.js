@@ -3,9 +3,10 @@
    ========================================================= */
 
 // Redirect guard: someone who already finished onboarding
-// doesn't belong here. Send them to the dashboard, keep their data.
+// doesn't belong here. Send them to Today, keep their data.
+// replace (not href): the Back button won't bring them back to welcome.
 if (isOnboardingComplete()) {
-    window.location.replace("../startup.html");
+    window.location.replace("./welcome.html");
 }
 
 const startButton = document.getElementById("startButton");

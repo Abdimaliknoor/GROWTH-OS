@@ -1,0 +1,520 @@
+/* =========================================================
+   FOCUS  (app/focus.html)
+
+   1. Page            full screen, no nav
+   2. Habit           "Focus on · Revise last hizb"
+   3. Above clock     15/25/45 chips  OR  Recording/Paused pill
+   4. Clock           ring + big time
+   5. Counter         − 7 pages +
+   6. Buttons         Start  /  Pause + Finish
+   7. Finish sheet    the <dialog> that slides up
+   8. Bigger screens + reduced motion
+
+   focus.js sets data-stage on <main>: "setup", "running" or "paused".
+   CSS reads it to change the look (e.g. paused = thinner clock).
+   ========================================================= */
+
+
+/* ---------- 1. Page ---------- */
+
+/* THE [hidden] TRAP, solved once for the whole page:
+   rules like display:flex beat the hidden attribute, so hidden things would still show.
+   !important makes hidden ALWAYS win on this page. */
+.focus-page [hidden] { display: none !important; }
+
+/* ✕ in the top-left corner, always there */
+.focus-close {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 12px);
+    left: 12px;
+    z-index: var(--z-fixed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface-container-low);
+    color: var(--on-surface-variant);
+}
+.focus-close:hover { color: var(--on-surface); background: var(--surface-container); }
+.focus-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* One column, centred. Full screen height (100dvh = the REAL visible height on phones,
+   without the browser bar). Buttons at the bottom, where your thumb is. */
+.focus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--lg);
+    width: 100%;
+    max-width: 420px;
+    min-height: 100dvh;
+    margin-inline: auto;
+    padding: calc(env(safe-area-inset-top) + 64px) var(--margin-mobile) calc(env(safe-area-inset-bottom) + var(--lg));
+    text-align: center;
+}
+
+
+/* ---------- 2. Habit ---------- */
+
+.focus-label {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--outline);
+}
+
+.focus-name {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    overflow-wrap: anywhere;               /* a long name wraps, never cut off */
+}
+
+.focus-progress {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+
+
+/* ---------- 3. Above the clock ---------- */
+
+/* margin-top: auto pushes the middle group (this + clock + counter) down,
+   and the buttons' margin-top: auto pushes them to the bottom.
+   Result: habit at the top, clock in the middle, buttons at the bottom. */
+.focus-targets,
+.focus-status {
+    margin-top: auto;
+}
+
+.focus-targets {
+    display: flex;
+    gap: 10px;
+}
+
+.target-chip {
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+    color: var(--on-surface-variant);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.target-chip:hover { background: var(--surface-container); color: var(--on-surface); }
+.target-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* The chosen one: white. aria-pressed is set by focus.js. */
+.target-chip[aria-pressed="true"] {
+    background: var(--primary);
+    color: var(--background);
+}
+
+/* Recording / Paused pill */
+.focus-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-surface);
+}
+
+/* The red dot. ::after is a copy behind it that grows and fades = the "ping". */
+.status-dot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ef4444;                   /* real red: "recording" */
+}
+
+.status-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    animation: ping 1.4s ease-out infinite;
+}
+
+@keyframes ping {
+    to { transform: scale(2.4); opacity: 0; }
+}
+
+/* Paused: grey dot, no ping, quieter text */
+.focus[data-stage="paused"] .status-dot { background: var(--outline); }
+.focus[data-stage="paused"] .status-dot::after { animation: none; }
+.focus[data-stage="paused"] .focus-status { color: var(--outline); }
+
+
+/* ---------- 4. Clock ---------- */
+
+.focus-clock {
+    position: relative;                    /* the text sits on top of the ring */
+    width: 240px;
+    height: 240px;
+    flex-shrink: 0;
+}
+
+.clock-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);             /* start at 12 o'clock */
+}
+
+.clock-track,
+.clock-fill {
+    fill: none;
+    stroke-width: 4;
+}
+
+.clock-track { stroke: var(--surface-container-high); }
+
+/* 678.58 = the circle's length (2 × π × 108).
+   focus.js changes stroke-dashoffset every second. The 1s transition makes it glide. */
+.clock-fill {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    stroke-dasharray: 678.58;
+    stroke-dashoffset: 678.58;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.clock-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.clock-time {
+    font-family: var(--font-time);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;    /* every digit the same width: the time doesn't wiggle */
+    color: var(--primary);
+}
+
+.clock-sub {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--outline);
+}
+
+/* Before start: a small caps label under the time */
+.focus[data-stage="setup"] .clock-sub {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Paused: the time goes thin and a bit dim, so it LOOKS stopped */
+.focus[data-stage="paused"] .clock-time {
+    font-weight: 300;
+    opacity: 0.8;
+}
+
+/* Past the target: the sub line turns white ("Target reached") */
+.focus.is-over .clock-sub { color: var(--primary); }
+
+
+/* ---------- 5. Counter ---------- */
+
+.focus-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+}
+
+/* Round − / + buttons. Also used in the finish sheet. */
+.counter-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--surface-container);
+    color: var(--on-surface);
+}
+.counter-button:hover { background: var(--surface-container-high); }
+.counter-button:active { transform: scale(0.92); }
+.counter-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.counter-value {
+    min-width: 104px;
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+}
+
+
+/* ---------- 6. Buttons ---------- */
+
+/* Two equal columns: [Pause] [Finish]. Start takes both columns. */
+.focus-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-top: auto;                      /* pushed to the bottom */
+}
+
+.focus-actions .btn {
+    min-height: 56px;
+    border-radius: var(--radius-full);
+    font-size: 16px;
+}
+
+.focus-start { grid-column: 1 / -1; }      /* "1 / -1" = from the first line to the last = full width */
+
+
+/* ---------- 7. Finish sheet ---------- */
+
+/* Phone: a sheet stuck to the bottom of the screen.
+   A <dialog> opened with showModal() is centred by default (margin: auto).
+   margin: auto 0 0 = push it all the way down, no gap at the sides. */
+.finish-sheet {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    padding: 28px var(--lg) calc(env(safe-area-inset-bottom) + var(--lg));
+    border: none;
+    border-radius: 28px 28px 0 0;
+    background: var(--surface-container-low);
+    color: var(--on-surface);
+    animation: sheet-up 250ms ease-out;
+}
+
+/* ::backdrop = the dimmed page behind an open dialog. The browser makes it, we style it. */
+.finish-sheet::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+@keyframes sheet-up {
+    from { transform: translateY(100%); }
+}
+
+.sheet-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+}
+
+.sheet-habit {
+    margin: 4px 0 var(--lg);
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+
+.sheet-label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.sheet-amount { margin-bottom: 20px; }
+
+.amount-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+}
+
+/* The number box: big, centred, no border (the row is the box) */
+.amount-input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    appearance: textfield;                 /* hide the tiny up/down arrows browsers add */
+}
+.amount-input::-webkit-inner-spin-button,
+.amount-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.amount-input:focus-visible { outline: 2px solid var(--primary); }
+
+/* <fieldset> has a border and padding by default. Remove them. */
+.sheet-mood {
+    margin-bottom: 20px;
+    padding: 0;
+    border: none;
+}
+
+.mood-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+/* Each pill is a <label> with a real radio inside.
+   The radio is invisible but still there (so keyboards and screen readers work);
+   the <span> next to it is what you see. */
+.mood-pill {
+    position: relative;
+    cursor: pointer;
+}
+
+.mood-pill input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.mood-pill span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;                       /* as tall as it is wide = a circle */
+    border-radius: 50%;
+    background: var(--background);
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 150ms, color 150ms, transform 150ms;
+}
+
+.mood-pill:hover span { background: var(--surface-container); }
+
+/* "input:checked + span" = the span right after a CHECKED radio */
+.mood-pill input:checked + span {
+    background: var(--primary);
+    color: var(--background);
+    font-weight: 700;
+    transform: scale(1.05);
+}
+
+.mood-pill input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.mood-ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--outline);
+}
+
+.sheet-note {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--lg);
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    font-size: 14px;
+    resize: none;                          /* no drag handle in the corner */
+}
+.sheet-note::placeholder { color: var(--outline); }
+.sheet-note:focus-visible { outline: none; border-color: var(--outline); }
+
+.sheet-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.sheet-actions .btn {
+    min-height: 52px;
+    border-radius: var(--radius-full);
+    font-size: 15px;
+}
+
+.sheet-actions .btn-primary { flex: 1; }
+
+.sheet-skip {
+    padding: 0 22px;
+    background: transparent;
+    color: var(--on-surface-variant);
+}
+.sheet-skip:hover { background: var(--surface-container); color: var(--on-surface); }
+
+/* Small and quiet on purpose: you shouldn't hit it by accident */
+.sheet-discard {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--outline);
+}
+.sheet-discard:hover { color: var(--error); text-decoration: underline; }
+.sheet-discard:focus-visible { outline: 2px solid var(--primary); border-radius: var(--radius-md); }
+
+
+/* ---------- 8. Bigger screens + reduced motion ---------- */
+
+/* Short phones (e.g. iPhone SE): a smaller clock so the buttons still fit */
+@media (max-height: 700px) {
+    .focus { gap: var(--md); padding-top: calc(env(safe-area-inset-top) + 56px); }
+    .focus-clock { width: 200px; height: 200px; }
+    .clock-time { font-size: 44px; }
+}
+
+/* Tablet / desktop: everything centred in the screen, the sheet becomes a centred card */
+@media (min-width: 600px) {
+    .focus {
+        justify-content: center;
+        gap: 28px;
+    }
+    .focus-targets,
+    .focus-status,
+    .focus-actions { margin-top: 0; }      /* no pushing to the bottom: it's all one centred group */
+
+    .focus-clock { width: 260px; height: 260px; }
+    .clock-time { font-size: 56px; }
+
+    .finish-sheet {
+        width: calc(100% - 2 * var(--lg));
+        max-width: 420px;
+        margin: auto;                      /* back to centred */
+        padding-bottom: var(--lg);
+        border-radius: 24px;
+        animation-name: sheet-pop;
+    }
+}
+
+@keyframes sheet-pop {
+    from { transform: scale(0.96); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .status-dot::after { animation: none; }
+    .clock-fill { transition: none; }
+    .finish-sheet { animation: none; }
+}

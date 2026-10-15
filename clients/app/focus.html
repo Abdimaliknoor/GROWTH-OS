@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#131313" />
+    <title>Focus | Growth OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Same order as Today: tokens → shared app pieces (buttons, bar...) → this page.
+         We load app.css for its buttons, but we DON'T use its nav:
+         Focus is full screen, no tabs, nothing to distract you. -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/focus.css" />
+  </head>
+  <body class="focus-page">
+    <!-- ✕ = go back to Today. It's a link, not "history.back()":
+         a link always goes to the same place, even if you opened Focus from a bookmark.
+         Leaving does NOT stop the timer: the start time is saved. -->
+    <a
+      class="focus-close"
+      href="today.html"
+      aria-label="Back to Today. The timer keeps running."
+    >
+      <span class="icon" aria-hidden="true">close</span>
+    </a>
+
+    <main class="focus">
+      <!-- ============ 1. THE HABIT ============
+             focus.js fills these from the habit in the URL (focus.html?habit=h2). -->
+      <header class="focus-habit">
+        <p class="focus-label">Focus on</p>
+        <h1 class="focus-name" id="habitName"></h1>
+        <p class="focus-progress" id="habitProgress"></p>
+        <!-- "4 / 10 pages today" -->
+      </header>
+
+      <!-- ============ 2. ABOVE THE CLOCK ============
+             Two things share this spot. focus.js shows ONE of them:
+               before you start → the 15 / 25 / 45 chips
+               after you start  → the "Recording" / "Paused" pill -->
+
+      <!-- 2a. How long? aria-pressed="true" marks the chosen chip:
+                 CSS uses it for the white chip, and a screen reader says "pressed". -->
+      <div
+        class="focus-targets"
+        id="targetChips"
+        role="group"
+        aria-label="Session length"
+      >
+        <button
+          class="target-chip"
+          type="button"
+          data-target="15"
+          aria-pressed="false"
+        >
+          15 min
+        </button>
+        <button
+          class="target-chip"
+          type="button"
+          data-target="25"
+          aria-pressed="true"
+        >
+          25 min
+        </button>
+        <button
+          class="target-chip"
+          type="button"
+          data-target="45"
+          aria-pressed="false"
+        >
+          45 min
+        </button>
+      </div>
+
+      <!-- 2b. Recording / Paused. role="status": a screen reader says it when it changes. -->
+      <p class="focus-status" id="focusStatus" role="status" hidden>
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="statusText">Recording</span>
+      </p>
+
+      <!-- ============ 3. THE CLOCK ============
+             The ring: a circle of radius 108 is 2 × π × 108 ≈ 678.58 long.
+             Same trick as Today's small ring: focus.js sets stroke-dashoffset
+               678.58 = nothing drawn ... 0 = full circle.
+             role="timer": screen readers know it's a clock, and DON'T read it out
+             every second (that would be awful). -->
+      <div class="focus-clock">
+        <svg class="clock-ring" viewBox="0 0 240 240" aria-hidden="true">
+          <circle class="clock-track" cx="120" cy="120" r="108" />
+          <circle class="clock-fill" id="clockRing" cx="120" cy="120" r="108" />
+        </svg>
+        <div class="clock-text">
+          <span class="clock-time" id="clockTime" role="timer">25:00</span>
+          <span class="clock-sub" id="clockSub">Target session</span>
+          <!-- "of 25:00" while running -->
+        </div>
+      </div>
+
+      <!-- ============ 4. THE COUNTER ============
+             Only for amount habits (pages, km...). Hidden for time and done/not-done habits.
+             <output> = "a value the page calculated". A screen reader says the new number. -->
+      <div class="focus-counter" id="counter" hidden>
+        <button
+          class="counter-button"
+          type="button"
+          data-action="less"
+          aria-label="One less"
+        >
+          <span class="icon" aria-hidden="true">remove</span>
+        </button>
+        <output class="counter-value" id="counterValue" aria-live="polite"
+          >0 pages</output
+        >
+        <button
+          class="counter-button"
+          type="button"
+          data-action="more"
+          aria-label="One more"
+        >
+          <span class="icon" aria-hidden="true">add</span>
+        </button>
+      </div>
+
+      <!-- ============ 5. THE BUTTONS ============
+             focus.js shows the right ones:
+               before start → [ ▶ Start focus ]
+               recording    → [ Pause ] [ Finish ]
+               paused       → [ Resume ] [ Finish ]   (same button as Pause, new words) -->
+      <div class="focus-actions">
+        <button
+          class="btn btn-primary focus-start"
+          id="startButton"
+          type="button"
+        >
+          <span class="icon" aria-hidden="true">play_arrow</span>
+          Start focus
+        </button>
+        <button class="btn btn-secondary" id="pauseButton" type="button" hidden>
+          <span class="icon" id="pauseIcon" aria-hidden="true">pause</span>
+          <span id="pauseText">Pause</span>
+        </button>
+        <button class="btn btn-primary" id="finishButton" type="button" hidden>
+          <span class="icon" aria-hidden="true">check</span>
+          Finish
+        </button>
+      </div>
+    </main>
+
+    <!-- ============ 6. THE FINISH SHEET ============
+         <dialog> is a pop-up the browser gives us for free:
+           - showModal() opens it ON TOP of the page and dims the rest
+           - keyboard focus stays inside it (you can't Tab to the buttons behind)
+         So we don't have to build any of that ourselves. -->
+    <dialog class="finish-sheet" id="finishSheet" aria-labelledby="sheetTitle">
+      <h2 class="sheet-title" id="sheetTitle">You focused for 25 min</h2>
+      <p class="sheet-habit" id="sheetHabit"></p>
+
+      <!-- How many pages? Amount habits only.
+             Pre-filled with the counter's number. − / + or type the exact number. -->
+      <div class="sheet-amount" id="sheetAmount" hidden>
+        <label class="sheet-label" for="amountInput" id="amountLabel"
+          >How many pages?</label
+        >
+        <div class="amount-row">
+          <button
+            class="counter-button"
+            type="button"
+            data-action="sheet-less"
+            aria-label="One less"
+          >
+            <span class="icon" aria-hidden="true">remove</span>
+          </button>
+          <!-- inputmode="decimal": phones open the number keyboard (with a dot, for 2.5 km) -->
+          <input
+            class="amount-input"
+            id="amountInput"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="any"
+          />
+          <button
+            class="counter-button"
+            type="button"
+            data-action="sheet-more"
+            aria-label="One more"
+          >
+            <span class="icon" aria-hidden="true">add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- How did it go? Real radio buttons, styled as 5 round pills.
+             Real radios = arrow keys and screen readers work with no extra code.
+             All share name="mood", so only one can be picked. -->
+      <fieldset class="sheet-mood">
+        <legend class="sheet-label">How did it go?</legend>
+        <div class="mood-row">
+          <label class="mood-pill"
+            ><input type="radio" name="mood" value="1" /><span>1</span></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="mood" value="2" /><span>2</span></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="mood" value="3" /><span>3</span></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="mood" value="4" /><span>4</span></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="mood" value="5" /><span>5</span></label
+          >
+        </div>
+        <p class="mood-ends" aria-hidden="true">
+          <span>Hard</span><span>Great</span>
+        </p>
+      </fieldset>
+
+      <!-- A short note. The label is hidden visually but read by screen readers. -->
+      <label class="visually-hidden" for="noteInput">A note (optional)</label>
+      <textarea
+        class="sheet-note"
+        id="noteInput"
+        rows="2"
+        maxlength="280"
+        placeholder="A note (optional)"
+      ></textarea>
+
+      <!-- Skip = save the progress, no mood or note.  Save = save everything. -->
+      <div class="sheet-actions">
+        <button class="btn sheet-skip" id="skipButton" type="button">
+          Skip
+        </button>
+        <button class="btn btn-primary" id="saveButton" type="button">
+          Save
+          <span class="icon" aria-hidden="true">arrow_forward</span>
+        </button>
+      </div>
+
+      <!-- Started by mistake? Throw this session away: nothing is logged. -->
+      <button class="sheet-discard" id="discardButton" type="button">
+        Discard this session
+      </button>
+    </dialog>
+
+    <!-- Same order as every app page: storage → state (facts) → insights (calculations) → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/insights.js"></script>
+    <script src="../js/app/focus.js"></script>
+  </body>
+</html>
