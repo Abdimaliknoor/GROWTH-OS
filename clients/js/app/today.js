@@ -240,6 +240,7 @@ function buildRow(item, late) {
 }
 
 // The big NOW card.
+// The big NOW card.
 function buildNow(item, badge) {
     const li = copyTemplate(nowTemplate);
     const habit = item.habit;
@@ -257,25 +258,28 @@ function buildNow(item, badge) {
 
     const focusButton = li.querySelector('[data-action="focus"]');
     const addButton = li.querySelector('[data-action="add"]');
+
     if (finished) {
         // Just hit the target: "Next" moves on, "Keep going +1" adds extra
-        focusButton.disabled = false;
         focusButton.dataset.action = "next";
         focusButton.textContent = "Next";
         addButton.textContent = `Keep going +${getStep(habit)}`;
-    } else if (habit.type === "completion") {
+        return li;
+    }
+
+    // A focus session for THIS habit already running? Say "Resume", not "Start".
+    const active = getActiveFocus();
+    if (active && active.habitId === habit.id) {
+        focusButton.querySelector(".focus-label").textContent = "Resume focus";
+    }
+
+    // The small button: "Mark done" for a tick habit, "+1" (or +5 min) for the others
+    if (habit.type === "completion") {
         addButton.textContent = "Mark done";
     } else {
         addButton.textContent = `+${getStep(habit)}`;
         addButton.setAttribute("aria-label", `Add ${getStep(habit)} ${habit.unit} to ${habit.name}`);
     }
-    return li;
-}
-
-// "All done today" card.
-function buildAllDone(summary) {
-    const li = copyTemplate(allDoneTemplate);
-    li.querySelector(".all-done-text").textContent = `${summary.done} of ${summary.total} habits. Great work.`;
     return li;
 }
 
@@ -411,6 +415,11 @@ function undoLast() {
     hideToast();
     updatePage();
 }
+// "Start focus": open the Focus page for this habit.
+// encodeURIComponent makes the id safe to put in an address (spaces, & etc.).
+function openFocus(habitId) {
+    window.location.href = `focus.html?habit=${encodeURIComponent(habitId)}`;
+}
 
 // "Next" after finishing: let the big card move on.
 function moveOn() {
@@ -457,6 +466,7 @@ function throwConfetti(count) {
 
 if (ready) {
     updatePage();
+    celebrateReturn();
 }
 
 
@@ -469,6 +479,7 @@ dayLine.addEventListener("click", (event) => {
     const habitId = button.closest("[data-habit-id]")?.dataset.habitId;
     if (button.dataset.action === "add" && habitId) addOne(habitId);
     if (button.dataset.action === "next") moveOn();
+    if (button.dataset.action === "focus" && habitId) openFocus(habitId);   // ← new
 });
 
 undoButton.addEventListener("click", undoLast);
@@ -488,3 +499,17 @@ setInterval(refresh, 60 * 1000);
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") refresh();
 });
+
+// finsihing a focus session on the Focus page: redraw so the "Done" card appears.// Came back from Focus with ?done=h1 in the address?
+// If that habit is now done → confetti. Then clean the address.
+function celebrateReturn() {
+    const doneId = new URLSearchParams(window.location.search).get("done");   
+    if (!doneId) return;                                                    
+
+    const habit = getHabitById(doneId);
+    if (habit && getHabitStatus(habit) === "done") {                         
+        throwConfetti(SMALL_CONFETTI);
+    }
+
+    history.replaceState(null, "", "today.html");                  
+}          

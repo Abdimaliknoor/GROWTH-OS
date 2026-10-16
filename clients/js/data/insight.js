@@ -217,3 +217,30 @@ function getStreak() {
     }
     return streak;
 }
+/* ---------- 6. Focus ---------- */
+
+// How long you REALLY focused, in milliseconds: time since the start, minus the pauses.
+//   started 14 min ago, paused 2 min → 720000 (12 min)
+function getFocusElapsed(session, now = Date.now()) {
+    const end = session.endedAt || now;                                  // finished? the clock stopped at endedAt
+    const pausedNow = session.pausedAt ? end - session.pausedAt : 0;     // paused right now? that part doesn't count either
+    return Math.max(0, end - session.startedAt - session.pausedMs - pausedNow);
+}
+// Which screen the Focus page should show. Worked out from the data, never saved:
+//   no session                 → "setup"      (the 15 / 25 / 45 chips + Start)
+//   pausedAt set               → "paused"
+//   still going                → "running"
+//   Finish tapped, not saved   → "finishing"  (the finish sheet)
+//   Save or Skip pressed       → "done"       (back to Today)
+function getFocusStage(session) {
+    if (!session) return "setup";
+    if (session.savedAt) return "done";
+    if (session.endedAt) return "finishing";
+    if (session.pausedAt) return "paused";
+    return "running";
+}
+// Whole minutes to log for a time habit. At least 1: you did start.
+//   12 min 40 s → 13      20 s → 1
+function getFocusMinutes(session, now = Date.now()) {
+    return Math.max(1, Math.round(getFocusElapsed(session, now) / 60000));
+}

@@ -157,6 +157,9 @@
 .focus[data-stage="paused"] .status-dot { background: var(--outline); }
 .focus[data-stage="paused"] .status-dot::after { animation: none; }
 .focus[data-stage="paused"] .focus-status { color: var(--outline); }
+/* Finished: a still white dot, no ping */
+.focus[data-stage="finishing"] .status-dot { background: var(--primary); }
+.focus[data-stage="finishing"] .status-dot::after { animation: none; }
 
 
 /* ---------- 4. Clock ---------- */
@@ -214,6 +217,52 @@
 .clock-sub {
     margin-top: 8px;
     font-size: 14px;
+    color: var(--outline);
+}
+/* The text lets clicks pass THROUGH it to the button underneath */
+.clock-text { pointer-events: none; }
+
+/* Invisible round button over the clock: tap anywhere on it to edit */
+.clock-edit {
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.clock-edit:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+.focus-clock:hover .clock-sub { color: var(--on-surface); }    /* a hint that it's tappable */
+
+/* The editor sits in the middle of the ring, like the time it replaces */
+.clock-editor {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: baseline;                 /* "40" and "min" sit on the same line bottom */
+    justify-content: center;
+    gap: 6px;
+    padding-top: 92px;                     /* roughly where the time's baseline is */
+}
+
+.clock-input {
+    width: 2.2em;                          /* room for 3 digits: "180" */
+    padding: 0;
+    border: none;
+    border-bottom: 2px solid var(--outline);
+    background: transparent;
+    font-family: var(--font-time);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    color: var(--primary);
+    appearance: textfield;                 /* no tiny up/down arrows */
+}
+.clock-input::-webkit-inner-spin-button,
+.clock-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.clock-input:focus { outline: none; border-bottom-color: var(--primary); }
+
+.clock-unit {
+    font-size: 16px;
     color: var(--outline);
 }
 
@@ -497,8 +546,10 @@
     .focus-actions { margin-top: 0; }      /* no pushing to the bottom: it's all one centred group */
 
     .focus-clock { width: 260px; height: 260px; }
-    .clock-time { font-size: 56px; }
-
+        .clock-time,
+    .clock-input { font-size: 44px; }
+    .clock-editor { padding-top: 74px; }
+    
     .finish-sheet {
         width: calc(100% - 2 * var(--lg));
         max-width: 420px;

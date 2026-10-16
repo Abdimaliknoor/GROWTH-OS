@@ -6,7 +6,7 @@
 // doesn't belong here. Send them to Today, keep their data.
 // replace (not href): the Back button won't bring them back to welcome.
 if (isOnboardingComplete()) {
-    window.location.replace("./welcome.html");
+    window.location.replace("../app/today.html");   // ✅ ../ = up out of startup/, then into app/
 }
 
 const startButton = document.getElementById("startButton");

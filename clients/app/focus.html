@@ -105,11 +105,40 @@
           <circle class="clock-track" cx="120" cy="120" r="108" />
           <circle class="clock-fill" id="clockRing" cx="120" cy="120" r="108" />
         </svg>
-        <div class="clock-text">
+        <div class="clock-text" id="clockText">
           <span class="clock-time" id="clockTime" role="timer">25:00</span>
-          <span class="clock-sub" id="clockSub">Target session</span>
+          <span class="clock-sub" id="clockSub">Tap to change</span>
           <!-- "of 25:00" while running -->
         </div>
+
+        <!-- Tap the clock to type your own length.
+                 An invisible round button laid over the whole clock. -->
+        <button
+          class="clock-edit"
+          id="clockEdit"
+          type="button"
+          aria-label="Change focus length"
+        ></button>
+
+        <!-- The editor: shown instead of the time while you type.
+                 A <form>: pressing Enter "submits" it, and focus.js saves the number.
+                 novalidate: don't let the browser block 500 with its own pop-up;
+                 focus.js turns 500 into 180 itself (cleanTarget). -->
+        <form class="clock-editor" id="clockEditor" novalidate hidden>
+          <label class="visually-hidden" for="targetInput"
+            >Focus length in minutes</label
+          >
+          <input
+            class="clock-input"
+            id="targetInput"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            max="180"
+            step="1"
+          />
+          <span class="clock-unit" aria-hidden="true">min</span>
+        </form>
       </div>
 
       <!-- ============ 4. THE COUNTER ============
@@ -263,7 +292,7 @@
     <!-- Same order as every app page: storage → state (facts) → insights (calculations) → this page -->
     <script src="../js/data/storage.js"></script>
     <script src="../js/data/state.js"></script>
-    <script src="../js/data/insights.js"></script>
+    <script src="../js/data/insight.js"></script>
     <script src="../js/app/focus.js"></script>
   </body>
 </html>
