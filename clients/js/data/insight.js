@@ -244,3 +244,87 @@ function getFocusStage(session) {
 function getFocusMinutes(session, now = Date.now()) {
     return Math.max(1, Math.round(getFocusElapsed(session, now) / 60000));
 }
+/* ---------- 7. Journal: 3 kinds of entries, one timeline ----------
+   ✍️ write  your own words                 (journal list)
+   🎯 focus  a focus session's mood + note  (focusSessions)
+   ⏭ skip   why you skipped a habit         (logs with status "skipped")
+   Each function copies ONE notebook onto the same kind of card. */
+
+// The habit's name, or "Deleted habit" if it's gone.
+function habitNameOf(habitId) {
+    const habit = getHabitById(habitId);
+    return habit ? habit.name : "Deleted habit";
+}
+
+// ✍️ Card for each of your own entries.
+function getWriteEntries() {
+    return getJournalEntries().map(entry => ({
+        kind: "write",
+        id: entry.id,
+        date: entry.date,
+        time: entry.createdAt,          // renamed to "time"
+        text: entry.text,
+        mood: entry.mood
+    }));
+}
+
+// 🎯 Card for each FINISHED focus session.
+function getFocusEntries() {
+    return getFocusSessions()
+        .filter(session => session.savedAt)        // still running? leave it out
+        .map(session => {
+            const habit = getHabitById(session.habitId);
+            return {
+                kind: "focus",
+                id: session.id,
+                date: session.date,
+                time: session.startedAt,           // renamed to "time"
+                habitName: habitNameOf(session.habitId),
+                minutes: getFocusMinutes(session),
+                amount: session.amount,
+                unit: habit ? habit.unit : "",
+                mood: session.mood,
+                note: session.note
+            };
+        });
+}
+
+// ⏭ Card for each skip. Skips saved no time, so time is null.
+function getSkipEntries() {
+    return getLogs()
+        .filter(log => log.status === "skipped")   // only the skips
+        .map(log => ({
+            kind: "skip",
+            id: log.id,
+            date: log.date,
+            time: null,
+            habitName: habitNameOf(log.habitId),
+            reason: log.reason
+        }));
+}
+// Everything together, grouped by day, newest day first.
+// Inside a day: timed entries earliest first; skips (no time) at the end.
+function getJournal() {
+    // A. Pour all the cards into one pile
+    const all = [...getWriteEntries(), ...getFocusEntries(), ...getSkipEntries()];
+
+    // B. Drop each card into its day's envelope
+    const byDate = {};
+    all.forEach(entry => {
+        if (!byDate[entry.date]) byDate[entry.date] = [];   // no envelope for this day? make one
+        byDate[entry.date].push(entry);                     // put the card in
+    });
+
+    // C. The envelope names (dates), newest first
+    const dates = Object.keys(byDate).sort().reverse();
+
+    // D. One { date, entries } per day, cards in time order
+    return dates.map(date => ({
+        date,
+        entries: byDate[date].sort((a, b) => {
+            if (a.time === null) return 1;      // a has no time → a goes after
+            if (b.time === null) return -1;     // b has no time → b goes after
+            return a.time - b.time;             // both have a time → earliest first
+        })
+    }));
+}

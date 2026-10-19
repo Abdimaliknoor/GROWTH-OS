@@ -2,9 +2,11 @@
    APP SHELL  (app/*.html: Today, Plan, Journal, Progress, Me)
 
    Everything the 5 app tabs SHARE:
-     1. Page layout       phone: one column · desktop: sidebar + column
-     2. Navigation        phone: bottom bar · desktop: left sidebar
-     3. Shared pieces     buttons, tag, progress bar, toast, confetti
+     1.  Page layout      phone: one column · desktop: sidebar + column
+     1b. Top bar          "you are here": page title + date
+     2.  Navigation       phone: bottom bar · desktop: left sidebar
+     3.  Shared pieces    buttons, tag, progress bar, toast, confetti
+     4.  Sheets           the pop-ups that slide up (Focus finish, Today record)
 
    Mobile first: the normal rules are for phones.
    @media (min-width: 900px) changes them for desktop.
@@ -13,15 +15,69 @@
 :root {
     --font-time: 'Geist Mono', ui-monospace, monospace;   /* times: 05:30 lines up with 16:00 */
     --nav-height: 64px;                                    /* the phone's bottom bar */
+    --topbar-height: 56px;                                 /* the "you are here" bar */
+    --page-width: 600px;                                   /* how wide the page gets (grows on desktop) */
 }
 
 
 /* ---------- 1. Page layout ---------- */
 
-    .app-main {
-        max-width: 720px;                /* wider on desktop (phone stays 600px) */
-        padding: var(--xl) var(--margin-desktop) var(--xxl);
-    }
+.app-main {
+    width: 100%;
+    max-width: var(--page-width);
+    margin-inline: auto;
+    /* Bottom padding = room for the fixed tab bar, so the last card isn't hidden behind it.
+       env(safe-area-inset-bottom) = the iPhone's home-bar area (0 on other phones). */
+    padding: var(--lg) var(--margin-mobile) calc(var(--nav-height) + env(safe-area-inset-bottom) + var(--xl));
+}
+
+
+/* ---------- 1b. Top bar: "you are here" ----------
+   The bar is full width (its line goes edge to edge).
+   The inner box is as wide as the page, so the title lines up
+   with the content under it. */
+
+.app-page { min-width: 0; }               /* lets the page shrink inside the desktop grid */
+
+.app-topbar {
+    position: sticky;                     /* stays at the top while you scroll */
+    top: 0;
+    z-index: var(--z-fixed);
+    background: rgba(19, 19, 19, 0.96);   /* almost solid: text scrolling under it stays hidden */
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--outline-variant);
+}
+
+.app-topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;       /* title left, date right */
+    gap: var(--md);
+    max-width: var(--page-width);
+    height: var(--topbar-height);
+    margin-inline: auto;
+    padding-inline: var(--margin-mobile);
+}
+
+.app-topbar-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.app-topbar-title .icon { font-size: 20px; color: var(--on-surface-variant); }
+
+.app-topbar-meta {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+    white-space: nowrap;
+}
 
 
 /* ---------- 2. Navigation: phone = bottom bar ---------- */
@@ -82,19 +138,17 @@
     outline-offset: -4px;
     border-radius: var(--radius-md);
 }
-/* 1200px+: wider page, room for Today's right column */
-@media (min-width: 1200px) {
-    .app-main { max-width: 1040px; }
-}
+
 
 /* ---------- 2b. Navigation: desktop = left sidebar ---------- */
 
 @media (min-width: 900px) {
-    /* Two columns: a 240px sidebar, then the page */
+    /* Two columns: a 240px sidebar, then the page box (.app-page) */
     .app {
         display: grid;
         grid-template-columns: 240px 1fr;
         min-height: 100vh;
+        --page-width: 720px;              /* wider on desktop (phone stays 600px) */
     }
 
     .app-nav {
@@ -122,9 +176,7 @@
         width: 26px;
         height: 26px;
         border-radius: var(--radius-full);
-        background: var(--primary);
-        color: var(--background);
-        font-size: 16px;
+        object-fit: cover;                /* your logo image fills the circle without stretching */
     }
 
     .app-tabs {
@@ -148,9 +200,17 @@
     .app-tab[aria-current="page"] { background: var(--surface-container-high); }
 
     .app-main {
-        padding: var(--xl) var(--margin-desktop) var(--xxl);
-        margin: auto;
+        padding: var(--lg) var(--margin-desktop) var(--xxl);   /* top = 24px: the top bar already gives room */
     }
+
+    .app-topbar-inner { padding-inline: var(--margin-desktop); }
+
+    .toast { bottom: var(--lg); }          /* no bottom bar on desktop */
+}
+
+/* 1200px+: wider page, room for Today's right column */
+@media (min-width: 1200px) {
+    .app { --page-width: 1040px; }
 }
 
 
@@ -164,7 +224,7 @@
 }
 .btn-secondary:hover { background: var(--surface-container-highest); }
 
-/* Not available yet (e.g. Start focus before Focus exists): clearly quieter, but still readable */
+/* Not available yet: clearly quieter, but still readable */
 .btn:disabled {
     background: var(--surface-container-high);
     border-color: var(--outline-variant);
@@ -249,10 +309,6 @@
     from { opacity: 0; transform: translate(-50%, 8px); }
 }
 
-@media (min-width: 900px) {
-    .toast { bottom: var(--lg); }          /* no bottom bar on desktop */
-}
-
 /* Confetti: JS adds small pieces here, each falls and fades, then JS removes them.
    Each piece gets its own --x (sideways drift) and --turn (spin) from JS. */
 .confetti {
@@ -277,8 +333,226 @@
     to   { opacity: 0; transform: translate(var(--x), 160px) rotate(var(--turn)); }
 }
 
+
+/* ---------- 4. Sheets: the pop-ups that slide up ----------
+   Used by Focus (finish sheet) and Today (record sheet).
+   One look for every sheet in the app: <dialog class="sheet">. */
+
+/* Phone: a sheet stuck to the bottom of the screen.
+   A <dialog> opened with showModal() is centred by default (margin: auto).
+   margin: auto 0 0 = push it all the way down, no gap at the sides. */
+.sheet {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    padding: 28px var(--lg) calc(env(safe-area-inset-bottom) + var(--lg));
+    border: none;
+    border-radius: 28px 28px 0 0;
+    background: var(--surface-container-low);
+    color: var(--on-surface);
+    animation: sheet-up 250ms ease-out;
+}
+
+/* ::backdrop = the dimmed page behind an open dialog. The browser makes it, we style it. */
+.sheet::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+@keyframes sheet-up {
+    from { transform: translateY(100%); }
+}
+
+.sheet-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+}
+
+.sheet-habit {
+    margin: 4px 0 var(--lg);
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+
+.sheet-label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.sheet-amount { margin-bottom: 20px; }
+
+.amount-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+}
+
+/* The number box: big, centred, no border (the row is the box) */
+.amount-input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    appearance: textfield;                 /* hide the tiny up/down arrows browsers add */
+}
+.amount-input::-webkit-inner-spin-button,
+.amount-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.amount-input:focus-visible { outline: 2px solid var(--primary); }
+
+.sheet-note {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--lg);
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    font-size: 14px;
+    resize: none;                          /* no drag handle in the corner */
+}
+.sheet-note::placeholder { color: var(--outline); }
+.sheet-note:focus-visible { outline: none; border-color: var(--outline); }
+
+.sheet-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.sheet-actions .btn {
+    min-height: 52px;
+    border-radius: var(--radius-full);
+    font-size: 15px;
+}
+
+.sheet-actions .btn-primary { flex: 1; }
+
+/* Round − / + buttons: Focus's counter and every sheet's amount row */
+.counter-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--surface-container);
+    color: var(--on-surface);
+}
+.counter-button:hover { background: var(--surface-container-high); }
+.counter-button:active { transform: scale(0.92); }
+.counter-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Tablet / desktop: the sheet becomes a card in the middle of the screen */
+@media (min-width: 600px) {
+    .sheet {
+        width: calc(100% - 2 * var(--lg));
+        max-width: 420px;
+        margin: auto;                      /* back to centred */
+        padding-bottom: var(--lg);
+        border-radius: 24px;
+        animation-name: sheet-pop;
+    }
+}
+
+@keyframes sheet-pop {
+    from { transform: scale(0.96); opacity: 0; }
+}
+/* Mood 1–5: Focus's finish sheet and the Journal.
+   <fieldset> has a border and padding by default. Remove them. */
+.sheet-mood {
+    margin-bottom: 20px;
+    padding: 0;
+    border: none;
+}
+
+.mood-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+/* Each pill is a <label> with a real radio inside.
+   The radio is invisible but still there (so keyboards and screen readers work);
+   the <span> next to it is what you see. */
+.mood-pill {
+    position: relative;
+    cursor: pointer;
+}
+
+.mood-pill input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.mood-pill span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;                       /* as tall as it is wide = a circle */
+    border-radius: 50%;
+    background: var(--background);
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 150ms, color 150ms, transform 150ms;
+}
+
+.mood-pill:hover span { background: var(--surface-container); }
+
+/* "input:checked + span" = the span right after a CHECKED radio */
+.mood-pill input:checked + span {
+    background: var(--primary);
+    color: var(--background);
+    font-weight: 700;
+    transform: scale(1.05);
+}
+
+.mood-pill input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.mood-ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--outline);
+}
+
+/* Small round pills you pick one of: [Today] [Yesterday].
+   aria-pressed="true" = the chosen one (white). */
+.chip {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: var(--radius-full);
+    background: var(--background);
+    color: var(--on-surface-variant);
+    font-size: 13px;
+    font-weight: 600;
+}
+.chip:hover { color: var(--on-surface); }
+.chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.chip[aria-pressed="true"] { background: var(--primary); color: var(--background); }
+
+
 /* Animations off for people who turned them off on their device */
 @media (prefers-reduced-motion: reduce) {
     .toast, .bar-fill { animation: none; transition: none; }
     .confetti { display: none; }
+    .sheet { animation: none; }
 }

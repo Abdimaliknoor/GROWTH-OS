@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#131313" />
+    <title>Journal | Growth OS</title>
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Same order as Today: tokens → the shared shell → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/journal.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ============ NAVIGATION ============
+             Same as Today. Only TWO things change:
+               Today   → now a normal link (no aria-current)
+               Journal → gets href + aria-current="page" (the highlighted tab) -->
+      <nav class="app-nav" aria-label="Main">
+        <p class="app-brand">
+          <img
+            class="app-brand-mark"
+            src="../assets/icons/unnamed.png"
+            alt=""
+          />
+          Growth OS
+        </p>
+        <ul class="app-tabs">
+          <li>
+            <a class="app-tab" href="today.html">
+              <span class="icon" aria-hidden="true">today</span>
+              Today
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">checklist</span>
+              Plan<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="journal.html" aria-current="page">
+              <span class="icon" aria-hidden="true">edit_note</span>
+              Journal
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">trending_up</span>
+              Progress<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">person</span>
+              Me<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- The "bag": top bar + main count as ONE thing in the desktop grid -->
+      <div class="app-page">
+        <!-- ============ A. TOP BAR ============
+             Same bar as Today. New icon, new title, and the right side
+             shows how many entries you have (journal.js fills it). -->
+        <header class="app-topbar">
+          <div class="app-topbar-inner">
+            <h1 class="app-topbar-title">
+              <span class="icon" aria-hidden="true">edit_note</span>
+              Journal
+            </h1>
+            <p class="app-topbar-meta" id="entryCount"></p>
+          </div>
+        </header>
+
+        <main class="app-main journal">
+          <!-- ============ B. WRITE BOX ============
+                 A <form>: pressing the Save button "submits" it,
+                 and journal.js catches that and saves the entry. -->
+          <form class="write-card" id="writeForm">
+            <label class="write-label" for="writeText">How was your day?</label>
+            <textarea
+              class="write-text"
+              id="writeText"
+              rows="3"
+              maxlength="2000"
+              placeholder="Write anything: what went well, what was hard, what you learned…"
+            ></textarea>
+
+            <div class="write-bottom">
+              <!-- Mood: the same 1–5 pills as Focus's finish sheet. Optional. -->
+              <fieldset class="sheet-mood write-mood">
+                <legend class="visually-hidden">Mood (optional)</legend>
+                <div class="mood-row">
+                  <label class="mood-pill"
+                    ><input type="radio" name="writeMood" value="1" /><span
+                      >1</span
+                    ></label
+                  >
+                  <label class="mood-pill"
+                    ><input type="radio" name="writeMood" value="2" /><span
+                      >2</span
+                    ></label
+                  >
+                  <label class="mood-pill"
+                    ><input type="radio" name="writeMood" value="3" /><span
+                      >3</span
+                    ></label
+                  >
+                  <label class="mood-pill"
+                    ><input type="radio" name="writeMood" value="4" /><span
+                      >4</span
+                    ></label
+                  >
+                  <label class="mood-pill"
+                    ><input type="radio" name="writeMood" value="5" /><span
+                      >5</span
+                    ></label
+                  >
+                </div>
+                <p class="mood-ends" aria-hidden="true">
+                  <span>Hard</span><span>Great</span>
+                </p>
+              </fieldset>
+
+              <button class="btn btn-primary write-save" type="submit">
+                Save
+              </button>
+            </div>
+          </form>
+
+          <!-- ============ C. EMPTY STATE ============
+                 Shown when there is nothing at all yet. -->
+          <div class="journal-empty" id="journalEmpty" hidden>
+            <span class="icon journal-empty-icon" aria-hidden="true"
+              >auto_stories</span
+            >
+            <p class="journal-empty-title">Your journal is empty</p>
+            <p class="journal-empty-text">
+              Write a few lines above. Your focus moods and skip reasons will
+              show up here too.
+            </p>
+          </div>
+
+          <!-- ============ D. THE DAYS ============
+                 journal.js adds one dayTemplate per day (newest first),
+                 and inside each day one card per entry. -->
+          <div class="journal-days" id="journalDays"></div>
+        </main>
+      </div>
+      <!-- /app-page -->
+    </div>
+    <!-- /app -->
+
+    <!-- ============ TEMPLATES ============
+         Same idea as Today: the HTML lives here, journal.js copies it. -->
+
+    <!-- One day: "Today" + its list of entries -->
+    <template id="dayTemplate">
+      <section class="journal-day">
+        <h2 class="journal-day-title"></h2>
+        <ol class="journal-list"></ol>
+      </section>
+    </template>
+
+    <!-- ✍️ Your own words. The only kind with an Edit (•••) button. -->
+    <template id="writeTemplate">
+      <li class="entry entry-write">
+        <span class="entry-icon icon" aria-hidden="true">edit_note</span>
+        <div class="entry-body">
+          <p class="entry-top">
+            <span class="entry-kind">You wrote</span>
+            <time class="entry-time"></time>
+            <span class="tag entry-mood" hidden></span>
+          </p>
+          <p class="entry-text"></p>
+        </div>
+        <button
+          class="entry-edit"
+          type="button"
+          data-action="edit"
+          aria-label="Edit entry"
+        >
+          <span class="icon" aria-hidden="true">more_horiz</span>
+        </button>
+      </li>
+    </template>
+
+    <!-- 🎯 A finished focus session: habit, time, mood, note. Read-only. -->
+    <template id="focusTemplate">
+      <li class="entry entry-focus">
+        <span class="entry-icon icon" aria-hidden="true">timer</span>
+        <div class="entry-body">
+          <p class="entry-top">
+            <span class="entry-kind"></span>
+            <time class="entry-time"></time>
+            <span class="tag entry-mood" hidden></span>
+          </p>
+          <p class="entry-detail"></p>
+          <p class="entry-text" hidden></p>
+        </div>
+      </li>
+    </template>
+
+    <!-- ⏭ A skipped habit and why. Read-only. -->
+    <template id="skipTemplate">
+      <li class="entry entry-skip">
+        <span class="entry-icon icon" aria-hidden="true">redo</span>
+        <div class="entry-body">
+          <p class="entry-top">
+            <span class="entry-kind"></span>
+          </p>
+          <p class="entry-detail"></p>
+        </div>
+      </li>
+    </template>
+
+    <!-- ============ E. EDIT SHEET ============
+         Tap ••• on your own entry → change the words or mood, or delete it.
+         Same <dialog class="sheet"> as Today's record sheet. -->
+    <dialog class="sheet" id="editSheet" aria-labelledby="editTitle">
+      <h2 class="sheet-title" id="editTitle">Edit entry</h2>
+      <p class="sheet-habit" id="editWhen"></p>
+
+      <label class="visually-hidden" for="editText">Your entry</label>
+      <textarea
+        class="sheet-note edit-text"
+        id="editText"
+        rows="5"
+        maxlength="2000"
+      ></textarea>
+
+      <fieldset class="sheet-mood">
+        <legend class="sheet-label">Mood</legend>
+        <div class="mood-row">
+          <label class="mood-pill"
+            ><input type="radio" name="editMood" value="1" /><span
+              >1</span
+            ></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="editMood" value="2" /><span
+              >2</span
+            ></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="editMood" value="3" /><span
+              >3</span
+            ></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="editMood" value="4" /><span
+              >4</span
+            ></label
+          >
+          <label class="mood-pill"
+            ><input type="radio" name="editMood" value="5" /><span
+              >5</span
+            ></label
+          >
+        </div>
+        <p class="mood-ends" aria-hidden="true">
+          <span>Hard</span><span>Great</span>
+        </p>
+      </fieldset>
+
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="editCancel" type="button">
+          Cancel
+        </button>
+        <button class="btn btn-primary" id="editSave" type="button">
+          Save
+        </button>
+      </div>
+
+      <!-- Small and quiet on purpose, like Focus's "Discard" -->
+      <button class="edit-delete" id="editDelete" type="button">
+        Delete this entry
+      </button>
+    </dialog>
+
+    <!-- ============ TOAST ============ "Saved" / "Deleted" -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span class="icon" aria-hidden="true">check_circle</span>
+      <span class="toast-text" id="toastText"></span>
+    </div>
+
+    <!-- Same order as every app page: storage → state (facts) → insights (calculations) → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/insight.js"></script>
+    <script src="../js/app/journal.js"></script>
+  </body>
+</html>

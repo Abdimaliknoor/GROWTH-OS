@@ -8,6 +8,13 @@
         rows        small habits (done, partial, skipped, late, later)
         now card    the big one
    4. Rest day, evening card
+   5. Side          goal + this week
+   6. Record sheet  Today-only parts of the sheet
+
+   Screen sizes (at the bottom):
+     phone  <600     goal only, day line under it
+     tablet 600+     goal + week side by side
+     big    1200+    goal + week in a right column
 
    The state classes (is-done, is-partial, is-skipped, is-late) are set by today.js.
    ========================================================= */
@@ -17,22 +24,13 @@
 
 .today-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;                  /* the pill sits level with the greeting */
     justify-content: space-between;
     gap: var(--md);
     margin-bottom: var(--lg);
 }
 
 .today-hello { min-width: 0; }            /* lets a long name wrap instead of pushing the ring out */
-
-.today-date {
-    margin-bottom: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--on-surface-variant);
-}
 
 .today-greeting {
     font-size: 28px;
@@ -44,6 +42,7 @@
 }
 
 .day-count {
+    position: relative;                   /* so the ✓ can sit exactly on top of the ring */
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -78,6 +77,30 @@
     transition: stroke-dashoffset 400ms ease-out;
 }
 
+/* The ✓ in the middle of the ring. Hidden until the day is complete. */
+.day-check {
+    position: absolute;
+    left: 6px;                            /* same spot as the ring (the pill's left padding) */
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    margin-top: -16px;                    /* half its height → centred up/down */
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--primary);           /* a filled white circle… */
+    color: var(--background);             /* …with a dark tick */
+    font-size: 20px;
+    opacity: 0;                           /* hidden */
+    transform: scale(0.5);
+    transition: opacity 200ms ease-out, transform 300ms ease-out;
+}
+
+.day-count.is-complete .day-check {
+    opacity: 1;                           /* shown, and it "pops" to full size */
+    transform: scale(1);
+}
+
 .day-count-text {
     font-size: 13px;
     font-weight: 600;
@@ -94,12 +117,14 @@
     border-radius: var(--radius-lg);
     background: var(--surface-container-low);
 }
+
 .goal-strip-top {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;                 /* was 12px: a little tighter */
+    margin-bottom: 10px;
 }
+
 .goal-strip-icon {
     width: 28px;
     height: 28px;
@@ -127,7 +152,7 @@
 }
 
 .goal-strip-numbers {
-    margin-top: 6px;                     /* was 8px */
+    margin-top: 6px;
     font-size: 13px;
     color: var(--on-surface-variant);
 }
@@ -207,12 +232,19 @@
 
 /* --- Rows: small habits --- */
 
+/* The name + details. A <button> (tap = open the record sheet),
+   so we undo the button look: left-aligned text, no box. */
 .row-text {
     display: flex;
     flex-direction: column;
     min-width: 0;
     padding: 8px 0;
+    text-align: left;
+    color: inherit;
+    border-radius: var(--radius-md);
 }
+.row-text:hover .row-name { text-decoration: underline; text-underline-offset: 3px; }
+.row-text:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .row-name {
     font-size: 15px;
@@ -250,7 +282,7 @@
 .row-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .row-button[hidden] { display: none; }
 
-/* Done: filled white dot with a tick feel, quieter text. No strikethrough:
+/* Done: filled white dot, quieter text. No strikethrough:
    a line through text reads as "cancelled", and this was DONE. */
 .habit-row.is-done .line-dot {
     border-color: var(--primary);
@@ -425,9 +457,10 @@
     color: var(--on-surface-variant);   /* wraps normally: no "…" cut-off */
 }
 
+
 /* ---------- 5. Side: goal + this week ---------- */
 
-/* The goal strip and the week card stacked, 16px apart */
+/* Phone: the goal strip and the week card stacked, 16px apart */
 .today-side {
     display: flex;
     flex-direction: column;
@@ -435,8 +468,8 @@
     margin-bottom: var(--lg);
 }
 
-/* Hidden on phones and small laptops: there the day line comes first.
-   It shows from 1200px (see the bottom of this file). */
+/* Hidden on phones: there the day line comes first.
+   From 600px it shows (see "Bigger screens" at the bottom). */
 .week-card {
     display: none;
     padding: var(--md);
@@ -523,13 +556,78 @@
 .week-streak .icon { font-size: 18px; color: var(--primary); }
 
 
+/* ---------- 6. Record sheet (only the Today-only parts; the sheet look is in app.css) ---------- */
+
+/* [Today] [Yesterday] */
+.record-days {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+/* Done / not-done habits: one big checkbox row */
+.record-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    font-size: 16px;
+    cursor: pointer;
+}
+.record-check[hidden] { display: none; }   /* display:flex above would beat hidden */
+
+.record-check input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);          /* the tick box in our white instead of browser blue */
+}
+
+/* "▸ Skip this day": closed = one line. Open = reason box, Skip button under it on the right. */
+.record-skip {
+    margin-bottom: 20px;
+}
+
+.record-skip summary {
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+}
+.record-skip summary:hover { color: var(--on-surface); }
+
+.record-skip .sheet-note { margin: 4px 0 0; }
+
+.record-skip .btn {
+    display: flex;
+    margin: 8px 0 0 auto;                  /* margin-left: auto = pushed to the right */
+}
+
+
 /* ---------- Bigger screens ---------- */
+
+/* TABLET 600px+: goal and week SIDE BY SIDE above the day line.
+   Two equal columns, both cards the same height:
+
+       [ goal         ] [ this week    ]
+       ...day line...                                         */
+@media (min-width: 600px) {
+    .today-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;             /* both cards as tall as the taller one */
+    }
+
+    .week-card { display: block; }        /* ← this was the bug: it stayed hidden until 1200px */
+}
 
 @media (min-width: 900px) {
     .today-greeting { font-size: 36px; }
 }
 
-/* 1200px+: two columns. Left = your day, right = goal + week.
+/* BIG 1200px+: two columns. Left = your day, right = goal + week.
    grid-template-areas draws the layout with words:
 
        header  side
@@ -556,10 +654,9 @@
 
     .today-side {
         grid-area: side;
+        display: flex;                    /* back to stacked: goal on top, week below */
         position: sticky;                 /* stays in view while the day line scrolls */
-        top: var(--xl);
+        top: calc(var(--topbar-height) + var(--lg));   /* below the sticky top bar */
         margin-bottom: 0;
     }
-
-    .week-card { display: block; }
 }

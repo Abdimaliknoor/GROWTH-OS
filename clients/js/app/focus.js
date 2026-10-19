@@ -328,10 +328,12 @@ function chosenMood() {
 }
 
 // − / + in the sheet: change the number in the box by one step.
-function changeSheetAmount(direction) {
-    const current = Number(amountInput.value) || 0;
-    const next = Math.max(0, current + direction * getStep(currentHabit));
-    amountInput.value = Math.round(next * 100) / 100;
+// − / + in the record sheet: change the number in the box by one step.
+function changeRecordAmount(direction) {
+    const habit = getHabitById(recordHabitId);
+    const current = Number(recordAmount.value) || 0;
+    const next = Math.max(0, current + direction * getStep(habit));
+    recordAmount.value = Math.round(next * 100) / 100;
 }
 
 // Save: log the progress + keep the mood and note. Then back to Today.

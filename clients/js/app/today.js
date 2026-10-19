@@ -46,6 +46,20 @@ const toast = document.getElementById("toast");
 const toastText = document.getElementById("toastText");
 const undoButton = document.getElementById("undoButton");
 const confetti = document.getElementById("confetti");
+const recordSheet = document.getElementById("recordSheet");
+const recordTitle = document.getElementById("recordTitle");
+const recordDays = document.getElementById("recordDays");
+const recordNow = document.getElementById("recordNow");
+const recordAmountBox = document.getElementById("recordAmountBox");
+const recordAmountLabel = document.getElementById("recordAmountLabel");
+const recordAmount = document.getElementById("recordAmount");
+const recordDoneBox = document.getElementById("recordDoneBox");
+const recordDone = document.getElementById("recordDone");
+const recordSkipBox = document.querySelector(".record-skip");
+const skipReason = document.getElementById("skipReason");
+const recordSkip = document.getElementById("recordSkip");
+const recordCancel = document.getElementById("recordCancel");
+const recordSave = document.getElementById("recordSave");
 
 const markerTemplate = document.getElementById("markerTemplate");
 const rowTemplate = document.getElementById("rowTemplate");
@@ -73,6 +87,8 @@ const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 let lastLogId = null;            // the log Undo would remove
 let toastTimer = null;           // so a new toast can cancel the old timer
 let justFinishedId = null;       // the habit that JUST hit its target: it stays the big card with "Keep going"
+let recordHabitId = null;        // the habit open in the record sheet
+let recordDate = null;           // the day the record sheet is changing: today or yesterday
 
 
 /* ---------- 5. Helpers ---------- */
@@ -282,6 +298,11 @@ function buildNow(item, badge) {
     }
     return li;
 }
+function buildAllDone(summary) {
+    const li = copyTemplate(allDoneTemplate);
+    li.querySelector(".all-done-text").textContent = `${summary.done} of ${summary.total} habits. Great work.`;
+    return li;
+}
 
 // The whole line, top to bottom.
 function renderLine(plan, summary) {
@@ -415,6 +436,96 @@ function undoLast() {
     hideToast();
     updatePage();
 }
+/* --- The record sheet --- */
+
+// Tap a habit's name: open the sheet for that habit, on TODAY.
+function openRecord(habitId) {
+    recordHabitId = habitId;
+    recordDate = todayDate();
+    recordSkipBox.open = false;                 // "Skip this day" starts closed
+    skipReason.value = "";
+    fillRecord();
+    recordSheet.showModal();
+}
+
+// Fill the sheet for the habit + day we're looking at.
+//   "Logged: 4 / 10 pages"   or   "Skipped · travelling"
+//   amount habit → the number box, pre-filled with what's logged
+//   tick habit   → the Done checkbox, ticked if done
+function fillRecord() {
+    const habit = getHabitById(recordHabitId);
+    const amount = getDayAmount(habit.id, recordDate);
+    const reason = getSkipReason(habit.id, recordDate);
+
+    recordTitle.textContent = habit.name;
+
+    // The white chip = the day we're on
+    recordDays.querySelectorAll("[data-day]").forEach(chip => {
+        const day = chip.dataset.day === "today" ? todayDate() : addDaysTo(todayDate(), -1);
+        chip.setAttribute("aria-pressed", String(day === recordDate));
+    });
+
+    if (reason) recordNow.textContent = `Skipped · ${reason}`;
+    else if (habit.type === "completion") recordNow.textContent = amount >= 1 ? "Done" : "Not done yet";
+    else recordNow.textContent = `Logged: ${amount} / ${habit.target} ${habit.unit}`;
+
+    const tick = habit.type === "completion";
+    recordAmountBox.hidden = tick;
+    recordDoneBox.hidden = !tick;
+    recordAmountLabel.textContent = `How many ${habit.unit}?`;
+    recordAmount.value = amount;
+    recordDone.checked = amount >= 1;
+}
+
+// [Today] / [Yesterday]: switch the day, then refill the sheet with THAT day's numbers.
+function chooseRecordDay(day) {
+    recordDate = day === "today" ? todayDate() : addDaysTo(todayDate(), -1);
+    fillRecord();
+}
+
+// − / + in the record sheet: change the number in the box by one step.
+function changeRecordAmount(direction) {
+    const habit = getHabitById(recordHabitId);
+    const current = Number(recordAmount.value) || 0;
+    const next = Math.max(0, current + direction * getStep(habit));
+    recordAmount.value = Math.round(next * 100) / 100;
+}
+
+// Save: replace that day's amount with the number in the box (or 1 / 0 for a tick habit).
+// setDayAmount() in state.js removes the day's old logs first, so 12 means 12, not "12 more".
+function saveRecord() {
+    const habit = getHabitById(recordHabitId);
+    let amount;
+    if (habit.type === "completion") {
+        amount = recordDone.checked ? 1 : 0;
+    } else {
+        const typed = Number(recordAmount.value);
+        amount = Number.isNaN(typed) || typed < 0 ? 0 : Math.round(typed * 100) / 100;
+    }
+    setDayAmount(habit.id, amount, recordDate);
+    finishRecord(`${habit.name} saved`);
+}
+
+// Skip: needs a reason (it's what makes a skip "excused" and not just "missed").
+function skipRecord() {
+    const reason = skipReason.value.trim();
+    if (!reason) {
+        skipReason.focus();                     // empty? put the cursor in the box instead of skipping
+        return;
+    }
+    const habit = getHabitById(recordHabitId);
+    skipHabit(habit.id, reason, recordDate);
+    finishRecord(`${habit.name} skipped`);
+}
+
+// After Save or Skip: close, redraw Today, say what happened.
+function finishRecord(message) {
+    recordSheet.close();
+    lastLogId = null;                           // the old +1 can't be undone after the day was rewritten
+    justFinishedId = null;
+    updatePage();
+    showToast(message, false);
+}
 // "Start focus": open the Focus page for this habit.
 // encodeURIComponent makes the id safe to put in an address (spaces, & etc.).
 function openFocus(habitId) {
@@ -433,8 +544,9 @@ function focusHabit(habitId) {
     if (button) button.focus();
 }
 
-function showToast(message) {
+function showToast(message, canUndo = true) {
     toastText.textContent = message;
+    undoButton.hidden = !canUndo;                      // the record sheet's saves can't be undone with this button
     toast.hidden = false;
     clearTimeout(toastTimer);                          // a new toast restarts the 5 seconds
     toastTimer = setTimeout(hideToast, TOAST_MS);
@@ -479,7 +591,8 @@ dayLine.addEventListener("click", (event) => {
     const habitId = button.closest("[data-habit-id]")?.dataset.habitId;
     if (button.dataset.action === "add" && habitId) addOne(habitId);
     if (button.dataset.action === "next") moveOn();
-    if (button.dataset.action === "focus" && habitId) openFocus(habitId);   // ← new
+    if (button.dataset.action === "focus" && habitId) openFocus(habitId); 
+    if (button.dataset.action === "record" && habitId) openRecord(habitId);
 });
 
 undoButton.addEventListener("click", undoLast);
@@ -513,3 +626,19 @@ function celebrateReturn() {
 
     history.replaceState(null, "", "today.html");                  
 }          
+// The record sheet
+recordDays.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-day]");
+    if (chip) chooseRecordDay(chip.dataset.day);
+});
+
+recordSheet.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
+    if (button.dataset.action === "record-less") changeRecordAmount(-1);
+    if (button.dataset.action === "record-more") changeRecordAmount(+1);
+});
+
+recordSave.addEventListener("click", saveRecord);
+recordSkip.addEventListener("click", skipRecord);
+recordCancel.addEventListener("click", () => recordSheet.close());

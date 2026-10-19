@@ -16,7 +16,8 @@ function emptyData() {
         habits: [],                                   // daily amounts (habit.goalId → goal)
         routine: [],                                  // when habits happen (item.habitId → habit)
         logs: [],                                    // what was actually done (log.habitId → habit)
-        focusSessions: []  
+        focusSessions: [] ,
+        journal: [] 
     };
 }
 
@@ -376,4 +377,37 @@ function cancelFocus(id) {
     if (!session || session.savedAt) return false;
     removeItem("focusSessions", id);
     return true;
+}
+/* ---------- 12. Journal (your own written entries) ---------- */
+
+// GET: all your written entries.
+function getJournalEntries() {
+    return getData().journal;
+}
+
+// ADD: save a new entry, written right now.
+//   addJournalEntry("Long day at uni", 4)
+function addJournalEntry(text, mood = null) {
+    if (!text.trim()) return null;      // empty or only spaces → save nothing
+
+    const now = Date.now();
+    const entry = {
+        id: generateId("journal"),
+        date: dateOf(now),              // which day: "2026-10-17"
+        createdAt: now,                 // exact moment: gives "21:02" and the order
+        text: text.trim(),              // "  hi  " → "hi"
+        mood                            // 1–5, or null
+    };
+    saveItem("journal", entry);
+    return entry;
+}
+
+// UPDATE: change the text or mood of one entry.
+//   updateJournalEntry(id, { text: "New words" })
+function updateJournalEntry(id, changes) {
+    const entry = getJournalEntries().find(item => item.id === id);
+    if (!entry) return null;
+    const updated = { ...entry, ...changes };   // old entry + new bits on top
+    saveItem("journal", updated);
+    return updated;
 }

@@ -57,9 +57,9 @@
             </a>
           </li>
           <li>
-            <a class="app-tab is-soon">
+            <a class="app-tab" href="journal.html">
               <span class="icon" aria-hidden="true">edit_note</span>
-              Journal<span class="visually-hidden"> (soon)</span>
+              Journal</span>
             </a>
           </li>
           <li>
@@ -77,116 +77,145 @@
         </ul>
       </nav>
 
-      <main class="app-main today">
-        <!-- ============ 1. HEADER ============
-                 today.js fills the date, the greeting and the count. -->
-        <header class="today-header">
-          <div class="today-hello">
-            <p class="today-date" id="todayDate"></p>
-            <h1 class="today-greeting" id="greeting">Good morning</h1>
-          </div>
-
-          <!-- The small ring + "2 of 5 done".
-                     The ring is an SVG circle; today.js sets how much of it is drawn. -->
-          <div class="day-count">
-            <svg class="day-ring" viewBox="0 0 36 36" aria-hidden="true">
-              <circle class="day-ring-track" cx="18" cy="18" r="15" />
-              <circle
-                class="day-ring-fill"
-                id="dayRing"
-                cx="18"
-                cy="18"
-                r="15"
-              />
-            </svg>
-            <p class="day-count-text" id="dayCount">0 of 0 done</p>
+      <!-- ============ PAGE BOX ============
+           The "bag": everything right of the sidebar.
+           On desktop .app is a 2-column grid (sidebar | page),
+           so the top bar + main must be ONE child → this div. -->
+      <div class="app-page">
+        <!-- ============ TOP BAR: "you are here" ============
+           Same bar on every app page. Only the icon, the title
+           and the right side change. today.js fills the date. -->
+        <header class="app-topbar">
+          <div class="app-topbar-inner">
+            <h1 class="app-topbar-title">
+              <span class="icon" aria-hidden="true">today</span>
+              Today
+            </h1>
+            <p class="app-topbar-meta" id="todayDate"></p>
           </div>
         </header>
 
-        <!-- ============ 2. GOAL STRIP ============
-                 A <section> for now. When the Plan tab exists, it becomes a link to the goal.
-                 role="progressbar" + aria-value* = a screen reader says "60 percent". -->
-        <!-- ============ 2. SIDE: goal + this week ============
+        <main class="app-main today">
+          <!-- ============ 1. HEADER ============
+                 today.js fills the greeting and the count. -->
+          <header class="today-header">
+            <div class="today-hello">
+              <p class="today-greeting" id="greeting">Good morning</p>
+            </div>
+
+            <!-- The small ring + "2 of 5 done".
+                     The ring is an SVG circle; today.js sets how much of it is drawn.
+                     When everything is done, today.js adds .is-complete → the ✓ shows. -->
+            <div class="day-count" id="dayCountBox">
+              <span class="icon day-check" aria-hidden="true">check</span>
+              <svg class="day-ring" viewBox="0 0 36 36" aria-hidden="true">
+                <circle class="day-ring-track" cx="18" cy="18" r="15" />
+                <circle
+                  class="day-ring-fill"
+                  id="dayRing"
+                  cx="18"
+                  cy="18"
+                  r="15"
+                />
+              </svg>
+              <p class="day-count-text" id="dayCount">0 of 0 done</p>
+            </div>
+          </header>
+
+          <!-- ============ 2. SIDE: goal + this week ============
                  Phone / small laptop: sits between the header and the day line.
                  Big screens (1200px+): CSS moves it to a column on the right.
                  Same HTML, two places. Only CSS decides where it goes. -->
-        <aside class="today-side" aria-label="Your progress">
-          <!-- The goal (same as before, just moved inside the aside) -->
-          <section class="goal-strip" id="goalStrip" aria-label="Your goal">
-            <div class="goal-strip-top">
-              <span class="icon goal-strip-icon" aria-hidden="true">flag</span>
-              <span class="goal-strip-title" id="goalTitle"></span>
-              <span class="goal-strip-days" id="goalDays"></span>
-            </div>
-            <div
-              class="bar"
-              id="goalBar"
-              role="progressbar"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-              aria-label="Goal progress"
-            >
-              <span class="bar-fill" id="goalBarFill"></span>
-            </div>
-            <p class="goal-strip-numbers" id="goalNumbers"></p>
-          </section>
+          <aside class="today-side" aria-label="Your progress">
+            <!-- The goal -->
+            <section class="goal-strip" id="goalStrip" aria-label="Your goal">
+              <div class="goal-strip-top">
+                <span class="icon goal-strip-icon" aria-hidden="true"
+                  >flag</span
+                >
+                <span class="goal-strip-title" id="goalTitle"></span>
+                <span class="goal-strip-days" id="goalDays"></span>
+              </div>
+              <div
+                class="bar"
+                id="goalBar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-label="Goal progress"
+              >
+                <span class="bar-fill" id="goalBarFill"></span>
+              </div>
+              <p class="goal-strip-numbers" id="goalNumbers"></p>
+            </section>
 
-          <!-- This week: one dot per day, Monday → Sunday, and the streak.
+            <!-- This week: one dot per day, Monday → Sunday, and the streak.
                      Only on big screens for now (CSS hides it on smaller ones). -->
-          <section class="week-card" aria-labelledby="weekTitle">
-            <div class="week-top">
-              <h2 class="week-title" id="weekTitle">This week</h2>
-              <p class="week-count" id="weekCount"></p>
-            </div>
-            <!-- today.js adds 7 <li>: a letter (M T W...) and a dot -->
-            <ol class="week-days" id="weekDays"></ol>
-            <p class="week-streak">
-              <span class="icon" aria-hidden="true">local_fire_department</span>
-              <span id="weekStreak"></span>
-            </p>
-          </section>
-        </aside>
+            <section class="week-card" aria-labelledby="weekTitle">
+              <div class="week-top">
+                <h2 class="week-title" id="weekTitle">This week</h2>
+                <p class="week-count" id="weekCount"></p>
+              </div>
+              <!-- today.js adds 7 <li>: a letter (M T W...) and a dot -->
+              <ol class="week-days" id="weekDays"></ol>
+              <p class="week-streak">
+                <span class="icon" aria-hidden="true"
+                  >local_fire_department</span
+                >
+                <span id="weekStreak"></span>
+              </p>
+            </section>
+          </aside>
 
-        <!-- ============ 3. THE DAY LINE ============
+          <!-- ============ 3. THE DAY LINE ============
                  An ordered list: the day IS a sequence, 05:30 before 07:00.
                  today.js builds one <li> per item from the templates below. -->
-        <section class="day" aria-labelledby="dayTitle">
-          <h2 class="visually-hidden" id="dayTitle">Your day</h2>
-          <ol class="day-line" id="dayLine"></ol>
+          <section class="day" aria-labelledby="dayTitle">
+            <h2 class="visually-hidden" id="dayTitle">Your day</h2>
+            <ol class="day-line" id="dayLine"></ol>
 
-          <!-- Shown instead of the line when no habits are planned today -->
-          <div class="rest-day" id="restDay" hidden>
-            <span class="icon rest-day-icon" aria-hidden="true"
-              >self_improvement</span
-            >
-            <p class="rest-day-title">Rest day</p>
-            <p class="rest-day-text">
-              Nothing planned today. Rest is part of growing.
-            </p>
-          </div>
-        </section>
+            <!-- Shown instead of the line when no habits are planned today -->
+            <div class="rest-day" id="restDay" hidden>
+              <span class="icon rest-day-icon" aria-hidden="true"
+                >self_improvement</span
+              >
+              <p class="rest-day-title">Rest day</p>
+              <p class="rest-day-text">
+                Nothing planned today. Rest is part of growing.
+              </p>
+            </div>
+          </section>
 
-        <!-- ============ 4. EVENING CARD ============
+          <!-- ============ 4. EVENING CARD ============
                  today.js shows it from 18:00. The daily review page comes later,
                  so the button is disabled for now. -->
-        <section
-          class="review-card"
-          id="reviewCard"
-          aria-labelledby="reviewTitle"
-          hidden
-        >
-          <span class="icon review-card-icon" aria-hidden="true">bedtime</span>
-          <div class="review-card-text">
-            <h2 class="review-card-title" id="reviewTitle">Review your day</h2>
-            <p class="review-card-sub">
-              How did today go? Takes under a minute.
-            </p>
-          </div>
-          <button class="btn btn-secondary" type="button" disabled>Soon</button>
-        </section>
-      </main>
+          <section
+            class="review-card"
+            id="reviewCard"
+            aria-labelledby="reviewTitle"
+            hidden
+          >
+            <span class="icon review-card-icon" aria-hidden="true"
+              >bedtime</span
+            >
+            <div class="review-card-text">
+              <h2 class="review-card-title" id="reviewTitle">
+                Review your day
+              </h2>
+              <p class="review-card-sub">
+                How did today go? Takes under a minute.
+              </p>
+            </div>
+            <button class="btn btn-secondary" type="button" disabled>
+              Soon
+            </button>
+          </section>
+        </main>
+      </div>
+      <!-- /app-page -->
     </div>
+    <!-- /app -->
 
     <!-- ============ TOAST ============
          "Added 1 page · Undo". role="status" + aria-live: a screen reader
@@ -218,13 +247,13 @@
     <template id="rowTemplate">
       <li class="line-item habit-row">
         <span class="line-dot" aria-hidden="true"></span>
-        <div class="row-text">
+        <button class="row-text" type="button" data-action="record">
           <span class="row-name"></span>
           <span class="row-detail">
             <span class="item-time"></span>
             <span class="row-status"></span>
           </span>
-        </div>
+        </button>
         <span class="tag row-extra" hidden></span>
         <button class="row-button" type="button" data-action="add"></button>
       </li>
@@ -277,6 +306,98 @@
         </article>
       </li>
     </template>
+
+    <!-- ============ RECORD SHEET ============
+         Tap a habit's name → this sheet: exact amount, yesterday, or skip.
+         Same <dialog> idea as Focus's finish sheet. today.js fills it in. -->
+    <dialog class="sheet" id="recordSheet" aria-labelledby="recordTitle">
+      <h2 class="sheet-title" id="recordTitle"></h2>
+
+      <!-- Which day? Same idea as Focus's 15 / 25 / 45 chips -->
+      <div class="record-days" id="recordDays" role="group" aria-label="Day">
+        <button class="chip" type="button" data-day="today" aria-pressed="true">
+          Today
+        </button>
+        <button
+          class="chip"
+          type="button"
+          data-day="yesterday"
+          aria-pressed="false"
+        >
+          Yesterday
+        </button>
+      </div>
+
+      <p class="sheet-habit" id="recordNow"></p>
+      <!-- "Logged: 4 / 10 pages" -->
+
+      <!-- Amount habits (pages, km, minutes): a number box with − / + -->
+      <div class="sheet-amount" id="recordAmountBox">
+        <label class="sheet-label" for="recordAmount" id="recordAmountLabel"
+          >How many?</label
+        >
+        <div class="amount-row">
+          <button
+            class="counter-button"
+            type="button"
+            data-action="record-less"
+            aria-label="One less"
+          >
+            <span class="icon" aria-hidden="true">remove</span>
+          </button>
+          <!-- inputmode="decimal": phones open the number keyboard (with a dot, for 2.5 km) -->
+          <input
+            class="amount-input"
+            id="recordAmount"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="any"
+          />
+          <button
+            class="counter-button"
+            type="button"
+            data-action="record-more"
+            aria-label="One more"
+          >
+            <span class="icon" aria-hidden="true">add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Done / not-done habits: one checkbox instead of the number -->
+      <label class="record-check" id="recordDoneBox" hidden>
+        <input type="checkbox" id="recordDone" />
+        <span>Done</span>
+      </label>
+
+      <!-- Skip. <details> opens and closes by ITSELF when you tap the summary: no JS needed -->
+      <details class="record-skip">
+        <summary>Skip this day</summary>
+        <label class="visually-hidden" for="skipReason"
+          >Why are you skipping?</label
+        >
+        <input
+          class="sheet-note"
+          id="skipReason"
+          type="text"
+          maxlength="60"
+          placeholder="Why? e.g. travelling, sick"
+        />
+        <button class="btn btn-secondary" id="recordSkip" type="button">
+          Skip
+        </button>
+      </details>
+
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="recordCancel" type="button">
+          Cancel
+        </button>
+        <button class="btn btn-primary" id="recordSave" type="button">
+          Save
+        </button>
+      </div>
+    </dialog>
 
     <!-- Order matters: storage → state (facts) → insights (calculations) → this page -->
     <script src="../js/data/storage.js"></script>

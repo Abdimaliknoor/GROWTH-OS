@@ -295,21 +295,6 @@
     background: var(--surface-container-low);
 }
 
-/* Round − / + buttons. Also used in the finish sheet. */
-.counter-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: var(--surface-container);
-    color: var(--on-surface);
-}
-.counter-button:hover { background: var(--surface-container-high); }
-.counter-button:active { transform: scale(0.92); }
-.counter-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .counter-value {
     min-width: 104px;
@@ -340,83 +325,6 @@
 .focus-start { grid-column: 1 / -1; }      /* "1 / -1" = from the first line to the last = full width */
 
 
-/* ---------- 7. Finish sheet ---------- */
-
-/* Phone: a sheet stuck to the bottom of the screen.
-   A <dialog> opened with showModal() is centred by default (margin: auto).
-   margin: auto 0 0 = push it all the way down, no gap at the sides. */
-.finish-sheet {
-    width: 100%;
-    max-width: none;
-    margin: auto 0 0;
-    padding: 28px var(--lg) calc(env(safe-area-inset-bottom) + var(--lg));
-    border: none;
-    border-radius: 28px 28px 0 0;
-    background: var(--surface-container-low);
-    color: var(--on-surface);
-    animation: sheet-up 250ms ease-out;
-}
-
-/* ::backdrop = the dimmed page behind an open dialog. The browser makes it, we style it. */
-.finish-sheet::backdrop {
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-}
-
-@keyframes sheet-up {
-    from { transform: translateY(100%); }
-}
-
-.sheet-title {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--primary);
-}
-
-.sheet-habit {
-    margin: 4px 0 var(--lg);
-    font-size: 14px;
-    color: var(--on-surface-variant);
-}
-
-.sheet-label {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--on-surface-variant);
-}
-
-.sheet-amount { margin-bottom: 20px; }
-
-.amount-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px;
-    border-radius: var(--radius-lg);
-    background: var(--background);
-}
-
-/* The number box: big, centred, no border (the row is the box) */
-.amount-input {
-    flex: 1;
-    min-width: 0;
-    height: 44px;
-    border: none;
-    border-radius: var(--radius-md);
-    background: transparent;
-    font-size: 24px;
-    font-weight: 600;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-    color: var(--primary);
-    appearance: textfield;                 /* hide the tiny up/down arrows browsers add */
-}
-.amount-input::-webkit-inner-spin-button,
-.amount-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
-.amount-input:focus-visible { outline: 2px solid var(--primary); }
 
 /* <fieldset> has a border and padding by default. Remove them. */
 .sheet-mood {
@@ -479,32 +387,6 @@
     color: var(--outline);
 }
 
-.sheet-note {
-    display: block;
-    width: 100%;
-    margin-bottom: var(--lg);
-    padding: 12px 14px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-lg);
-    background: var(--background);
-    font-size: 14px;
-    resize: none;                          /* no drag handle in the corner */
-}
-.sheet-note::placeholder { color: var(--outline); }
-.sheet-note:focus-visible { outline: none; border-color: var(--outline); }
-
-.sheet-actions {
-    display: flex;
-    gap: 12px;
-}
-
-.sheet-actions .btn {
-    min-height: 52px;
-    border-radius: var(--radius-full);
-    font-size: 15px;
-}
-
-.sheet-actions .btn-primary { flex: 1; }
 
 .sheet-skip {
     padding: 0 22px;
@@ -549,23 +431,16 @@
         .clock-time,
     .clock-input { font-size: 44px; }
     .clock-editor { padding-top: 74px; }
+    .clock-time,
+    .clock-input { font-size: 56px; }
+    .clock-editor { padding-top: 100px; }
     
-    .finish-sheet {
-        width: calc(100% - 2 * var(--lg));
-        max-width: 420px;
-        margin: auto;                      /* back to centred */
-        padding-bottom: var(--lg);
-        border-radius: 24px;
-        animation-name: sheet-pop;
-    }
+
 }
 
-@keyframes sheet-pop {
-    from { transform: scale(0.96); opacity: 0; }
-}
+
 
 @media (prefers-reduced-motion: reduce) {
     .status-dot::after { animation: none; }
     .clock-fill { transition: none; }
-    .finish-sheet { animation: none; }
 }
