@@ -1,76 +1,117 @@
-// state.js
-// FACTS: read and save what the user told us (goals, habits, routine, logs).
-// Pages never touch localStorage. They call these functions.
-// Anything CALCULATED from the facts (today's plan, progress) lives in insights.js.
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  STATE  ·  js/data/state.js                                  ║
+   ║  FACTS: read and save what the user told us.                 ║
+   ╚══════════════════════════════════════════════════════════════╝
+
+   THE RULES OF THIS FILE
+     • Pages NEVER touch localStorage. They call the functions here.
+     • This file only reads and SAVES facts (goals, habits, logs…).
+     • Anything CALCULATED from the facts (today's plan, progress, pace)
+       lives in insight.js, and never saves anything.
+     • Load order on every page: storage.js → state.js → insight.js → the page.
+
+   HOW THE DATA FITS TOGETHER
+     profile ─── who you are, your direction
+     goals ───── the finish lines
+       └─ habits ──────── habit.goalId → goal
+            ├─ routine ─── item.habitId → habit     (WHEN)
+            ├─ logs ────── log.habitId → habit      (WHAT you did)
+            └─ focusSessions ── session.habitId → habit
+     journal ─── your own written entries (by date)
+
+   MAP OF THIS FILE
+      1. Shape of a new user ..... emptyData
+      2. Read / reset ............ getData, resetUser
+      3. Dates and words ......... generateId, todayDate, weekdayOf, dateOf,
+                                   addDaysTo, describeDays, describeHabitAmount
+      4. Save into ANY list ...... saveItem, removeItem
+      5. Profile ................. name, direction
+      6. Onboarding .............. step, complete
+      7. Goals ................... get, save, toggleMilestone
+      8. Habits .................. get, save, replaceGoalHabits, archive / restore
+      9. Routine ................. get, day, add / update / remove, replaceRoutinePlan
+     10. Logs .................... addLog, setDayAmount, skipHabit
+     11. Focus sessions .......... start, pause, resume, stop, finish, cancel
+     12. Journal ................. get, add, update, delete
+   ══════════════════════════════════════════════════════════════════ */
 
 
-/* ---------- 1. The shape of a new user ---------- */
+/* ════════════════════ 1. THE SHAPE OF A NEW USER ════════════════════ */
 
-// Each list is like a database table. Each item has an id.
+// Each list is like a database table. Each item in it has an id.
 function emptyData() {
     return {
-        version: 1,                                   // bump this when the shape changes
+        version: 1,                                       // bump this when the shape changes
         profile: { name: "", area: "", areaLabel: "", identity: "" },
         onboarding: { step: 1, completed: false },
-        goals: [],                                    // the finish lines
-        habits: [],                                   // daily amounts (habit.goalId → goal)
-        routine: [],                                  // when habits happen (item.habitId → habit)
-        logs: [],                                    // what was actually done (log.habitId → habit)
-        focusSessions: [] ,
-        journal: [] 
+        goals: [],                                        // the finish lines
+        habits: [],                                       // daily amounts           (habit.goalId → goal)
+        routine: [],                                      // WHEN things happen      (item.habitId → habit)
+        logs: [],                                         // what was actually done  (log.habitId → habit)
+        focusSessions: [],                                // focus timers            (session.habitId → habit)
+        journal: []                                       // your own written entries
     };
 }
 
 
-/* ---------- 2. Read and save everything ---------- */
+/* ════════════════════ 2. READ AND RESET EVERYTHING ════════════════════ */
 
+// Everything saved, as one object. Missing parts get their defaults,
+// so an older user (saved before "journal" existed) still gets journal: [].
 function getData() {
     const saved = readStorage();
     if (!saved) return emptyData();
-    return { ...emptyData(), ...saved };              // missing parts get their defaults
+    return { ...emptyData(), ...saved };
 }
 
+// Start over: a brand-new, empty user.
 function resetUser() {
     writeStorage(emptyData());
 }
 
 
-/* ---------- 3. Small helpers ---------- */
+/* ════════════════════ 3. DATES AND WORDS (small helpers) ════════════════════ */
 
-// "habit-1760000000000-4821": time + random, so two ids never match.
+// ── Ids ──
+// "habit-1760000000000-4821": the time + a random number, so two ids never match.
 function generateId(prefix) {
     return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
 }
 
-// Today as "2026-10-09", in LOCAL time (toISOString would give the UTC date).
-function todayDate() {
-    return dateOf(Date.now());
-}
-
+// ── Days of the week ──
 const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri"];
 const WEEKEND = ["sat", "sun"];
 
-// "2026-10-09" → "fri"
-function weekdayOf(date) {
-    const [year, month, day] = date.split("-").map(Number);
-    const sundayFirst = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-    return sundayFirst[new Date(year, month - 1, day).getDay()];
+// ── Dates (always LOCAL time, never UTC) ──
+
+// Today as "2026-10-09". (toISOString would give the UTC date: wrong after 21:00 in Nairobi.)
+function todayDate() {
+    return dateOf(Date.now());
 }
 
-// A timestamp (Date.now()) → its LOCAL date: 1760000000000 → "2025-10-09"
+// A timestamp → its local date.   1760000000000 → "2025-10-09"
 function dateOf(timestamp) {
     const d = new Date(timestamp);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// "2026-10-10" + (-3) → "2026-10-07". Uses local dates, handles month ends.
+// "2026-10-09" → "fri"
+function weekdayOf(date) {
+    const [year, month, day] = date.split("-").map(Number);
+    const sundayFirst = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];   // getDay(): 0 = Sunday
+    return sundayFirst[new Date(year, month - 1, day).getDay()];
+}
+
+// "2026-10-10" + (-3) → "2026-10-07". Handles month ends: "2026-10-31" + 1 → "2026-11-01".
 function addDaysTo(date, amount) {
     const [year, month, day] = date.split("-").map(Number);
     return dateOf(new Date(year, month - 1, day + amount).getTime());
 }
 
-// ["mon","wed"] → "Mon, Wed"   (or "Every day" / "Weekdays" / "Weekends")
+// ── Words ──
+
+// ["mon","wed"] → "Mon, Wed"     (or "Every day" / "Weekdays" / "Weekends")
 function describeDays(days) {
     const same = list => days.length === list.length && list.every(d => days.includes(d));
     if (same(WEEK_DAYS)) return "Every day";
@@ -81,26 +122,30 @@ function describeDays(days) {
         .join(", ");
 }
 
-// { target: 1, unit: "pages" } → "1 pages"   ·   completion habit → "Done"
+// { target: 1, unit: "pages" } → "1 pages"     a done/not-done habit → "Done"
 function describeHabitAmount(habit) {
     if (habit.type === "completion") return "Done";
     return `${habit.target} ${habit.unit}`.trim();
 }
 
 
-/* ---------- 4. One way to save into any list ---------- */
+/* ════════════════════ 4. SAVE INTO ANY LIST ════════════════════
+   The two functions every section below uses.
+   listName = "goals", "habits", "routine", "logs", "focusSessions" or "journal". */
 
 // Add the item, or replace the one with the same id.
+//   saveItem("habits", { id: "h1", … })   new id → added   ·   known id → replaced
 function saveItem(listName, item) {
     if (!item || !item.id) throw new Error(`saveItem("${listName}"): item needs an id`);
     const data = getData();
     const list = data[listName];
     const index = list.findIndex(existing => existing.id === item.id);
-    if (index === -1) list.push(item);       // new → add
-    else list[index] = item;                 // known → replace
+    if (index === -1) list.push(item);           // new   → add at the end
+    else list[index] = item;                     // known → replace in place
     writeStorage(data);
 }
 
+// Remove the item with this id.   removeItem("journal", "journal-…")
 function removeItem(listName, id) {
     const data = getData();
     data[listName] = data[listName].filter(item => item.id !== id);
@@ -108,12 +153,13 @@ function removeItem(listName, id) {
 }
 
 
-/* ---------- 5. Profile ---------- */
+/* ════════════════════ 5. PROFILE ════════════════════ */
 
 function getProfile() {
     return getData().profile;
 }
 
+// ── Name ──
 function getName() {
     return getProfile().name;
 }
@@ -124,6 +170,7 @@ function saveName(name) {
     writeStorage(data);
 }
 
+// ── Direction: the area of life + "I am someone who…" ──
 function getDirection() {
     const { area, areaLabel, identity } = getProfile();
     return { area, areaLabel, identity };
@@ -136,8 +183,9 @@ function saveDirection({ area, areaLabel, identity }) {
 }
 
 
-/* ---------- 6. Onboarding ---------- */
+/* ════════════════════ 6. ONBOARDING ════════════════════ */
 
+// Which step the user reached (so they can continue later).
 function getCurrentStep() {
     return getData().onboarding.step;
 }
@@ -148,6 +196,7 @@ function setCurrentStep(step) {
     writeStorage(data);
 }
 
+// Finished setup → the app pages open (their Guard checks this).
 function completeOnboarding() {
     const data = getData();
     data.onboarding.completed = true;
@@ -159,10 +208,13 @@ function isOnboardingComplete() {
 }
 
 
-/* ---------- 7. Goals ---------- */
+/* ════════════════════ 7. GOALS ════════════════════ */
 
 function getGoals() {
     return getData().goals;
+}
+function getActiveGoal() {
+    return getGoals().find(goal => goal.status === "active") || null;
 }
 
 function getGoalById(id) {
@@ -172,10 +224,35 @@ function getGoalById(id) {
 function saveGoal(goal) {
     saveItem("goals", goal);
 }
+// Close a goal: it gets the "done" sticker, its habits go to the archive.
+// Nothing is deleted: logs, focus sessions and journal stay for history.
+//   finishGoal("goal-1") → Juz 30 is now { status: "done", finishedAt: … }
+function finishGoal(goalId) {
+    const data = getData();
+    data.goals = data.goals.map(goal =>
+        goal.id === goalId ? { ...goal, status: "done", finishedAt: Date.now() } : goal);
+    data.habits = data.habits.map(habit =>
+        habit.goalId === goalId ? { ...habit, archived: true } : habit);
+    writeStorage(data);
+}
+
+// Tick (or untick) one milestone step of a goal.
+//   toggleMilestone("goal-…", "step-…") → the updated goal
+// Only the matching step flips (done ↔ not done); the others are copied as they are.
+function toggleMilestone(goalId, stepId) {
+    const goal = getGoalById(goalId);
+    if (!goal) return null;
+    const milestones = goal.milestones.map(step => step.id === stepId ? { ...step, done: !step.done } : step);
+    const updated = { ...goal, milestones };
+    saveGoal(updated);
+    return updated;
+}
 
 
-/* ---------- 8. Habits ---------- */
+/* ════════════════════ 8. HABITS ════════════════════
+   archived: true = hidden from Today and Plan's list, but its history (logs) is kept. */
 
+// ── Read ──
 function getHabits() {
     return getData().habits;
 }
@@ -184,35 +261,134 @@ function getHabitById(id) {
     return getHabits().find(habit => habit.id === id) || null;
 }
 
-// A goal's habits that are still in use.
+// A goal's habits still in use (not archived).
 function getHabitsForGoal(goalId) {
     return getHabits().filter(habit => habit.goalId === goalId && !habit.archived);
 }
 
+// A goal's archived habits (Plan's "Archived" list).
+function getArchivedHabits(goalId) {
+    return getHabits().filter(habit => habit.goalId === goalId && habit.archived);
+}
+
+// ── Save ──
 function saveHabit(habit) {
     saveItem("habits", habit);
 }
 
-// Habit page: "this is now the full habit list for this goal".
+// The habit page: "this is now the full ACTIVE habit list for this goal".
+// A habit missing from the new list:
+//   has history (logs)  → ARCHIVED: hidden, its history stays, it can come back
+//   never used          → deleted for good (nothing to keep)
+// Habits already archived stay archived. Other goals' habits are not touched.
 function replaceGoalHabits(goalId, habits) {
     const data = getData();
-    const otherGoals = data.habits.filter(habit => habit.goalId !== goalId);
-    data.habits = otherGoals.concat(habits);
+    const keptIds = habits.map(habit => habit.id);
+    const usedIds = data.logs.map(log => log.habitId);
 
-    // Routine items of removed habits must go too.
+    const others = data.habits.filter(habit => habit.goalId !== goalId);
+    const leaving = data.habits.filter(habit => habit.goalId === goalId && !keptIds.includes(habit.id));
+    const toArchive = leaving
+        .filter(habit => habit.archived || usedIds.includes(habit.id))
+        .map(habit => ({ ...habit, archived: true }));
+
+    data.habits = others.concat(habits, toArchive);
+
+    // Routine items of DELETED habits go. Archived habits keep theirs (hidden until restored).
     const ids = data.habits.map(habit => habit.id);
     data.routine = data.routine.filter(item => item.kind !== "habit" || ids.includes(item.habitId));
     writeStorage(data);
 }
 
+// ── Archive / restore (flip one switch) ──
 
-/* ---------- 9. Routine ---------- */
+// Hide a habit from Today, keep its history.
+function archiveHabit(id) {
+    const habit = getHabitById(id);
+    if (!habit) return null;
+    const updated = { ...habit, archived: true };
+    saveHabit(updated);
+    return updated;
+}
 
+// Bring it back: on Today again, with its old routine times.
+function restoreHabit(id) {
+    const habit = getHabitById(id);
+    if (!habit) return null;
+    const updated = { ...habit, archived: false };
+    saveHabit(updated);
+    return updated;
+}
+
+
+/* ════════════════════ 9. ROUTINE ════════════════════
+   One item = one thing at one time:
+     { id, kind: "wake",     label: "Wake up", time: "06:00", days: [...] }
+     { id, kind: "habit",    habitId: "h1",    time: "05:30", days: [...] }
+     { id, kind: "activity", label: "Class",   time: "08:00", days: WEEKDAYS }
+     { id, kind: "activity", label: "Dentist", time: "15:00", days: [], date: "2026-10-20" }  ← only that day
+     { id, kind: "sleep",    label: "Sleep",   time: "22:00", days: [...] } */
+
+// ── Read ──
 function getRoutine() {
     return getData().routine;
 }
 
-// Routine page saves the whole list at once.
+// One date's items, sorted by time.   "2026-10-09" → Friday's items
+// An item with a date ("only today") shows on that date only; the others on their weekdays.
+function getRoutineForDay(date) {
+    const day = weekdayOf(date);
+    return getRoutine()
+        .filter(item => item.date ? item.date === date : item.days.includes(day))
+        .sort((a, b) => a.time.localeCompare(b.time));
+}
+
+// ── Change ONE item (Today's "Add to my day" and tapping a marker) ──
+
+// ADD one thing to your day.
+//   every week: addRoutineItem({ label: "Class", time: "08:00", days: WEEKDAYS })
+//   only once:  addRoutineItem({ label: "Dentist", time: "15:00", date: "2026-10-20" })
+function addRoutineItem({ kind = "activity", label, time, days = [], date = null, habitId = null, note = "" }) {
+    const item = { id: generateId("routine"), kind, habitId, label: label.trim(), time, days, date, note: note.trim() };
+    saveItem("routine", item);
+    return item;
+}
+
+// CHANGE one item.   updateRoutineItem(id, { time: "09:00" })
+function updateRoutineItem(id, changes) {
+    const item = getRoutine().find(entry => entry.id === id);
+    if (!item) return null;
+    const updated = { ...item, ...changes };
+    saveItem("routine", updated);
+    return updated;
+}
+
+// REMOVE one item.
+function removeRoutineItem(id) {
+    removeItem("routine", id);
+}
+
+// ── Save the routine PAGE (wake, sleep, habit times) ──
+
+// The routine page only knows wake, sleep and your active habits' times.
+// This replaces ONLY those, and KEEPS everything the page doesn't show:
+//   activities (Class, Lunch…)  ·  "only today" items  ·  archived habits' times (for Restore)
+//   replaceRoutinePlan([ {kind:"wake",…}, {kind:"habit",…}, {kind:"sleep",…} ])
+function replaceRoutinePlan(items) {
+    const data = getData();
+    const archivedIds = data.habits.filter(habit => habit.archived).map(habit => habit.id);
+
+    const kept = data.routine.filter(item =>
+        item.kind === "activity"                                          // Class, Lunch…
+        || item.date                                                      // "only today"
+        || (item.kind === "habit" && archivedIds.includes(item.habitId))  // archived habit
+    );
+    data.routine = kept.concat(items);
+    writeStorage(data);
+}
+
+// ⚠️ OLD: replaces the WHOLE routine (activities too). Only for tests / a full reset.
+//    Pages should use replaceRoutinePlan (above) or the add / update / remove functions.
 function saveRoutine(items) {
     if (!Array.isArray(items)) throw new Error("saveRoutine needs an array");
     const data = getData();
@@ -220,36 +396,27 @@ function saveRoutine(items) {
     writeStorage(data);
 }
 
-// One day's items, sorted by time. "2026-10-09" → Friday's items.
-function getRoutineForDay(date) {
-    const day = weekdayOf(date);
-    return getRoutine()
-        .filter(item => item.days.includes(day))
-        .sort((a, b) => a.time.localeCompare(b.time));
-}
 
-
-/* ---------- 10. Logs (the actual result) ---------- */
-
-// A log = one record of what really happened.
-//   { id, habitId, date: "2026-10-10", amount: 1, status: "done" }
-//   { id, habitId, date: "2026-10-10", amount: 0, status: "skipped", reason: "travel" }
-// Reading logs as totals ("how much today?") is a calculation, so it lives in insights.js.
+/* ════════════════════ 10. LOGS (what really happened) ════════════════════
+   One log = one record:
+     { id, habitId, date: "2026-10-10", amount: 1, status: "done" }
+     { id, habitId, date: "2026-10-10", amount: 0, status: "skipped", reason: "travel" }
+   "How much today?" is a calculation, so it lives in insight.js (getDayAmount). */
 
 function getLogs() {
     return getData().logs;
 }
 
-// Record progress: addLog("h1", 1) → 1 page today.
-// Returns the log, so the page can offer "Undo" (removeItem("logs", log.id)).
+// +1: add progress.   addLog("h1", 1) → 1 page today.
+// Returns the log, so the page can offer Undo: removeItem("logs", log.id).
 function addLog(habitId, amount, date = todayDate()) {
     const log = { id: generateId("log"), habitId, amount, date, status: "done" };
     saveItem("logs", log);
     return log;
 }
 
-// Set a day's total to an exact number (Record sheet "fix it", or untick).
-// Removes that day's logs for the habit, then saves one log with the new total.
+// Set a day's total to an EXACT number (the Record sheet, or untick).
+// That day's logs for the habit are removed first, so 12 means 12, not "12 more".
 function setDayAmount(habitId, amount, date = todayDate()) {
     const data = getData();
     data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
@@ -259,8 +426,7 @@ function setDayAmount(habitId, amount, date = todayDate()) {
     writeStorage(data);
 }
 
-// Skip a habit for a day, with a reason ("sick", "travel", "forgot").
-// Same idea: that day's logs are replaced by one "skipped" log.
+// Skip a day, with a reason ("sick", "travel"). That day's logs → one "skipped" log.
 function skipHabit(habitId, reason, date = todayDate()) {
     const data = getData();
     data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
@@ -268,7 +434,13 @@ function skipHabit(habitId, reason, date = todayDate()) {
     writeStorage(data);
 }
 
-/* ---------- 11. Focus sessions ---------- */
+
+/* ════════════════════ 11. FOCUS SESSIONS ════════════════════
+   We save TIMES (startedAt, pausedAt…), never "seconds so far".
+   The clock is always worked out as now − startedAt − pauses (insight.js),
+   so a reload or a locked phone can't break it. */
+
+// ── Read ──
 
 // All sessions, oldest first.
 function getFocusSessions() {
@@ -280,37 +452,37 @@ function getFocusById(id) {
     return getFocusSessions().find(session => session.id === id) || null;
 }
 
-// The session still going: not saved yet (no Save/Skip pressed). Only one at a time.
-//   getActiveFocus() → { id: "focus-…", habitId: "h2", ... }  or  null
+// The session still going (Save/Skip not pressed yet). Only one at a time.
+//   getActiveFocus() → { id: "focus-…", habitId: "h2", … }  or  null
 function getActiveFocus() {
     return getFocusSessions().find(session => !session.savedAt) || null;
 }
 
-// Start a new session NOW. We save the start TIME, never "seconds so far":
-// the clock is always worked out as now − startedAt, so a reload or a locked phone can't break it.
-//   startFocus("h2", 25) → the new session
+// ── Change ──
+
+// Start a new session NOW.   startFocus("h2", 25) → the new session
 function startFocus(habitId, targetMin) {
     const session = {
         id: generateId("focus"),
         habitId,
         date: todayDate(),           // the day it counts for: the day it STARTED
-        startedAt: Date.now(),       // timestamp, e.g. 1760518800000
+        startedAt: Date.now(),       // a timestamp, e.g. 1760518800000
         targetMin,                   // 15 / 25 / 45
         pausedAt: null,              // a timestamp while paused, otherwise null
         pausedMs: 0,                 // all finished pauses, added up
         endedAt: null,               // set when you tap Finish
         amount: 0,                   // the − 7 pages + counter
-        logId: null,                 // the log it created (Journal will link them later)
+        logId: null,                 // the log it created
         mood: null,                  // 1–5 from the finish sheet
         note: "",
-        savedAt: null                // set when you press Save or Skip = the session is done
+        savedAt: null                // set on Save or Skip = the session is done
     };
     saveItem("focusSessions", session);
     return session;
 }
-// Change some fields of a session and save it. Returns the updated session.
-//   updateFocus(id, { amount: 7 }) → the session with amount 7
-// The "..." copies all the old fields first, then the changes overwrite just those.
+
+// Change some fields and save.   updateFocus(id, { amount: 7 })
+// "..." copies all the old fields first, then the changes overwrite just those.
 function updateFocus(id, changes) {
     const session = getFocusById(id);
     if (!session) return null;
@@ -319,9 +491,8 @@ function updateFocus(id, changes) {
     return updated;
 }
 
-// Pause: remember WHEN the pause started. The clock freezes because
-// getFocusElapsed() subtracts "now − pausedAt" while pausedAt is set.
-// Already paused or finished? Do nothing (a double tap can't break it).
+// Pause: remember WHEN the pause started (the clock freezes while pausedAt is set).
+// Already paused or finished? Do nothing, so a double tap can't break it.
 function pauseFocus(id) {
     const session = getFocusById(id);
     if (!session || session.pausedAt || session.endedAt) return session;
@@ -329,7 +500,7 @@ function pauseFocus(id) {
 }
 
 // Resume: add this pause's length to pausedMs, then clear pausedAt.
-//   paused at 10:00, resume at 10:02 → pausedMs grows by 120000 (2 min)
+//   paused 10:00, resumed 10:02 → pausedMs grows by 120000 (2 min)
 function resumeFocus(id) {
     const session = getFocusById(id);
     if (!session || !session.pausedAt) return session;
@@ -338,9 +509,9 @@ function resumeFocus(id) {
         pausedAt: null
     });
 }
+
 // Finish tapped: freeze the clock (endedAt = now).
-// Paused at that moment? Close the pause first, so it's counted in pausedMs.
-// Already stopped? Do nothing.
+// Paused at that moment? Close the pause first, so it's counted.
 function stopFocus(id) {
     const session = getFocusById(id);
     if (!session || session.endedAt) return session;
@@ -352,9 +523,8 @@ function stopFocus(id) {
 // Save or Skip on the finish sheet: log the progress, keep the reflection, close the session.
 //   finishFocus(id, { amount: 25, mood: 4, note: "Easy today" })   ← Save
 //   finishFocus(id, { amount: 25 })                                ← Skip (no mood, no note)
-// The amount is decided by the page: minutes for a time habit, pages for an amount habit, 1 for a tick.
-// amount 0 → nothing to log, but the session is still closed.
-// The log goes on the day the session STARTED (session.date), even if you finish after midnight.
+// amount 0 → nothing logged, but the session still closes.
+// The log goes on the day the session STARTED, even if you finish after midnight.
 function finishFocus(id, { amount, mood = null, note = "" }) {
     let session = getFocusById(id);
     if (!session || session.savedAt) return session;
@@ -370,7 +540,7 @@ function finishFocus(id, { amount, mood = null, note = "" }) {
     });
 }
 
-// "Discard this session": delete it, nothing is logged.
+// "Discard this session": delete it, nothing logged.
 // Only while it's still open: a saved session has a log, and that's history now.
 function cancelFocus(id) {
     const session = getFocusById(id);
@@ -378,23 +548,28 @@ function cancelFocus(id) {
     removeItem("focusSessions", id);
     return true;
 }
-/* ---------- 12. Journal (your own written entries) ---------- */
 
-// GET: all your written entries.
+
+/* ════════════════════ 12. JOURNAL (your own written entries) ════════════════════
+   One entry: { id, date: "2026-10-17", createdAt: 1760…, text: "Long day", mood: 4 or null }
+   Focus moods and skip reasons are NOT saved here: insight.js reads them from
+   focusSessions and logs, and mixes them in (getJournal). */
+
+// All your written entries, oldest first.
 function getJournalEntries() {
     return getData().journal;
 }
 
-// ADD: save a new entry, written right now.
-//   addJournalEntry("Long day at uni", 4)
+// ADD an entry, written right now.   addJournalEntry("Long day at uni", 4)
+// Empty text (or only spaces) → nothing saved, returns null.
 function addJournalEntry(text, mood = null) {
-    if (!text.trim()) return null;      // empty or only spaces → save nothing
+    if (!text.trim()) return null;
 
     const now = Date.now();
     const entry = {
         id: generateId("journal"),
         date: dateOf(now),              // which day: "2026-10-17"
-        createdAt: now,                 // exact moment: gives "21:02" and the order
+        createdAt: now,                 // the exact moment: gives "21:02" and the order
         text: text.trim(),              // "  hi  " → "hi"
         mood                            // 1–5, or null
     };
@@ -402,12 +577,16 @@ function addJournalEntry(text, mood = null) {
     return entry;
 }
 
-// UPDATE: change the text or mood of one entry.
-//   updateJournalEntry(id, { text: "New words" })
+// CHANGE the text or mood.   updateJournalEntry(id, { text: "New words" })
 function updateJournalEntry(id, changes) {
     const entry = getJournalEntries().find(item => item.id === id);
     if (!entry) return null;
-    const updated = { ...entry, ...changes };   // old entry + new bits on top
+    const updated = { ...entry, ...changes };
     saveItem("journal", updated);
     return updated;
+}
+
+// DELETE an entry for good.
+function deleteJournalEntry(id) {
+    removeItem("journal", id);
 }

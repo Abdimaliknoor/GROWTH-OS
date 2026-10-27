@@ -1,11 +1,38 @@
 <!doctype html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  HABITS  ·  startup/habit.html                               ║
+  ║  Onboarding step 3: the daily habits that move your goal.    ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  WHAT'S IN THIS FILE (top → bottom)
+
+    Top bar ............. logo + "Step 03 of 04"
+    Progress ............ Direction · Goal · Habit · Routine
+    Goal card ........... the goal these habits serve                 [Edit]
+    Builder (a form) .... make or edit ONE habit
+      1. Name ........... text box + suggestion chips
+      2. Type ........... Amount / Time / Done-not
+      3. Amount ......... number + unit + "Counts toward my goal"
+      4. Days ........... presets + M T W T F S S
+      Hint + Add habit
+    Your habits ......... the list so far + "At this pace…" sentence
+    Footer .............. Back · Continue
+
+  EDIT MODE (habit.html?mode=edit, opened from Plan)
+    Same page. edit-mode.js swaps: Step → "Editing your habits",
+    Back → Cancel, Continue → Save (back to Plan).
+
+  Who fills what: habit.js. Data: state.js (+ insight.js for min ↔ hours).
+-->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Habits | Growth OS</title>
-    <link rel="icon" type="image/png" href="./assets/icons/unnamed.png" />
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
 
+    <!-- Fonts: Geist for text, Material icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,13 +44,15 @@
       rel="stylesheet"
     />
 
-    <!-- Order matters: base (tokens) → onboarding (shared shell) → this page -->
+    <!-- Styles. Order matters: tokens → the onboarding shell → this page -->
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/startup/onboarding.css" />
     <link rel="stylesheet" href="../css/startup/habits.css" />
   </head>
+
   <body>
     <div class="ob-page">
+      <!-- ═══════════════ TOP BAR + PROGRESS ═══════════════ -->
       <header class="ob-topbar">
         <span class="ob-brand">
           <span class="ob-brand-mark icon" aria-hidden="true">north_east</span>
@@ -42,8 +71,7 @@
       </nav>
 
       <main class="ob-content ob-content-top">
-        <!-- The goal these habits serve, pinned at the top as a FINISH LINE.
-                 habit.js fills the empty spans from state.js. -->
+        <!-- ─── GOAL CARD · the finish line these habits serve ─── -->
         <div class="chain-card">
           <span class="icon chain-icon" aria-hidden="true">flag</span>
           <div class="chain-text">
@@ -62,13 +90,13 @@
           there.
         </p>
 
-        <!-- ============ HABIT BUILDER ============
-                 Its own form: pressing Enter or "Add habit" adds a habit to
-                 the list below. It does NOT leave the page. -->
+        <!-- ═══════════════ BUILDER ═══════════════
+             Its own form: Enter or "Add habit" puts the habit in the list below.
+             Nothing is saved until Continue. -->
         <form class="habit-builder" id="habitForm" novalidate>
           <p class="builder-heading" id="builderHeading">New habit</p>
 
-          <!-- 1. Name + suggestions (habit.js draws the chips) -->
+          <!-- ─── 1. NAME · habit.js draws the suggestion chips ─── -->
           <div class="builder-field">
             <label class="ob-label" for="habitName">What will you do?</label>
             <input
@@ -86,8 +114,7 @@
             ></div>
           </div>
 
-          <!-- 2. How it's measured. Same trick as the Goal page:
-                     real radios, hidden, inside labels styled as cards. -->
+          <!-- ─── 2. TYPE · real radios (hidden) inside cards ─── -->
           <fieldset class="builder-field type-fieldset">
             <legend class="ob-label">How will you measure it?</legend>
             <div class="type-grid">
@@ -130,7 +157,7 @@
             </div>
           </fieldset>
 
-          <!-- 3. Daily amount. Hidden for "Done / not" habits. -->
+          <!-- ─── 3. AMOUNT · hidden for "Done / not" habits ─── -->
           <div class="builder-field" id="amountField">
             <p class="ob-label" id="amountLabel">How much each day?</p>
             <div class="amount-row">
@@ -162,10 +189,24 @@
               id="habitUnitChips"
               aria-label="Common units"
             ></div>
+
+            <!-- Counts toward my goal? Shown only when the unit CAN count
+                 (pages → pages, min ↔ hours). The whole box is a label: tap anywhere. -->
+            <label class="counts-field" id="countsField" hidden>
+              <input
+                class="counts-check"
+                id="habitCounts"
+                type="checkbox"
+                checked
+              />
+              <span>
+                <span class="counts-title">Counts toward my goal</span>
+                <span class="counts-hint" id="countsHint"></span>
+              </span>
+            </label>
           </div>
 
-          <!-- 4. Days. Real checkboxes (hidden) inside round labels.
-                     A <legend> must be the FIRST child of its <fieldset>. -->
+          <!-- ─── 4. DAYS · real checkboxes (hidden) inside round labels ─── -->
           <fieldset class="builder-field days-fieldset">
             <legend class="ob-label">Which days?</legend>
             <div class="day-presets">
@@ -253,6 +294,7 @@
             </div>
           </fieldset>
 
+          <!-- ─── HINT + BUTTONS ─── -->
           <p class="ob-error" id="habitError" role="alert" hidden></p>
 
           <div class="builder-actions">
@@ -278,7 +320,7 @@
           </div>
         </form>
 
-        <!-- ============ HABITS LIST ============ -->
+        <!-- ═══════════════ YOUR HABITS ═══════════════ -->
         <section class="habit-list-section" aria-labelledby="habitListTitle">
           <div class="supports-line" aria-hidden="true">
             <span class="icon icon-sm">north</span> supports your goal
@@ -294,14 +336,15 @@
             No habits yet. Add one above, one is enough to start.
           </p>
 
-          <!-- "At 1 page a day, you'll reach 20 pages in about 4 weeks" -->
+          <!-- "At this pace, 5 pages a week, you'll reach 20 pages in about 4 weeks." -->
           <p class="projection" id="projection" hidden></p>
         </section>
       </main>
 
+      <!-- ═══════════════ FOOTER ═══════════════ -->
       <footer class="ob-footer">
         <a class="ob-btn ob-btn-secondary" href="goal.html">Back</a>
-        <!-- type="button": this is NOT the builder form's submit button -->
+        <!-- type="button": NOT the builder's submit button -->
         <button
           class="ob-btn ob-btn-primary"
           id="continueButton"
@@ -314,10 +357,14 @@
       </footer>
     </div>
 
-    <!-- Order matters: state.js and areas.js define functions habit.js uses -->
-    <script src="../js//data/storage.js"></script>
-    <script src="../js//data/state.js"></script>
+    <!-- ═══════════════ SCRIPTS ═══════════════
+         Order matters: storage → state (facts) → insight (min ↔ hours)
+         → areas (suggestions) → edit-mode → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/insight.js"></script>
     <script src="../js/onboardingPages/areas.js"></script>
+    <script src="../js/onboardingPages/edit-mode.js"></script>
     <script src="../js/onboardingPages/habit.js"></script>
   </body>
 </html>

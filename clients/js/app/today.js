@@ -1,51 +1,72 @@
-/* =========================================================
-   TODAY  (app/today.html)
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  TODAY  ·  js/app/today.js                                   ║
+   ║  Draws your day as one timeline and lets you record it.      ║
+   ╚══════════════════════════════════════════════════════════════╝
 
-   What this page does:
-     Draws today as one line (wake up → habits → sleep),
-     makes the habit for RIGHT NOW the big card,
-     and lets you record progress with one tap (+1),
-     with Undo, confetti, and a "Keep going" after the target.
+   WHAT THIS PAGE DOES
+     • Timeline: wake up → habits → activities → sleep
+     • The habit to do NOW is the big card
+     • +1 in one tap (Undo, confetti, "Keep going" after the target)
+     • Record sheet: exact amount, yesterday, start focus, skip
+     • Item sheet: add / change activities (note, time, one day or repeat)
+     • Coming up: the next one-day items this week
 
-   Where the data comes from:
-     getDayPlan(), getDaySummary(), getGoalProgress()  → insights.js
-     addLog(), removeItem()                            → state.js
+   DATA
+     insight.js → getDayPlan, getDaySummary, getGoalProgress, getWeek, getStreak, getUpcomingItems
+     state.js   → addLog, setDayAmount, skipHabit, addRoutineItem, updateRoutineItem, removeRoutineItem
+     focus-bar.js → focusBarOpen (loaded after this file, used on click)
 
-   1. Guard   2. Elements   3. Settings   4. Page state
-   5. Helpers (they only work things out, never draw)
-   6. Renderers (they draw)   7. Actions (they change data)
-   8. Page load   9. Events
-   ========================================================= */
+   MAP
+     1. Guard        2. Elements     3. Settings     4. Page state
+     5. Helpers      6. Renderers    7. Actions      8. Page load    9. Events
+
+   THE LOOP   click → action → change data → updatePage()
+   ══════════════════════════════════════════════════════════════════ */
 
 
-/* ---------- 1. Guard ---------- */
+/* ════════════════════ 1. GUARD ════════════════════ */
 
-// Not finished onboarding? Today has nothing to show yet.
 const ready = isOnboardingComplete();
 if (!ready) {
     window.location.replace("../startup/welcome.html");
 }
 
 
-/* ---------- 2. Elements ---------- */
+/* ════════════════════ 2. ELEMENTS ════════════════════ */
 
+// ── Header ──
 const todayDateText = document.getElementById("todayDate");
 const greeting = document.getElementById("greeting");
 const dayRing = document.getElementById("dayRing");
 const dayCount = document.getElementById("dayCount");
+const dayCountBox = document.getElementById("dayCountBox");
+
+// ── Side: goal, week, coming up ──
 const goalStrip = document.getElementById("goalStrip");
 const goalTitle = document.getElementById("goalTitle");
 const goalDays = document.getElementById("goalDays");
 const goalBar = document.getElementById("goalBar");
 const goalBarFill = document.getElementById("goalBarFill");
 const goalNumbers = document.getElementById("goalNumbers");
+const weekDays = document.getElementById("weekDays");
+const weekCount = document.getElementById("weekCount");
+const weekStreak = document.getElementById("weekStreak");
+const upcoming = document.getElementById("upcoming");
+const upcomingList = document.getElementById("upcomingList");
+
+// ── Day line + evening card ──
 const dayLine = document.getElementById("dayLine");
+const addItemButton = document.getElementById("addItemButton");
 const restDay = document.getElementById("restDay");
 const reviewCard = document.getElementById("reviewCard");
+
+// ── Toast + confetti ──
 const toast = document.getElementById("toast");
 const toastText = document.getElementById("toastText");
 const undoButton = document.getElementById("undoButton");
 const confetti = document.getElementById("confetti");
+
+// ── Record sheet ──
 const recordSheet = document.getElementById("recordSheet");
 const recordTitle = document.getElementById("recordTitle");
 const recordDays = document.getElementById("recordDays");
@@ -55,92 +76,97 @@ const recordAmountLabel = document.getElementById("recordAmountLabel");
 const recordAmount = document.getElementById("recordAmount");
 const recordDoneBox = document.getElementById("recordDoneBox");
 const recordDone = document.getElementById("recordDone");
+const recordFocus = document.getElementById("recordFocus");
+const recordFocusText = document.getElementById("recordFocusText");
 const recordSkipBox = document.querySelector(".record-skip");
 const skipReason = document.getElementById("skipReason");
 const recordSkip = document.getElementById("recordSkip");
 const recordCancel = document.getElementById("recordCancel");
 const recordSave = document.getElementById("recordSave");
 
+
+// ── Templates ──
 const markerTemplate = document.getElementById("markerTemplate");
 const rowTemplate = document.getElementById("rowTemplate");
 const nowTemplate = document.getElementById("nowTemplate");
 const allDoneTemplate = document.getElementById("allDoneTemplate");
-const weekDays = document.getElementById("weekDays");
-const weekCount = document.getElementById("weekCount");
-const weekStreak = document.getElementById("weekStreak");
+const upcomingTemplate = document.getElementById("upcomingTemplate");
 
 
-/* ---------- 3. Settings ---------- */
+/* ════════════════════ 3. SETTINGS ════════════════════ */
 
-const RING_LENGTH = 94.25;       // the ring's circle: 2 × π × 15 (same number as in today.css)
-const REVIEW_HOUR = 18;          // the "Review your day" card shows from 18:00
-const TOAST_MS = 5000;           // the Undo toast stays 5 seconds
-const SMALL_CONFETTI = 14;       // pieces when one habit is done
-const BIG_CONFETTI = 40;         // pieces when the whole day is done
-const MARKER_ICONS = { wake: "wb_sunny", sleep: "bedtime", activity: "radio_button_unchecked" };
-const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];                  // Monday first, like getWeek()
+const RING_LENGTH = 94.25;           // the day ring: 2 × π × 15 (same as today.css)
+const REVIEW_HOUR = 18;              // "Review your day" from 18:00
+const TOAST_MS = 5000;
+const SMALL_CONFETTI = 14;           // one habit done
+const BIG_CONFETTI = 40;             // whole day done
+const UPCOMING_DAYS = 7;             // Coming up: look one week ahead…
+const UPCOMING_MAX = 3;              // …and show at most 3
+
+const MARKER_ICONS = { wake: "wb_sunny", sleep: "bedtime", activity: "event" };
+
+// Week card, Monday first
+const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 
-/* ---------- 4. Page state ---------- */
+/* ════════════════════ 4. PAGE STATE ════════════════════ */
 
-let lastLogId = null;            // the log Undo would remove
-let toastTimer = null;           // so a new toast can cancel the old timer
-let justFinishedId = null;       // the habit that JUST hit its target: it stays the big card with "Keep going"
-let recordHabitId = null;        // the habit open in the record sheet
-let recordDate = null;           // the day the record sheet is changing: today or yesterday
+let lastLogId = null;                // the log Undo would remove
+let toastTimer = null;
+let justFinishedId = null;           // just hit its target: stays the big card ("Keep going")
+let recordHabitId = null;            // record sheet: which habit
+let recordDate = null;               // record sheet: today or yesterday
 
 
-/* ---------- 5. Helpers ---------- */
+/* ════════════════════ 5. HELPERS ════════════════════
+   Work things out. Never draw, never save. */
 
-// The time right now as "HH:MM", e.g. "07:05". Same format as routine times, so we can compare them.
+// "07:05": same format as routine times, so they compare as text
 function nowTime() {
     const now = new Date();
     return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 }
 
-// "Sunday 11 October"   (en-GB writes it without a comma)
+// "Sunday 25 October"
 function formatToday() {
     return new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 }
 
-// 05:00–11:59 morning, 12:00–16:59 afternoon, the rest evening.
 function greetingWord(hour) {
     if (hour >= 5 && hour < 12) return "Good morning";
     if (hour >= 12 && hour < 17) return "Good afternoon";
     return "Good evening";
 }
 
-// What to show as a habit's progress.
-//   amount habit     → "4 / 10 pages"
-//   done/not-done    → "Done" or "Not done yet"
+// "4 / 10 pages"   ·   "Done" / "Not done yet"
 function formatAmount(item) {
     const habit = item.habit;
     if (habit.type === "completion") return item.status === "done" ? "Done" : "Not done yet";
     return `${item.amount} / ${habit.target} ${habit.unit}`.trim();
 }
 
-// How far a habit is, as a percent for a bar: 4 of 10 → 40. Never above 100.
+// 4 of 10 → 40 (never above 100)
 function percentOf(item) {
     return Math.min(100, Math.round((item.amount / item.habit.target) * 100));
 }
 
-// Anything above the target: did 2 pages, target 1 → 1. Otherwise 0.
+// Above the target: did 2, target 1 → 1
 function extraOf(item) {
     const extra = item.amount - item.habit.target;
     return extra > 0 ? Math.round(extra * 100) / 100 : 0;
 }
 
-// A habit still waiting for you today (not done, not skipped)?
+// A habit still waiting today (not done, not skipped)
 function isOpen(item) {
     return item.kind === "habit" && item.status !== "done" && item.status !== "skipped";
 }
 
-// Which habit is NOW? Returns { habitId, badge } or null when nothing is open.
-//   1. The habit you JUST finished stays now (so "Keep going" has a place).
-//   2. The earliest open habit whose time has passed  → "Still to do"
-//   3. Otherwise the next open habit coming up         → "Up next"
-//   4. Otherwise an open habit with no time            → "Anytime"
+// Which habit is NOW? → { habitId, badge } or null
+//   1. just finished      → "Done"  (so "Keep going" has a place)
+//   2. time passed, open  → "Still to do"
+//   3. next one coming    → "Up next"
+//   4. no time, open      → "Anytime"
 function pickNow(plan, time) {
     if (justFinishedId && plan.some(item => item.habitId === justFinishedId)) {
         return { habitId: justFinishedId, badge: "Done" };
@@ -155,15 +181,15 @@ function pickNow(plan, time) {
     return null;
 }
 
-// Copy a <template>'s content so we can fill it in.
 function copyTemplate(template) {
     return template.content.firstElementChild.cloneNode(true);
 }
 
 
-/* ---------- 6. Renderers ---------- */
+/* ════════════════════ 6. RENDERERS ════════════════════
+   Draw from the data. updatePage() calls them all. */
 
-// Date, greeting, "2 of 5 done" and the ring.
+// ── Header: date, greeting, "2 of 5 done", ring, ✓ ──
 function renderHeader(summary) {
     todayDateText.textContent = formatToday();
     const name = getName();
@@ -172,16 +198,19 @@ function renderHeader(summary) {
 
     if (summary.total === 0) {
         dayCount.textContent = "Rest day";
-        dayRing.style.strokeDashoffset = RING_LENGTH;            // empty ring
+        dayCountBox.classList.remove("is-complete");
+        dayRing.style.strokeDashoffset = RING_LENGTH;
         return;
     }
-    dayCount.textContent = `${summary.done} of ${summary.total} done`;
+    const allDone = summary.done === summary.total;
+    dayCount.textContent = allDone ? "All done" : `${summary.done} of ${summary.total} done`;
+    dayCountBox.classList.toggle("is-complete", allDone);
     dayRing.style.strokeDashoffset = RING_LENGTH * (1 - summary.done / summary.total);
 }
 
-// The goal card. Hidden if there's no goal (shouldn't happen after onboarding, but never crash).
+// ── Goal strip (hidden when there is no active goal) ──
 function renderGoal() {
-    const goal = getGoals()[0];
+    const goal = getActiveGoal();
     goalStrip.hidden = !goal;
     if (!goal) return;
 
@@ -200,16 +229,81 @@ function renderGoal() {
     goalNumbers.textContent = `${progress.done} / ${progress.target} ${unit} · ${progress.percent}%`;
 }
 
-// Wake up / Sleep marker.
-function buildMarker(item) {
-    const li = copyTemplate(markerTemplate);
-    li.querySelector(".line-dot").textContent = MARKER_ICONS[item.kind] || MARKER_ICONS.activity;
-    li.querySelector(".item-time").textContent = item.time;
-    li.querySelector(".marker-label").textContent = item.label;
+// ── Week card: 7 dots, "9 / 20 check-ins", streak ──
+function renderWeek() {
+    const week = getWeek();
+    const today = todayDate();
+    weekDays.innerHTML = "";
+
+    week.forEach((day, i) => {
+        const li = document.createElement("li");
+        li.className = `week-day is-${day.state}`;
+        if (day.date === today) li.classList.add("is-today");
+
+        let words;
+        if (day.state === "rest") words = "rest day";
+        else if (day.state === "future" || day.state === "before") words = "nothing yet";
+        else words = `${day.done} of ${day.due} done`;
+        li.setAttribute("aria-label", `${DAY_NAMES[i]}: ${words}`);
+
+        const letter = document.createElement("span");
+        letter.className = "week-letter";
+        letter.textContent = DAY_LETTERS[i];
+        letter.setAttribute("aria-hidden", "true");
+
+        const dot = document.createElement("span");
+        dot.className = "week-dot";
+
+        li.append(letter, dot);
+        weekDays.append(li);
+    });
+
+    const counted = week.filter(day => day.state !== "before");
+    const done = counted.reduce((sum, day) => sum + day.done, 0);
+    const due = counted.reduce((sum, day) => sum + day.due, 0);
+    weekCount.textContent = `${done} / ${due} check-ins`;
+
+    const streak = getStreak();
+    if (streak === 0) weekStreak.textContent = "Finish today to start a streak";
+    else if (streak === 1) weekStreak.textContent = "1-day streak";
+    else weekStreak.textContent = `${streak}-day streak`;
+}
+
+// ── Coming up: next one-day items this week (hidden when none) ──
+function renderUpcoming() {
+    const items = getUpcomingItems(UPCOMING_DAYS, UPCOMING_MAX);
+    upcoming.hidden = items.length === 0;
+    upcomingList.replaceChildren(...items.map(buildUpcoming));
+}
+
+function buildUpcoming(item) {
+    const li = copyTemplate(upcomingTemplate);
+        li.dataset.itemId = item.id;                     
+    li.querySelector(".upcoming-day").textContent = `${describeUpcomingDay(item.date)} ${item.time}`;
+    li.querySelector(".upcoming-label").textContent = item.label;
+    const note = li.querySelector(".upcoming-note");
+    note.textContent = item.note || "";
+    note.hidden = !item.note;
     return li;
 }
 
-// A small habit row. late = its time has passed and nothing is logged.
+// ── Builders: copy a template → fill → return ──
+
+// Marker: Wake up / Sleep / activity (+ its note). Tap → item sheet.
+function buildMarker(item) {
+    const li = copyTemplate(markerTemplate);
+    li.dataset.itemId = item.id;
+    li.querySelector(".line-dot").textContent = MARKER_ICONS[item.kind] || MARKER_ICONS.activity;
+    li.querySelector(".item-time").textContent = item.time;
+    li.querySelector(".marker-label").textContent = item.label;
+
+    const note = li.querySelector(".marker-note");
+    note.textContent = item.note || "";
+    note.hidden = !item.note;
+    return li;
+}
+
+// Row: a small habit. late = time passed, nothing logged.
 function buildRow(item, late) {
     const li = copyTemplate(rowTemplate);
     const habit = item.habit;
@@ -217,7 +311,6 @@ function buildRow(item, late) {
     li.querySelector(".row-name").textContent = item.label;
     li.querySelector(".item-time").textContent = item.time || "Anytime";
 
-    // Status text and the class the CSS uses for the dot
     const status = li.querySelector(".row-status");
     if (item.status === "skipped") {
         li.classList.add("is-skipped");
@@ -233,7 +326,6 @@ function buildRow(item, late) {
         status.textContent = formatAmount(item);
     }
 
-    // "+1 extra" tag
     const extra = extraOf(item);
     if (extra > 0) {
         const tag = li.querySelector(".row-extra");
@@ -241,7 +333,7 @@ function buildRow(item, late) {
         tag.textContent = `+${extra} extra`;
     }
 
-    // The round button: "+" for amounts, a tick for done/not-done. None when skipped or ticked.
+    // Round button: "+" for amounts, ✓ for done/not. None when skipped or ticked.
     const button = li.querySelector(".row-button");
     if (item.status === "skipped" || (habit.type === "completion" && item.status === "done")) {
         button.hidden = true;
@@ -255,8 +347,7 @@ function buildRow(item, late) {
     return li;
 }
 
-// The big NOW card.
-// The big NOW card.
+// Now card: the big one.
 function buildNow(item, badge) {
     const li = copyTemplate(nowTemplate);
     const habit = item.habit;
@@ -275,21 +366,19 @@ function buildNow(item, badge) {
     const focusButton = li.querySelector('[data-action="focus"]');
     const addButton = li.querySelector('[data-action="add"]');
 
+    // Target just reached: "Next" + "Keep going +1"
     if (finished) {
-        // Just hit the target: "Next" moves on, "Keep going +1" adds extra
         focusButton.dataset.action = "next";
         focusButton.textContent = "Next";
         addButton.textContent = `Keep going +${getStep(habit)}`;
         return li;
     }
 
-    // A focus session for THIS habit already running? Say "Resume", not "Start".
     const active = getActiveFocus();
     if (active && active.habitId === habit.id) {
         focusButton.querySelector(".focus-label").textContent = "Resume focus";
     }
 
-    // The small button: "Mark done" for a tick habit, "+1" (or +5 min) for the others
     if (habit.type === "completion") {
         addButton.textContent = "Mark done";
     } else {
@@ -298,13 +387,15 @@ function buildNow(item, badge) {
     }
     return li;
 }
+
+// All done: replaces the now card.
 function buildAllDone(summary) {
     const li = copyTemplate(allDoneTemplate);
     li.querySelector(".all-done-text").textContent = `${summary.done} of ${summary.total} habits. Great work.`;
     return li;
 }
 
-// The whole line, top to bottom.
+// ── The whole line, top to bottom ──
 function renderLine(plan, summary) {
     dayLine.innerHTML = "";
     const hasHabits = summary.total > 0;
@@ -318,8 +409,7 @@ function renderLine(plan, summary) {
 
     plan.forEach(item => {
         if (item.kind !== "habit") {
-            // Nothing open left: the "All done" card goes just before Sleep
-            if (!now && !allDoneShown && item.kind === "sleep") {
+            if (!now && !allDoneShown && item.kind === "sleep") {      // "All done" just before Sleep
                 dayLine.append(buildAllDone(summary));
                 allDoneShown = true;
             }
@@ -332,77 +422,35 @@ function renderLine(plan, summary) {
         }
     });
 
-    // No Sleep marker in the routine? Put "All done" at the end.
-    if (!now && !allDoneShown) dayLine.append(buildAllDone(summary));
-}
-// The week card: 7 dots (Mon → Sun), "9 / 20 check-ins", and the streak.
-function renderWeek() {
-    const week = getWeek();
-    const today = todayDate();
-    weekDays.innerHTML = "";
-
-    week.forEach((day, i) => {
-        const li = document.createElement("li");
-        li.className = `week-day is-${day.state}`;           // is-done, is-partial, is-missed... → CSS colours the dot
-        if (day.date === today) li.classList.add("is-today");
-
-        // What a screen reader says, e.g. "Monday: 3 of 4 done" or "Saturday: rest day"
-        let words;
-        if (day.state === "rest") words = "rest day";
-        else if (day.state === "future" || day.state === "before") words = "nothing yet";
-        else words = `${day.done} of ${day.due} done`;
-        li.setAttribute("aria-label", `${DAY_NAMES[i]}: ${words}`);
-
-        const letter = document.createElement("span");
-        letter.className = "week-letter";
-        letter.textContent = DAY_LETTERS[i];
-        letter.setAttribute("aria-hidden", "true");           // the aria-label already says the day
-
-        const dot = document.createElement("span");
-        dot.className = "week-dot";
-
-        li.append(letter, dot);
-        weekDays.append(li);
-    });
-
-    // Check-ins: every habit on every day of the week, from your start day on.
-    // Future days count in the total: "9 / 20" = 20 planned this week, 9 done so far.
-    const counted = week.filter(day => day.state !== "before");
-    const done = counted.reduce((sum, day) => sum + day.done, 0);
-    const due = counted.reduce((sum, day) => sum + day.due, 0);
-    weekCount.textContent = `${done} / ${due} check-ins`;
-
-    // 0 → an encouraging line instead of "0-day streak"
-    const streak = getStreak();
-    if (streak === 0) weekStreak.textContent = "Finish today to start a streak";
-    else if (streak === 1) weekStreak.textContent = "1-day streak";
-    else weekStreak.textContent = `${streak}-day streak`;
+    if (!now && !allDoneShown) dayLine.append(buildAllDone(summary));   // no Sleep: at the end
 }
 
-// "Review your day" from 18:00.
 function renderReviewCard() {
     reviewCard.hidden = new Date().getHours() < REVIEW_HOUR;
 }
 
-// Redraw everything from the saved data. Called after every change.
+// ── Redraw everything. Every action ends here. ──
 function updatePage() {
     const plan = getDayPlan();
     const summary = getDaySummary();
     renderHeader(summary);
     renderGoal();
-    renderWeek();         
+    renderWeek();
+    renderUpcoming();
     renderLine(plan, summary);
     renderReviewCard();
 }
 
 
-/* ---------- 7. Actions ---------- */
+/* ════════════════════ 7. ACTIONS ════════════════════
+   Change the data, then call updatePage(). */
 
-// +1 (or a tick) on a habit.
+/* ── 7a. +1 and Undo ── */
+
 function addOne(habitId) {
     const habit = getHabitById(habitId);
     if (!habit) return;
-    if (habitId !== justFinishedId) justFinishedId = null;   // working on another habit: the old "Done" card can shrink
+    if (habitId !== justFinishedId) justFinishedId = null;
 
     const before = getHabitStatus(habit);
     const step = getStep(habit);
@@ -410,7 +458,7 @@ function addOne(habitId) {
     const after = getHabitStatus(habit);
     lastLogId = log.id;
 
-    // Just reached the target: celebrate, and keep it as the big card (except tick habits)
+    // Target just reached: celebrate, keep it as the big card (not for tick habits)
     if (before !== "done" && after === "done") {
         justFinishedId = habit.type === "completion" ? null : habit.id;
         const summary = getDaySummary();
@@ -422,36 +470,38 @@ function addOne(habitId) {
     focusHabit(habitId);
 }
 
-// Undo the last +1.
 function undoLast() {
     if (!lastLogId) return;
     const log = getLogs().find(item => item.id === lastLogId);
     removeItem("logs", lastLogId);
     lastLogId = null;
 
-    // Still done after the undo (e.g. 2 pages → 1, target 1)? Keep the "Done" card. Otherwise let it go.
     const habit = log ? getHabitById(log.habitId) : null;
     if (!habit || getHabitStatus(habit) !== "done") justFinishedId = null;
 
     hideToast();
     updatePage();
 }
-/* --- The record sheet --- */
 
-// Tap a habit's name: open the sheet for that habit, on TODAY.
+// "Next" after finishing: the big card moves on.
+function moveOn() {
+    justFinishedId = null;
+    updatePage();
+}
+
+
+/* ── 7b. Record sheet ── */
+
 function openRecord(habitId) {
     recordHabitId = habitId;
     recordDate = todayDate();
-    recordSkipBox.open = false;                 // "Skip this day" starts closed
+    recordSkipBox.open = false;
     skipReason.value = "";
     fillRecord();
     recordSheet.showModal();
 }
 
-// Fill the sheet for the habit + day we're looking at.
-//   "Logged: 4 / 10 pages"   or   "Skipped · travelling"
-//   amount habit → the number box, pre-filled with what's logged
-//   tick habit   → the Done checkbox, ticked if done
+// Fill the sheet for the current habit + day.
 function fillRecord() {
     const habit = getHabitById(recordHabitId);
     const amount = getDayAmount(habit.id, recordDate);
@@ -459,7 +509,6 @@ function fillRecord() {
 
     recordTitle.textContent = habit.name;
 
-    // The white chip = the day we're on
     recordDays.querySelectorAll("[data-day]").forEach(chip => {
         const day = chip.dataset.day === "today" ? todayDate() : addDaysTo(todayDate(), -1);
         chip.setAttribute("aria-pressed", String(day === recordDate));
@@ -475,15 +524,19 @@ function fillRecord() {
     recordAmountLabel.textContent = `How many ${habit.unit}?`;
     recordAmount.value = amount;
     recordDone.checked = amount >= 1;
+
+    // ▶ Focus: today only (a session counts on the day it starts)
+    const active = getActiveFocus();
+    recordFocus.hidden = recordDate !== todayDate();
+    recordFocusText.textContent = active && active.habitId === habit.id ? "Resume focus" : "Start focus";
 }
 
-// [Today] / [Yesterday]: switch the day, then refill the sheet with THAT day's numbers.
 function chooseRecordDay(day) {
     recordDate = day === "today" ? todayDate() : addDaysTo(todayDate(), -1);
     fillRecord();
 }
 
-// − / + in the record sheet: change the number in the box by one step.
+// − / + in the number box
 function changeRecordAmount(direction) {
     const habit = getHabitById(recordHabitId);
     const current = Number(recordAmount.value) || 0;
@@ -491,8 +544,7 @@ function changeRecordAmount(direction) {
     recordAmount.value = Math.round(next * 100) / 100;
 }
 
-// Save: replace that day's amount with the number in the box (or 1 / 0 for a tick habit).
-// setDayAmount() in state.js removes the day's old logs first, so 12 means 12, not "12 more".
+// Save REPLACES the day's amount (12 means 12, not 12 more).
 function saveRecord() {
     const habit = getHabitById(recordHabitId);
     let amount;
@@ -506,11 +558,11 @@ function saveRecord() {
     finishRecord(`${habit.name} saved`);
 }
 
-// Skip: needs a reason (it's what makes a skip "excused" and not just "missed").
+// Skip needs a reason (that's what makes it "excused", not "missed").
 function skipRecord() {
     const reason = skipReason.value.trim();
     if (!reason) {
-        skipReason.focus();                     // empty? put the cursor in the box instead of skipping
+        skipReason.focus();
         return;
     }
     const habit = getHabitById(recordHabitId);
@@ -518,37 +570,59 @@ function skipRecord() {
     finishRecord(`${habit.name} skipped`);
 }
 
-// After Save or Skip: close, redraw Today, say what happened.
 function finishRecord(message) {
     recordSheet.close();
-    lastLogId = null;                           // the old +1 can't be undone after the day was rewritten
+    lastLogId = null;                    // the day was rewritten: the old +1 can't be undone
     justFinishedId = null;
     updatePage();
     showToast(message, false);
 }
-// "Start focus": open the Focus page for this habit.
-// encodeURIComponent makes the id safe to put in an address (spaces, & etc.).
-function openFocus(habitId) {
-    window.location.href = `focus.html?habit=${encodeURIComponent(habitId)}`;
-}
 
-// "Next" after finishing: let the big card move on.
-function moveOn() {
-    justFinishedId = null;
+
+//* ── 7c. Schedule sheet (item-sheet.js) ── */
+
+// The sheet calls this after Save / Remove: redraw, then say what happened.
+function afterItemChange(message) {
     updatePage();
+    showToast(message, false);
 }
 
-// After a redraw the old buttons are gone. Put the keyboard focus back on the same habit.
+/* ── 7d. Small things ── */
+
+// Start focus. focusBarOpen (focus-bar.js) also handles "another session is running".
+function openFocus(habitId) {
+    focusBarOpen(habitId);
+}
+
+// Back from Focus with ?done=h1? Confetti if it's now done, then clean the address.
+function celebrateReturn() {
+    const doneId = new URLSearchParams(window.location.search).get("done");
+    if (!doneId) return;
+    const habit = getHabitById(doneId);
+    if (habit && getHabitStatus(habit) === "done") throwConfetti(SMALL_CONFETTI);
+    history.replaceState(null, "", "today.html");
+}
+
+// After a redraw, put keyboard focus back on the same habit.
 function focusHabit(habitId) {
     const button = dayLine.querySelector(`[data-habit-id="${habitId}"] [data-action="add"]:not([hidden])`);
     if (button) button.focus();
 }
 
+// Redraw without losing keyboard focus (minute timer, back to the tab).
+function refresh() {
+    if (!ready) return;
+    const focused = document.activeElement.closest("[data-habit-id]");
+    updatePage();
+    if (focused) focusHabit(focused.dataset.habitId);
+}
+
+// canUndo = false hides Undo (sheet saves can't be undone with it).
 function showToast(message, canUndo = true) {
     toastText.textContent = message;
-    undoButton.hidden = !canUndo;                      // the record sheet's saves can't be undone with this button
+    undoButton.hidden = !canUndo;
     toast.hidden = false;
-    clearTimeout(toastTimer);                          // a new toast restarts the 5 seconds
+    clearTimeout(toastTimer);
     toastTimer = setTimeout(hideToast, TOAST_MS);
 }
 
@@ -557,15 +631,15 @@ function hideToast() {
     clearTimeout(toastTimer);
 }
 
-// Small pieces fall from the top middle of the screen, then remove themselves.
+// Pieces fall from the middle of the screen, then remove themselves.
 function throwConfetti(count) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     for (let i = 0; i < count; i++) {
         const piece = document.createElement("span");
         piece.className = "confetti-piece";
-        piece.style.left = (35 + Math.random() * 30) + "%";            // somewhere in the middle third
+        piece.style.left = (35 + Math.random() * 30) + "%";
         piece.style.top = (10 + Math.random() * 15) + "%";
-        piece.style.setProperty("--x", (Math.random() * 160 - 80) + "px");  // drift left or right
+        piece.style.setProperty("--x", (Math.random() * 160 - 80) + "px");
         piece.style.setProperty("--turn", (Math.random() * 720 - 360) + "deg");
         piece.style.animationDelay = (Math.random() * 150) + "ms";
         piece.addEventListener("animationend", () => piece.remove());
@@ -574,7 +648,7 @@ function throwConfetti(count) {
 }
 
 
-/* ---------- 8. Page load ---------- */
+/* ════════════════════ 8. PAGE LOAD ════════════════════ */
 
 if (ready) {
     updatePage();
@@ -582,63 +656,53 @@ if (ready) {
 }
 
 
-/* ---------- 9. Events ---------- */
+/* ════════════════════ 9. EVENTS ════════════════════
+   All at the top level, never inside another listener. */
 
-// One listener for the whole line (event delegation): which button, which habit?
+// ── Day line: one listener for every button (event delegation) ──
+//    data-action = WHAT · closest data-habit-id / data-item-id = WHICH
 dayLine.addEventListener("click", (event) => {
     const button = event.target.closest("[data-action]");
     if (!button || button.disabled) return;
+    const action = button.dataset.action;
     const habitId = button.closest("[data-habit-id]")?.dataset.habitId;
-    if (button.dataset.action === "add" && habitId) addOne(habitId);
-    if (button.dataset.action === "next") moveOn();
-    if (button.dataset.action === "focus" && habitId) openFocus(habitId); 
-    if (button.dataset.action === "record" && habitId) openRecord(habitId);
+
+    if (action === "add" && habitId) addOne(habitId);
+    if (action === "next") moveOn();
+    if (action === "focus" && habitId) openFocus(habitId);
+    if (action === "record" && habitId) openRecord(habitId);
+    if (action === "edit-item") openEditItem(button.closest("[data-item-id]").dataset.itemId, afterItemChange);
+});
+// ── Coming up: tap a line → the same item sheet ──
+upcomingList.addEventListener("click", (event) => {
+    const line = event.target.closest("[data-item-id]");
+     if (line) openEditItem(line.dataset.itemId, afterItemChange);
 });
 
+// ── Toast ──
 undoButton.addEventListener("click", undoLast);
 
-// Redraw without losing the keyboard focus (used by the timer and when you come back to the tab).
-function refresh() {
-    if (!ready) return;
-    const focused = document.activeElement.closest("[data-habit-id]");
-    updatePage();
-    if (focused) focusHabit(focused.dataset.habitId);
-}
-
-// Time moves: redraw every minute so "now" follows the clock (and a new day starts at midnight).
-setInterval(refresh, 60 * 1000);
-
-// Coming back to the tab after a while: redraw straight away.
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") refresh();
-});
-
-// finsihing a focus session on the Focus page: redraw so the "Done" card appears.// Came back from Focus with ?done=h1 in the address?
-// If that habit is now done → confetti. Then clean the address.
-function celebrateReturn() {
-    const doneId = new URLSearchParams(window.location.search).get("done");   
-    if (!doneId) return;                                                    
-
-    const habit = getHabitById(doneId);
-    if (habit && getHabitStatus(habit) === "done") {                         
-        throwConfetti(SMALL_CONFETTI);
-    }
-
-    history.replaceState(null, "", "today.html");                  
-}          
-// The record sheet
+// ── Record sheet ──
 recordDays.addEventListener("click", (event) => {
     const chip = event.target.closest("[data-day]");
     if (chip) chooseRecordDay(chip.dataset.day);
 });
-
 recordSheet.addEventListener("click", (event) => {
     const button = event.target.closest("[data-action]");
     if (!button) return;
     if (button.dataset.action === "record-less") changeRecordAmount(-1);
     if (button.dataset.action === "record-more") changeRecordAmount(+1);
 });
-
+recordFocus.addEventListener("click", () => openFocus(recordHabitId));
 recordSave.addEventListener("click", saveRecord);
 recordSkip.addEventListener("click", skipRecord);
 recordCancel.addEventListener("click", () => recordSheet.close());
+
+// ── Schedule ──
+addItemButton.addEventListener("click", () => openAddItem(afterItemChange));
+
+// ── Time ──
+setInterval(refresh, 60 * 1000);                           // "now" follows the clock
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refresh();
+});

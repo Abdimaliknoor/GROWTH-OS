@@ -73,8 +73,7 @@ const area = getAreaById(direction.area);
 
 // The goal they already saved, if they came back with Back.
 // null the first time. Onboarding only ever creates one goal.
-const existingGoal = getGoals()[0] || null;
-
+const existingGoal = getActiveGoal();   
 
 /* ---------- 4. Readers: they only LOOK, never change anything ---------- */
 
@@ -334,6 +333,16 @@ function loadExistingGoal() {
     whyInput.value = existingGoal.why;
     deadlineInput.value = existingGoal.deadline;
 }
+// The typed steps → milestone objects.
+// A step that was already saved KEEPS its id and its tick (done).
+// Only a brand-new step gets a new id and starts unticked.
+function buildSteps() {
+    const oldSteps = existingGoal ? existingGoal.milestones : [];
+    return getSteps().map(title => {
+        const same = oldSteps.find(step => step.title === title);
+        return same || { id: generateId("step"), title: title, done: false };
+    });
+}
 
 // Pack the form into ONE clean goal object, ready for saveGoal().
 // Fields that don't apply are saved as null / "" / [] so the
@@ -353,17 +362,33 @@ function buildGoal() {
         target: number ? readNumber(targetInput) : null,
         unit: number ? unitInput.value.trim() : "",
         current: measure === "level" ? readNumber(currentInput) : null,
-        milestones: measure === "milestones"
-            ? getSteps().map(title => ({ id: generateId("step"), title: title, done: false }))
-            : [],
+        milestones: measure === "milestones" ? buildSteps() : [],
+        status: "active",   
         createdAt: existingGoal ? existingGoal.createdAt : Date.now()
     };
 }
+// Edit mode: the measure or the unit changed? Habits may stop counting toward the goal
+// (e.g. "hours" → "pages": your minutes no longer add up). Ask first. true = go ahead.
+function confirmCountingChange(newGoal) {
+    if (!existingGoal)return true;
+    const unitOf = text => (text || "").trim().toLowerCase();
+    const measureChanged = newGoal.measure !== existingGoal.measure;
+    const unitChanged = unitOf(newGoal.unit) !== unitOf(existingGoal.unit);
+    if (!measureChanged && !unitChanged) return true;
 
+    const habits = getHabitsForGoal(existingGoal.id).map(habit => `${habit.name} (${habit.unit || "done/not done"})`);
+    return confirm(
+        "You changed how this goal is measured.\n\n" +
+        "Your progress is worked out again from your habits, so it may go up or down. " +
+        "Habits in a different unit stop counting toward the goal.\n\n" +
+        (habits.length ? `Your habits: ${habits.join(", ")}\n\n` : "") +
+        "Save anyway?"
+    );
+}
 
 /* ---------- 7. Page load ---------- */
 
-// Fill the Direction card at the top (textContent: safe for user text).
+// Fill the Direction card atr the top (textContent: safe for user text).
 document.getElementById("directionIcon").textContent = area ? area.icon : "flag";
 document.getElementById("directionArea").textContent = direction.areaLabel;
 document.getElementById("directionIdentity").textContent = direction.identity;
@@ -376,6 +401,9 @@ renderUnitChips();
 loadExistingGoal();
 updatePage();
 
+// Opened from Plan (?mode=edit)? Same form, but Cancel / Save go back to Plan.
+// No active goal = you just closed one on Plan → this is your NEXT goal.
+if (editMode) applyEditMode(existingGoal ? "Editing your goal" : "Your next goal", continueButton);
 
 /* ---------- 8. Events ---------- */
 
@@ -423,7 +451,13 @@ goalForm.addEventListener("submit", (event) => {
     event.preventDefault();                     // stop the browser reloading the page
     if (getProblem()) return;                   // safety net: never save a broken goal
 
-    saveGoal(buildGoal());                      // state.js does the saving
+        const goal = buildGoal();
+    if (editMode && !confirmCountingChange(goal)) return;   // "your habits may stop counting" → Cancel = stay
+
+        saveGoal(goal);                             // state.js does the saving
+    // A NEW goal from Plan has no habits yet → go straight to adding one.
+    if (editMode && !existingGoal) { window.location.href = "habit.html?mode=edit&add=1"; return; }
+    if (editMode) { leaveEditMode(); return; }  // edit: back to Plan, onboarding step untouched
     setCurrentStep(4);
     window.location.href = "habit.html";
 });

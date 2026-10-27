@@ -354,3 +354,41 @@
 @media (min-width: 600px) {
     .habit-builder { padding: var(--lg); }
 }
+
+
+/* ---------- Counts toward my goal ----------
+   [✓] Counts toward my goal
+       What you log adds to your 20 pages.                */
+.counts-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: var(--md);
+    padding: 12px var(--md);
+    border-radius: var(--radius-md);
+    background: var(--surface-container);
+    cursor: pointer;
+}
+.counts-field[hidden] { display: none; }
+
+.counts-check {
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    flex-shrink: 0;
+    accent-color: var(--primary);
+}
+
+.counts-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+.counts-hint {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--on-surface-variant);
+}

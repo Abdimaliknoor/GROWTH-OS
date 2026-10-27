@@ -400,11 +400,11 @@ function letSleep() {
 }
 /* ---------- 8. Page load ---------- */
 
+/* ---------- 8. Page load ---------- */
+
 if (pageOk) {
     updatePage();
 }
-
-
 /* ---------- 9. Events ---------- */
 
 // One listener for all 3 chips (event delegation, like Today's line).

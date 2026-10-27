@@ -1,0 +1,517 @@
+/* =========================================================
+   PLAN  (app/plan.html)
+
+   1. Direction     "I am someone who…"
+   2. Sections      title + Edit link (Goal, Habits, My week)
+   3. Goal card     bar, pace line, milestones, why
+   4. Habit rows    active + archived, this week's dots
+   5. My week       day chips + that day's list
+   6. Archived      the folding section
+   Bigger screens   900px: bigger identity · 1200px: two columns
+
+   Shared things (top bar, nav, .btn, .tag, .bar, .chip, .toast) live in app.css.
+   ========================================================= */
+
+
+/* ---------- 1. Direction ---------- */
+
+.direction {
+    margin-bottom: var(--xl);
+}
+.direction[hidden] { display: none; }
+
+.direction-area {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+/* The identity sentence: big, like the greeting on Today */
+.direction-identity {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+
+/* ---------- 2. Sections ---------- */
+
+.plan-section { margin-bottom: var(--xl); }
+.plan-section[hidden] { display: none; }
+
+/* "Habits 3 / 5"  ……………  ✎ Edit */
+.section-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--md);
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.section-count {
+    margin-left: 6px;
+    font-family: var(--font-time);
+    letter-spacing: 0;
+    color: var(--outline);
+}
+
+.section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+.section-link .icon { font-size: 16px; }
+.section-link:hover { background: var(--surface-container-high); }
+.section-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.plan-empty {
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+.plan-empty[hidden] { display: none; }
+
+.plan-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--outline);
+}
+.plan-hint .icon { font-size: 16px; }
+/* "No goal right now": shown only between closing a goal and picking the next */
+.no-goal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 20px;
+    border: 1px dashed var(--outline-variant);
+    border-radius: var(--radius-xl);
+}
+.no-goal[hidden] { display: none; }
+.no-goal-icon { font-size: 28px; color: var(--on-surface-variant); }
+.no-goal-title { font-size: 20px; font-weight: 700; color: var(--primary); }
+.no-goal-hint { margin-bottom: 8px; font-size: 14px; color: var(--on-surface-variant); }
+
+/* ---------- 3. Goal card ---------- */
+
+.goal-card {
+    padding: 20px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+}
+
+.goal-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: var(--md);
+}
+
+.goal-card-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--surface-container-high);
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.goal-card-text { min-width: 0; }
+
+.goal-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+.goal-card-finish {
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+
+/* "4 / 20 pages · 20%"  ……  "165 days left" */
+.goal-card-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px var(--md);
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+/* "On track: ~1.2 pages a day → done around 2 Jan" */
+.goal-pace {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: var(--md);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--surface-container);
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--on-surface);
+}
+.goal-pace[hidden] { display: none; }
+.goal-pace-icon { font-size: 18px; color: var(--on-surface-variant); }
+.goal-pace.is-ahead .goal-pace-icon { color: var(--success); }
+.goal-pace.is-behind .goal-pace-icon { color: var(--error); }
+.goal-pace.is-done .goal-pace-icon { color: var(--primary); }
+
+/* The end of a goal: "You reached your goal" / "The date has passed" + buttons */
+.goal-end {
+    margin-top: var(--md);
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container);
+}
+.goal-end[hidden] { display: none; }
+
+.goal-end-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.goal-end-icon { font-size: 24px; color: var(--on-surface-variant); }
+.goal-end.is-reached .goal-end-icon { color: var(--success); }
+
+.goal-end-title { font-size: 15px; font-weight: 700; color: var(--on-surface); }
+.goal-end-hint { margin-top: 2px; font-size: 13px; line-height: 1.45; color: var(--on-surface-variant); }
+
+.goal-end-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: var(--md);
+}
+.goal-end-actions .btn { flex: 1 1 140px; }          /* side by side, or stacked on a tiny phone */
+.goal-end-actions .btn[hidden] { display: none; }
+
+/* Milestone steps: a checkbox list */
+.milestone-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--md);
+}
+.milestone-list[hidden] { display: none; }
+
+.milestone-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--outline-variant);
+    font-size: 15px;
+    color: var(--on-surface);
+    cursor: pointer;
+}
+.milestone:last-child .milestone-label { border-bottom: none; }
+
+.milestone-check {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--primary);          /* our white, not browser blue */
+}
+
+/* A done step: quieter, with a line through (here it MEANS "crossed off the list") */
+.milestone-check:checked + .milestone-title {
+    color: var(--on-surface-variant);
+    text-decoration: line-through;
+}
+
+/* Your why, in quotes, a bit quieter */
+.goal-card-why {
+    margin-top: var(--md);
+    padding-top: var(--md);
+    border-top: 1px solid var(--outline-variant);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--on-surface-variant);
+    overflow-wrap: anywhere;
+}
+.goal-card-why[hidden] { display: none; }
+
+
+/* ---------- 4. Habit rows ---------- */
+
+.habit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* [ name + detail + dots ] [archive] */
+.habit-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px 12px var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+
+.habit-item-text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Name + "Feeds your goal" tag on one line (the tag wraps under on a narrow phone) */
+.habit-item-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--on-surface);
+    overflow-wrap: anywhere;
+}
+
+.habit-item-detail {
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+.habit-item-tag[hidden] { display: none; }
+
+/* This week: 7 small dots (Mon → Sun) + "4 / 5". Same dot language as Today's week card. */
+.habit-week {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.habit-dots {
+    display: flex;
+    gap: 5px;
+    padding: 0;
+    list-style: none;                      /* an <ol>: no "1. 2. 3." numbers */
+}
+
+.habit-dot {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--outline-variant);
+    border-radius: 50%;
+}
+.habit-dot.is-done    { border-color: var(--primary); background: var(--primary); }
+.habit-dot.is-partial { border-color: var(--primary); background: linear-gradient(90deg, var(--primary) 50%, transparent 50%); }
+.habit-dot.is-open    { border-color: var(--primary); }                   /* today, still to do */
+.habit-dot.is-missed  { border-color: var(--outline); }
+.habit-dot.is-skipped { border-style: dashed; border-color: var(--outline); }
+.habit-dot.is-off,
+.habit-dot.is-before  { border: none; background: var(--surface-container-high); transform: scale(0.5); }  /* not planned: a tiny dot */
+
+.habit-week-count {
+    font-family: var(--font-time);
+    font-size: 12px;
+    color: var(--on-surface-variant);
+}
+
+/* Round icon-only button (Archive) */
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--on-surface-variant);
+}
+.icon-button .icon { font-size: 20px; }
+.icon-button:hover { background: var(--surface-container-high); color: var(--on-surface); }
+.icon-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Archived rows are quieter */
+.habit-item.is-archived { background: transparent; border: 1px dashed var(--outline-variant); }
+.habit-item.is-archived .habit-item-name { color: var(--on-surface-variant); }
+
+.restore-button {
+    min-height: 36px;
+    padding-inline: 14px;
+    font-size: 13px;
+}
+
+/* "＋ Add a habit ……… 4 spots left": dashed = "an empty slot" */
+.add-habit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 52px;
+    margin-top: 8px;
+    padding: 0 var(--md);
+    border: 1px dashed var(--outline-variant);
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+.add-habit[hidden] { display: none; }
+.add-habit .icon { font-size: 20px; }
+.add-habit:hover { border-color: var(--outline); background: var(--surface-container-low); }
+.add-habit:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.add-habit-left {
+    margin-left: auto;                     /* pushed to the right end */
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.plan-hint[hidden] { display: none; }
+
+
+/* ---------- 5. My week ---------- */
+
+/* 7 equal chips in one row: Mon … Sun always fit, even on a small phone */
+.week-chips {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: var(--md);
+}
+.week-chips .chip { min-width: 0; padding: 0; font-size: 12px; }
+
+.week-list {
+    display: flex;
+    flex-direction: column;
+    padding: 4px var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+.week-list:empty { display: none; }
+
+/* "05:30   ●  Memorize new" */
+.week-item {
+    display: grid;
+    grid-template-columns: 52px 20px 1fr;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--outline-variant);
+}
+.week-item:last-child { border-bottom: none; }
+
+.week-item-time {
+    font-family: var(--font-time);
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+
+.week-item-icon { font-size: 18px; color: var(--on-surface-variant); }
+
+.week-item-label {
+    font-size: 15px;
+    color: var(--on-surface);
+    overflow-wrap: anywhere;
+}
+
+/* Habits stand out (white, bold, filled dot); markers are quieter */
+.week-item.is-habit .week-item-label { font-weight: 600; color: var(--primary); }
+.week-item.is-habit .week-item-icon { color: var(--primary); }
+
+/* ---------- 5b. Coming up ---------- */
+
+/* Each row is a button: tap → the schedule sheet */
+.upcoming-row {
+    width: 100%;
+    grid-template-columns: 112px 1fr;
+    padding: 10px 0;
+    text-align: left;
+    color: inherit;
+}
+.upcoming-line { list-style: none; }               /* plain <li> now: no "1." */
+.upcoming-line:last-child .upcoming-row { border-bottom: none; }
+.upcoming-row:hover .upcoming-label { text-decoration: underline; text-underline-offset: 3px; }
+.upcoming-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--radius-md); }.upcoming-when { font-size: 12px; }
+.upcoming-text { min-width: 0; }
+.upcoming-label { display: block; font-weight: 600; }
+.upcoming-note { display: block; font-size: 13px; color: var(--on-surface-variant); overflow-wrap: anywhere; }
+.upcoming-note[hidden] { display: none; }
+
+/* ---------- 6. Archived ---------- */
+
+.archived-summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+}
+.archived-summary:hover { color: var(--on-surface); }
+.archived[open] .archived-summary { margin-bottom: 8px; }
+
+
+/* ---------- Bigger screens ---------- */
+
+@media (min-width: 900px) {
+    .direction-identity { font-size: 30px; }
+}
+
+/* Big screens: two columns.  Left = goal + habits, right = my week.
+   Same idea as Today's right column. (The page is already 1040px wide here: app.css.) */
+@media (min-width: 1200px) {
+    .plan {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        grid-template-areas:
+            "direction direction"
+            "nogoal    side"
+            "goal      side"
+            "habits    side"
+            "archived  side";
+        grid-template-rows: auto auto auto auto 1fr;
+        column-gap: var(--xl);
+        align-items: start;
+    }
+
+    .direction    { grid-area: direction; }
+    .no-goal      { grid-area: nogoal; }
+    .plan-goal    { grid-area: goal; }
+    .plan-habits  { grid-area: habits; }
+    .archived     { grid-area: archived; }
+    .plan-side {         
+        grid-area: side;
+        position: sticky;                  /* stays in view while the left side scrolls */
+        top: calc(var(--topbar-height) + var(--lg));
+    }
+}

@@ -34,10 +34,10 @@
 
 // Routine needs habits. No habits saved = they skipped the Habit step.
 // (getGoals()[0] can be null, so `goal ? ... : []` avoids a crash.)
-const goal = getGoals()[0] || null;
+const goal = getActiveGoal() ;
 const habits = goal ? getHabitsForGoal(goal.id) : [];
 if (habits.length === 0) {
-    window.location.replace("habit.html");
+    window.location.replace(editMode ? "habit.html?mode=edit" : "habit.html");
 }
 
 
@@ -193,7 +193,7 @@ function createPlan({ key, kind, habitId, label, detail, icon, allowedDays, save
 // All plans, in day order: Wake up → each habit → Sleep.
 // getRoutine() (state.js) gives back what was saved last time, if anything.
 function buildPlans() {
-    const saved = getRoutine();
+    const saved = getRoutine().filter(item => !item.date);     
 
     const wake = createPlan({
         key: "wake", kind: "wake", habitId: null,
@@ -513,6 +513,8 @@ if (habits.length > 0) {
     plans = buildPlans();
     renderPreviewDays();
     renderPlans();
+    if (editMode) applyEditMode("Editing your times", finishButton);
+
 }
 
 
@@ -568,7 +570,8 @@ previewDays.addEventListener("click", (event) => {
 // Finish: save the whole routine at once, then go to the summary page.
 finishButton.addEventListener("click", () => {
     if (getUnfinishedPlans().length > 0) return;         // safety net
-    saveRoutine(buildRoutineItems());                     // state.js does the saving
+    replaceRoutinePlan(buildRoutineItems());              // replaces wake/sleep/habit times, KEEPS activities
+    if (editMode) { leaveEditMode(); return; }            // edit: back to Plan, onboarding step untouched
     setCurrentStep(6);
     window.location.href = "setup.html";
 });

@@ -1,0 +1,473 @@
+<!doctype html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PLAN  ·  app/plan.html                                      ║
+  ║  Your direction, goal, habits and schedule in one place.     ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  WHAT'S IN THIS FILE (top → bottom)
+
+    PAGE
+      Navigation ......... same as Today (Plan is the highlighted tab)
+      Top bar ............ "☑ Plan             3 HABITS"
+      1. Direction ....... "I am someone who…"
+      No goal ............ "No goal right now → Start a new goal" (only after closing one)
+      2. Goal ............ bar, deadline, pace, end box, milestones, why     [Edit]
+      3. Habits .......... rows + "＋ Add a habit"                          [Edit]
+      SIDE (right column on desktop)
+        4a. Coming up .... one-day items, next 30 days
+        4b. My week ...... Mon…Sun chips → that day's plan              [Edit times]
+      5. Archived ........ old habits + Restore (hidden when empty)
+
+    ALWAYS THERE, SHOWN BY JS
+      Toast
+
+    TEMPLATES
+      habitTemplate · milestoneTemplate · weekItemTemplate · upcomingTemplate · archivedTemplate
+
+  [Edit] links open the onboarding pages in edit mode (?mode=edit): Save comes back here.
+  Who fills what: plan.js. Data: state.js + insight.js.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#131313" />
+    <title>Plan | Growth OS</title>
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
+
+    <!-- Fonts: Geist for text, Geist Mono for times, Material icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles. Order matters: tokens → the shared shell → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/plan.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- ═══════════════ NAVIGATION ═══════════════ -->
+      <nav class="app-nav" aria-label="Main">
+        <p class="app-brand">
+          <img
+            class="app-brand-mark"
+            src="../assets/icons/unnamed.png"
+            alt=""
+          />
+          Growth OS
+        </p>
+        <ul class="app-tabs">
+          <li>
+            <a class="app-tab" href="today.html">
+              <span class="icon" aria-hidden="true">today</span>
+              Today
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="plan.html" aria-current="page">
+              <span class="icon" aria-hidden="true">checklist</span>
+              Plan
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="journal.html">
+              <span class="icon" aria-hidden="true">edit_note</span>
+              Journal
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">trending_up</span>
+              Progress<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+          <li>
+            <a class="app-tab is-soon">
+              <span class="icon" aria-hidden="true">person</span>
+              Me<span class="visually-hidden"> (soon)</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ═══════════════ PAGE BOX ═══════════════ -->
+      <div class="app-page">
+        <!-- ─── TOP BAR · plan.js fills the habit count ─── -->
+        <header class="app-topbar">
+          <div class="app-topbar-inner">
+            <h1 class="app-topbar-title">
+              <span class="icon" aria-hidden="true">checklist</span>
+              Plan
+            </h1>
+            <p class="app-topbar-meta" id="planCount"></p>
+          </div>
+        </header>
+
+        <main class="app-main plan">
+          <!-- ─── 1. DIRECTION · who you're becoming ─── -->
+          <section class="direction" id="direction" aria-label="Your direction">
+            <p class="direction-area" id="directionArea"></p>
+            <p class="direction-identity" id="directionIdentity"></p>
+          </section>
+
+          <!-- ─── NO GOAL · after closing one, before picking the next ─── -->
+          <section class="plan-section no-goal" id="noGoal" hidden>
+            <span class="icon no-goal-icon" aria-hidden="true">flag</span>
+            <h2 class="no-goal-title">No goal right now</h2>
+            <p class="no-goal-hint">
+              Pick your next finish line. Your old goals and their history are
+              kept.
+            </p>
+            <a class="btn btn-primary" href="../startup/goal.html?mode=edit"
+              >Start a new goal</a
+            >
+          </section>
+
+          <!-- ─── 2. GOAL · bar, deadline, pace, end box, milestones, why ─── -->
+          <section
+            class="plan-section plan-goal"
+            id="planGoal"
+            aria-labelledby="goalHeading"
+          >
+            <div class="section-top">
+              <h2 class="section-title" id="goalHeading">Goal</h2>
+              <a class="section-link" href="../startup/goal.html?mode=edit">
+                <span class="icon" aria-hidden="true">edit</span>
+                Edit
+              </a>
+            </div>
+
+            <article class="goal-card">
+              <div class="goal-card-top">
+                <span class="icon goal-card-icon" aria-hidden="true">flag</span>
+                <div class="goal-card-text">
+                  <h3 class="goal-card-title" id="goalTitle"></h3>
+                  <p class="goal-card-finish" id="goalFinish"></p>
+                </div>
+              </div>
+              <div
+                class="bar"
+                id="goalBar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-label="Goal progress"
+              >
+                <span class="bar-fill" id="goalBarFill"></span>
+              </div>
+              <p class="goal-card-numbers">
+                <span id="goalNumbers"></span>
+                <span id="goalDeadline"></span>
+              </p>
+
+              <!-- On track? (total goals only) -->
+              <p class="goal-pace" id="goalPace" hidden>
+                <span
+                  class="icon goal-pace-icon"
+                  id="goalPaceIcon"
+                  aria-hidden="true"
+                ></span>
+                <span id="goalPaceText"></span>
+              </p>
+
+              <!-- The end: reached 🎉 or date passed. "Change the date" only when the date passed. -->
+              <div class="goal-end" id="goalEnd" hidden>
+                <div class="goal-end-top">
+                  <span
+                    class="icon goal-end-icon"
+                    id="goalEndIcon"
+                    aria-hidden="true"
+                  ></span>
+                  <div>
+                    <p class="goal-end-title" id="goalEndTitle"></p>
+                    <p class="goal-end-hint" id="goalEndHint"></p>
+                  </div>
+                </div>
+                <div class="goal-end-actions">
+                  <a
+                    class="btn btn-secondary"
+                    id="goalExtend"
+                    href="../startup/goal.html?mode=edit"
+                    >Change the date</a
+                  >
+                  <button
+                    class="btn btn-primary"
+                    id="newGoalButton"
+                    type="button"
+                  >
+                    Start a new goal
+                  </button>
+                </div>
+              </div>
+
+              <!-- Milestone goals: tick the steps here -->
+              <ul class="milestone-list" id="milestoneList" hidden></ul>
+
+              <p class="goal-card-why" id="goalWhy" hidden></p>
+            </article>
+          </section>
+
+          <!-- ─── 3. HABITS · archive = hidden from Today, history kept ─── -->
+          <section
+            class="plan-section plan-habits"
+            id="planHabits"
+            aria-labelledby="habitsHeading"
+          >
+            <div class="section-top">
+              <h2 class="section-title" id="habitsHeading">
+                Habits <span class="section-count" id="habitCount"></span>
+              </h2>
+              <a class="section-link" href="../startup/habit.html?mode=edit">
+                <span class="icon" aria-hidden="true">edit</span>
+                Edit
+              </a>
+            </div>
+            <ul class="habit-list" id="habitList"></ul>
+            <p class="plan-empty" id="habitsEmpty" hidden>
+              No habits yet. One is enough to start.
+            </p>
+
+            <!-- ＋ Add a habit → habit page in edit mode, cursor ready. At 5 / 5 → the hint instead. -->
+            <a
+              class="add-habit"
+              id="addHabit"
+              href="../startup/habit.html?mode=edit&add=1"
+            >
+              <span class="icon" aria-hidden="true">add</span>
+              <span class="add-habit-text" id="addHabitText">Add a habit</span>
+              <span class="add-habit-left" id="addHabitLeft"></span>
+            </a>
+            <p class="plan-hint" id="habitsFull" hidden>
+              <span class="icon" aria-hidden="true">info</span>
+              5 / 5 habits. Archive one to add another.
+            </p>
+          </section>
+
+          <!-- ═══ SIDE · Coming up + My week. Desktop: right column. Phone: stacked here. ═══ -->
+          <div class="plan-side">
+            <!-- ─── 4a. COMING UP · one-day items, next 30 days ─── -->
+            <section
+              class="plan-section plan-upcoming"
+              aria-labelledby="upcomingHeading"
+            >
+              <div class="section-top">
+                <h2 class="section-title" id="upcomingHeading">Coming up</h2>
+                <button class="section-link" id="upcomingAdd" type="button">
+                  <span class="icon" aria-hidden="true">add</span>
+                  Add
+                </button>
+              </div>
+              <ol class="week-list" id="upcomingList"></ol>
+              <p class="plan-empty" id="upcomingEmpty" hidden>
+                Nothing scheduled. Exams, trips, appointments: tap Add.
+              </p>
+              <p class="plan-hint">
+                <span class="icon" aria-hidden="true">info</span>
+                Add class, an exam or a reminder with “Add to schedule” on
+                Today.
+              </p>
+            </section>
+
+            <!-- ─── 4b. MY WEEK · pick a day → its plan ─── -->
+            <section
+              class="plan-section plan-week"
+              aria-labelledby="weekHeading"
+            >
+              <div class="section-top">
+                <h2 class="section-title" id="weekHeading">My week</h2>
+                <a
+                  class="section-link"
+                  href="../startup/routine.html?mode=edit"
+                >
+                  <span class="icon" aria-hidden="true">schedule</span>
+                  Edit times
+                </a>
+              </div>
+
+              <!-- 7 chips, Monday first. plan.js makes the chosen one white. -->
+              <div
+                class="week-chips"
+                id="weekChips"
+                role="group"
+                aria-label="Day of the week"
+              >
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="mon"
+                  aria-pressed="false"
+                >
+                  Mon
+                </button>
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="tue"
+                  aria-pressed="false"
+                >
+                  Tue
+                </button>
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="wed"
+                  aria-pressed="false"
+                >
+                  Wed
+                </button>
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="thu"
+                  aria-pressed="false"
+                >
+                  Thu
+                </button>
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="fri"
+                  aria-pressed="false"
+                >
+                  Fri
+                </button>
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="sat"
+                  aria-pressed="false"
+                >
+                  Sat
+                </button>
+                <button
+                  class="chip"
+                  type="button"
+                  data-day="sun"
+                  aria-pressed="false"
+                >
+                  Sun
+                </button>
+              </div>
+
+              <ol class="week-list" id="weekList"></ol>
+              <p class="plan-empty" id="weekEmpty" hidden>
+                Nothing planned on this day.
+              </p>
+            </section>
+          </div>
+          <!-- /plan-side -->
+
+          <!-- ─── 5. ARCHIVED · hidden when empty ─── -->
+          <details class="plan-section archived" id="archived" hidden>
+            <summary class="archived-summary">
+              Archived habits
+              <span class="section-count" id="archivedCount"></span>
+            </summary>
+            <ul class="habit-list" id="archivedList"></ul>
+          </details>
+        </main>
+      </div>
+      <!-- /app-page -->
+    </div>
+    <!-- /app -->
+
+    <!-- ═══════════════ ALWAYS THERE, SHOWN BY JS ═══════════════ -->
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span class="icon" aria-hidden="true">check_circle</span>
+      <span class="toast-text" id="toastText"></span>
+    </div>
+
+    <!-- ═══════════════ TEMPLATES ═══════════════
+         Copied and filled by plan.js (copy → fill → return). -->
+
+    <!-- HABIT · name (+ tag), "1 page · Every day · 05:30", this week's dots, Archive -->
+    <template id="habitTemplate">
+      <li class="habit-item">
+        <div class="habit-item-text">
+          <p class="habit-item-name">
+            <span class="habit-item-title"></span>
+            <span class="tag habit-item-tag" hidden>Feeds your goal</span>
+          </p>
+          <p class="habit-item-detail"></p>
+          <div class="habit-week">
+            <ol class="habit-dots" aria-hidden="true"></ol>
+            <span class="habit-week-count"></span>
+          </div>
+        </div>
+        <button class="icon-button" type="button" data-action="archive">
+          <span class="icon" aria-hidden="true">inventory_2</span>
+        </button>
+      </li>
+    </template>
+
+    <!-- MILESTONE · one step, with a real checkbox -->
+    <template id="milestoneTemplate">
+      <li class="milestone">
+        <label class="milestone-label">
+          <input type="checkbox" class="milestone-check" />
+          <span class="milestone-title"></span>
+        </label>
+      </li>
+    </template>
+
+    <!-- WEEK ITEM · "05:30  ● Memorize new" -->
+    <template id="weekItemTemplate">
+      <li class="week-item">
+        <span class="week-item-time"></span>
+        <span class="icon week-item-icon" aria-hidden="true"></span>
+        <span class="week-item-label"></span>
+      </li>
+    </template>
+
+    <!-- UPCOMING · "Mon 3 Nov  09:00  Exam" + note. Tap → the schedule sheet. -->
+    <template id="upcomingTemplate">
+      <li class="upcoming-line">
+        <button class="week-item upcoming-row" type="button">
+          <span class="week-item-time upcoming-when"></span>
+          <span class="upcoming-text">
+            <span class="week-item-label upcoming-label"></span>
+            <span class="upcoming-note" hidden></span>
+          </span>
+        </button>
+      </li>
+    </template>
+
+    <!-- ARCHIVED · name + Restore -->
+    <template id="archivedTemplate">
+      <li class="habit-item is-archived">
+        <div class="habit-item-text">
+          <p class="habit-item-name"><span class="habit-item-title"></span></p>
+          <p class="habit-item-detail"></p>
+        </div>
+        <button
+          class="btn btn-secondary restore-button"
+          type="button"
+          data-action="restore"
+        >
+          Restore
+        </button>
+      </li>
+    </template>
+
+    <!-- ═══════════════ SCRIPTS ═══════════════
+         Order: storage → state → insight → this page → the mini focus bar (last) -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/insight.js"></script>
+    <script src="../js/app/item-sheet.js"></script>
+    <script src="../js/app/plan.js"></script>
+    <script src="../js/app/focus-bar.js"></script>
+  </body>
+</html>

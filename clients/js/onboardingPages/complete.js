@@ -18,7 +18,7 @@
 /* ---------- 1. Guard ---------- */
 
 // Every step must be done. If one is missing, send them to it.
-const goal = getGoals()[0] || null;
+const goal = getActiveGoal();
 const habits = goal ? getHabitsForGoal(goal.id) : [];
 const routine = getRoutine();
 

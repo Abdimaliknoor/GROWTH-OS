@@ -296,3 +296,11 @@
 
     .ob-btn-primary { flex: none; }
 }
+/* ---------- Edit mode (opened from Plan: ?mode=edit) ----------
+   edit-mode.js adds .is-editing to <body>. The progress bar is hidden,
+   so the top bar gets a thin line and a "← Plan" link instead of the logo. */
+.is-editing .ob-topbar { border-bottom: 1px solid var(--outline-variant); }
+.ob-back { gap: 6px; color: var(--on-surface); }
+.ob-back .icon { font-size: 20px; }
+.ob-back:hover { color: var(--primary); }
+.ob-back:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: var(--radius-md); }

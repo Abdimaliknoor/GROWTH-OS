@@ -4,19 +4,22 @@
    1. Header        greeting + "2 of 5 done" ring
    2. Goal strip    the goal and its bar
    3. Day line      one vertical line, a dot per item
-        markers     Wake up / Sleep
+        markers     Wake up / Sleep / Class (+ your note)
         rows        small habits (done, partial, skipped, late, later)
         now card    the big one
+        add button  "＋ Add to schedule"
    4. Rest day, evening card
-   5. Side          goal + this week
+   5. Side          goal + this week + coming up
    6. Record sheet  Today-only parts of the sheet
 
-   Screen sizes (at the bottom):
-     phone  <600     goal only, day line under it
-     tablet 600+     goal + week side by side
-     big    1200+    goal + week in a right column
+   The schedule sheet's styles are in app.css (Plan uses it too).
 
-   The state classes (is-done, is-partial, is-skipped, is-late) are set by today.js.
+   Screen sizes (at the bottom):
+     phone  <600     goal + coming up, day line under it
+     tablet 600+     goal + week side by side, coming up under them
+     big    1200+    all of it in a right column
+
+   State classes (is-done, is-partial, is-skipped, is-late) are set by today.js.
    ========================================================= */
 
 
@@ -205,13 +208,27 @@
 }
 
 
-/* --- Markers: Wake up / Sleep --- */
+/* --- Markers: Wake up / Sleep / Class --- */
 
-/* 3 columns here: [dot] [time] [label] */
+/* 2 columns here: [dot] [the button with time + label] */
 .line-marker {
-    grid-template-columns: 24px auto 1fr;
+    grid-template-columns: 24px 1fr;
     min-height: 36px;
 }
+
+/* Time + label in one button (tap = change it). We undo the button look. */
+.marker-text {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-self: start;                   /* only as wide as its text, not the whole row */
+    padding: 6px 8px 6px 0;
+    border-radius: var(--radius-md);
+    text-align: left;
+    color: inherit;
+}
+.marker-text:hover .marker-label { color: var(--on-surface); text-decoration: underline; text-underline-offset: 3px; }
+.marker-text:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .line-marker .line-dot {
     width: 24px;
@@ -220,6 +237,23 @@
     font-size: 16px;
     color: var(--on-surface-variant);
 }
+
+/* Label on top, your note under it */
+.marker-words {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+/* Your note: normal case and brighter than the label, because it's the part to READ */
+.marker-note {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--on-surface);
+    overflow-wrap: anywhere;
+}
+.marker-note[hidden] { display: none; }
 
 .marker-label {
     font-size: 12px;
@@ -395,6 +429,25 @@
 }
 
 
+/* --- "＋ Add to schedule": under the line, lined up with the times --- */
+
+.add-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    margin: 8px 0 0 30px;                  /* 24px dot column + a bit: sits under the times */
+    padding: 0 14px 0 10px;
+    border: 1px dashed var(--outline-variant);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+.add-item .icon { font-size: 18px; }
+.add-item:hover { border-color: var(--outline); color: var(--on-surface); }
+.add-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
 /* ---------- 4. Rest day + evening card ---------- */
 
 .rest-day {
@@ -458,7 +511,7 @@
 }
 
 
-/* ---------- 5. Side: goal + this week ---------- */
+/* ---------- 5. Side: goal + this week + coming up ---------- */
 
 /* Phone: the goal strip and the week card stacked, 16px apart */
 .today-side {
@@ -467,6 +520,61 @@
     gap: var(--md);
     margin-bottom: var(--lg);
 }
+
+/* Coming up: a quiet card, like the goal strip */
+.upcoming {
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+.upcoming[hidden] { display: none; }
+
+.upcoming-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+.upcoming-title .icon { font-size: 16px; }
+
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    list-style: none;
+}
+
+/* "Tomorrow 15:00 │ Dentist". Each line is a button: tap → change it. */
+.upcoming-item {
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    gap: 8px;
+    align-items: baseline;
+    width: 100%;
+    padding: 4px 0;
+    border-radius: var(--radius-md);
+    text-align: left;
+    color: inherit;
+}
+.upcoming-item:hover { background: var(--surface-container); }
+.upcoming-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.upcoming-day {
+    font-family: var(--font-time);
+    font-size: 12px;
+    color: var(--on-surface-variant);
+}
+.upcoming-text { min-width: 0; }
+.upcoming-label { display: block; font-size: 14px; font-weight: 600; color: var(--on-surface); overflow-wrap: anywhere; }
+.upcoming-note { display: block; font-size: 13px; color: var(--on-surface-variant); overflow-wrap: anywhere; }
+.upcoming-note[hidden] { display: none; }
+
 
 /* Hidden on phones: there the day line comes first.
    From 600px it shows (see "Bigger screens" at the bottom). */
@@ -585,6 +693,15 @@
     accent-color: var(--primary);          /* the tick box in our white instead of browser blue */
 }
 
+/* ▶ Start focus: full width, under the amount */
+.record-focus {
+    width: 100%;
+    min-height: 48px;
+    margin-top: var(--md);
+}
+.record-focus[hidden] { display: none; }
+.record-focus .icon { font-size: 20px; }
+
 /* "▸ Skip this day": closed = one line. Open = reason box, Skip button under it on the right. */
 .record-skip {
     margin-bottom: 20px;
@@ -620,14 +737,15 @@
         align-items: stretch;             /* both cards as tall as the taller one */
     }
 
-    .week-card { display: block; }        /* ← this was the bug: it stayed hidden until 1200px */
+    .week-card { display: block; }
+    .upcoming  { grid-column: 1 / -1; }   /* full width under goal + week */
 }
 
 @media (min-width: 900px) {
     .today-greeting { font-size: 36px; }
 }
 
-/* BIG 1200px+: two columns. Left = your day, right = goal + week.
+/* BIG 1200px+: two columns. Left = your day, right = goal + week + coming up.
    grid-template-areas draws the layout with words:
 
        header  side
