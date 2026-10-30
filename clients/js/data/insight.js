@@ -13,8 +13,11 @@
      4. Goal progress       convertAmount, countsTowardGoal, getGoalProgress, getDaysLeft
      5. Week + streak       getStartDate, getDayResult, getWeek, getStreak
      6. Focus               getFocusElapsed, getFocusStage, getFocusMinutes
-     7. Journal             getWriteEntries, getFocusEntries, getSkipEntries, getJournal
+          7. Journal             getWriteEntries, getFocusEntries, getSkipEntries, getRecordLines,
+                            getJournalDayStats, getWriteStreak, getJournal
      8. Plan page           getHabitWeek, getGoalPace
+     9. Progress page       getRange … getProgressSummary
+    10. Notes               getNoteTitle, describeNoteFolder, getNoteFolders, getNoteList
    ══════════════════════════════════════════════════════════════════ */
 
 
@@ -310,10 +313,10 @@ function getFocusMinutes(session, now = Date.now()) {
 
 
 /* ════════════════════ 7. JOURNAL ════════════════════
-   Three kinds of entries on one timeline:
-     write  your own words   ·   focus  a session's mood + note   ·   skip  why you skipped
-   Each function turns one list into the same card shape. */
-
+   One day on the timeline:
+     write   your own words (+ photos)   ·   focus   a session's mood + note
+     skip    why you skipped             ·   records what you logged with + or the sheet (one line per habit)
+   Plus a small summary on top: "3 of 4 habits · 25 min focus". */
 function habitNameOf(habitId) {
     const habit = getHabitById(habitId);
     return habit ? habit.name : "Deleted habit";
@@ -326,7 +329,8 @@ function getWriteEntries() {
         date: entry.date,
         time: entry.createdAt,
         text: entry.text,
-        mood: entry.mood
+        mood: entry.mood,
+        photos: entry.photos || [] 
     }));
 }
 
@@ -366,26 +370,75 @@ function getSkipEntries() {
 }
 
 // All entries grouped by day, newest day first. Inside a day: timed first, skips last.
+// What you logged WITHOUT focus (+1 on Today, or the record sheet), added up per habit per day.
+// Focus logs are left out: the focus entry already shows them.
+//   → { "2026-10-27": [ { habitName: "Memorize new", amount: 3, unit: "pages", tick: false } ] }
+function getRecordLines() {
+    const focusLogIds = getFocusSessions().map(session => session.logId);
+    const byDate = {};
+    getLogs()
+        .filter(log => log.status === "done" && log.source !== "focus" && !focusLogIds.includes(log.id))
+        .forEach(log => {
+            if (!byDate[log.date]) byDate[log.date] = [];
+            const line = byDate[log.date].find(item => item.habitId === log.habitId);
+            if (line) { line.amount += log.amount; return; }
+            const habit = getHabitById(log.habitId);
+            byDate[log.date].push({
+                habitId: log.habitId,
+                habitName: habitNameOf(log.habitId),
+                amount: log.amount,
+                unit: habit ? habit.unit : "",
+                tick: habit ? habit.type === "completion" : false
+            });
+        });
+    return byDate;
+}
+
+// The small summary on top of a day: "3 of 4 habits · 25 min focus · Good"
+//   habits null = nothing was due that day (a rest day)
+function getJournalDayStats(date, entries) {
+    const summary = getDaySummary(date);
+    const focusMinutes = entries.filter(entry => entry.kind === "focus").reduce((sum, entry) => sum + entry.minutes, 0);
+    const lastMood = entries.filter(entry => entry.kind === "write" && entry.mood).map(entry => entry.mood).at(-1) || null;
+    return { habits: summary.total ? summary : null, focusMinutes, mood: lastMood };
+}
+
+// How many days in a row you WROTE something, up to today.
+// Not written yet today? Counting from yesterday still keeps it alive (the day isn't over).
+//   wrote Mon, Tue, Wed · today Wed → 3     ·     wrote Mon, Tue · today Wed → 2     ·     last Sun → 0
+function getWriteStreak() {
+    const written = new Set(getJournalEntries().map(entry => entry.date));
+    let day = written.has(todayDate()) ? todayDate() : addDaysTo(todayDate(), -1);
+    let streak = 0;
+    while (written.has(day)) {
+        streak++;
+        day = addDaysTo(day, -1);
+    }
+    return streak;
+}
+
+// Every day that has something, newest first.
+//   → [ { date, stats, entries: [timed first, skips last], records: [lines] } ]
 function getJournal() {
     const all = [...getWriteEntries(), ...getFocusEntries(), ...getSkipEntries()];
+    const records = getRecordLines();
 
     const byDate = {};
     all.forEach(entry => {
         if (!byDate[entry.date]) byDate[entry.date] = [];
         byDate[entry.date].push(entry);
     });
+    Object.keys(records).forEach(date => { if (!byDate[date]) byDate[date] = []; });
 
-    return Object.keys(byDate).sort().reverse().map(date => ({
-        date,
-        entries: byDate[date].sort((a, b) => {
+    return Object.keys(byDate).sort().reverse().map(date => {
+        const entries = byDate[date].sort((a, b) => {
             if (a.time === null) return 1;
             if (b.time === null) return -1;
             return a.time - b.time;
-        })
-    }));
+        });
+        return { date, entries, records: records[date] || [], stats: getJournalDayStats(date, entries) };
+    });
 }
-
-
 /* ════════════════════ 8. PLAN PAGE ════════════════════ */
 
 // One habit, Monday → Sunday → { days: [{ date, state }], done, due }
@@ -437,5 +490,213 @@ function getGoalPace(goal) {
         perDay: Math.round(perDay * 10) / 10,
         finishDate,
         needPerDay: needPerDay && Math.ceil(needPerDay * 10) / 10
+    };
+}
+
+
+/* ════════════════════ 9. PROGRESS PAGE ════════════════════
+   One function per question. Each takes a range { from, to } and returns plain data,
+   so you can check every number in the console before drawing anything.
+
+   DEFINITIONS (decided once, used everywhere)
+     Showing up %    habits done ÷ habits planned (like Today's week card)
+                     · skips are excused, rest days and days before you started don't count
+                     · today counts once it's fully done
+     Habit rate %    days the habit hit its target ÷ days it was due (from the day it was made)
+     Best streak     longest run of fully done days (rest days don't break it)
+     Focus time      saved sessions only */
+
+     // "week" → Monday…today · "month" → the last 30 days · "all" → since you started
+// Never before your start day.
+function getRange(name) {
+    const today = todayDate();
+    const start = getStartDate();
+    let from;
+    if (name === "week") from = addDaysTo(today, -WEEK_DAYS.indexOf(weekdayOf(today)));
+    else if (name === "month") from = addDaysTo(today, -29);
+    else from = start;
+    return { from: from < start ? start : from, to: today };
+}
+
+
+// The same number of days just BEFORE a range (for "↑ more than last month").
+//   null if that's before you started.
+function getPreviousRange({ from, to }) {
+    const length = datesBetween(from, to).length;
+    const prevTo = addDaysTo(from, -1);
+    const prevFrom = addDaysTo(from, -length);
+    return prevTo < getStartDate() ? null : { from: prevFrom, to: prevTo };
+}
+
+// Every date from → to:  ("2026-10-26", "2026-10-28") → ["…26", "…27", "…28"]
+function datesBetween(from, to) {
+    const dates = [];
+    for (let date = from; date <= to; date = addDaysTo(date, 1)) dates.push(date);
+    return dates;
+}
+// Q2 · Am I showing up? Counted in HABITS, the same as Today's week card.
+//   → { done: 11, planned: 15, percent: 73, days: [{ date, state, done, due }] }
+// Today counts only once everything is done (the day isn't over).
+function getConsistency({ from, to }) {
+    const start = getStartDate();
+    const days = datesBetween(from, to).map(date => getDayResult(date, start));
+    const counted = days.filter(day => ["done", "partial", "missed"].includes(day.state));
+    const done = counted.reduce((sum, day) => sum + day.done, 0);
+    const planned = counted.reduce((sum, day) => sum + day.due, 0);
+    const percent = planned ? Math.round((done / planned) * 100) : 0;
+    return { done, planned, percent, days };
+}
+
+// The longest run of fully done days, ever.
+function getBestStreak() {
+    const today = todayDate();
+    const start = getStartDate();
+    let best = 0;
+    let run = 0;
+    datesBetween(start, today).forEach(date => {
+        const state = getDayResult(date, start).state;
+        if (state === "done") { run++; best = Math.max(best, run); }
+        else if (state === "rest" || state === "before" || (date === today && state === "none")) { /* doesn't break it */ }
+        else run = 0;
+    });
+    return best;
+}
+
+// Q3 · Which habits are strong / weak? → [{ habit, done, due, percent }], best first
+function getHabitRates({ from, to }) {
+    const today = todayDate();
+    return getHabits()
+        .filter(habit => !habit.archived)
+        .map(habit => {
+            const created = habit.createdAt ? dateOf(habit.createdAt) : from;
+            let done = 0;
+            let due = 0;
+            datesBetween(from < created ? created : from, to).forEach(date => {
+                if (!isDueOn(habit, date)) return;
+                const status = getHabitStatus(habit, date);
+                if (status === "skipped") return;                       // excused
+                if (date === today && status !== "done") return;         // today isn't over
+                due++;
+                if (status === "done") done++;
+            });
+            return { habit, done, due, percent: due ? Math.round((done / due) * 100) : 0 };
+        })
+        .sort((a, b) => b.percent - a.percent);
+}
+
+// Q4a · Where did my time go? → { sessions, minutes, mood }   (mood = average 1–5, or null)
+function getFocusTotals({ from, to }) {
+    const sessions = getFocusSessions().filter(s => s.savedAt && s.date >= from && s.date <= to);
+    const minutes = sessions.reduce((sum, s) => sum + getFocusMinutes(s), 0);
+    const moods = sessions.map(s => s.mood).filter(mood => mood);
+    const mood = moods.length ? Math.round((moods.reduce((a, b) => a + b, 0) / moods.length) * 10) / 10 : null;
+    return { sessions: sessions.length, minutes, mood };
+}
+
+// Q4b · Why do I miss? → [{ reason: "travelling", count: 3 }], most first
+function getSkipReasons({ from, to }) {
+    const counts = {};
+    getLogs()
+        .filter(log => log.status === "skipped" && log.date >= from && log.date <= to)
+        .forEach(log => {
+            const reason = (log.reason || "no reason").trim().toLowerCase();
+            counts[reason] = (counts[reason] || 0) + 1;
+        });
+    return Object.entries(counts)
+        .map(([reason, count]) => ({ reason, count }))
+        .sort((a, b) => b.count - a.count);
+}
+
+
+// Q4b · Why do I miss? → [{ reason: "travelling", count: 3 }], most first
+function getSkipReasons({ from, to }) {
+    const counts = {};
+    getLogs()
+        .filter(log => log.status === "skipped" && log.date >= from && log.date <= to)
+        .forEach(log => {
+            const reason = (log.reason || "no reason").trim().toLowerCase();
+            counts[reason] = (counts[reason] || 0) + 1;
+        });
+    return Object.entries(counts)
+        .map(([reason, count]) => ({ reason, count }))
+        .sort((a, b) => b.count - a.count);
+}
+
+// The one-sentence summary on top. Simple rules, worked out from the numbers above.
+function getProgressSummary(rangeName, consistency, rates) {
+    const word = { week: "week", month: "month", all: "run" }[rangeName];
+
+    // New user: too few days to judge anything yet
+    const sinceStart = getConsistency({ from: getStartDate(), to: todayDate() }).days
+        .filter(day => ["done", "partial", "missed"].includes(day.state)).length;
+    if (sinceStart < 3) {
+        return "You're just getting started. After a few days, this page shows how it's going.";
+    }
+    if (consistency.planned === 0) return "Nothing to count yet in this range. Today counts once it's done.";
+
+    let text;
+    if (consistency.percent >= 80) text = `Great ${word}: you did ${consistency.percent}% of your habits.`;
+    else if (consistency.percent >= 60) text = `Good ${word}: you did ${consistency.percent}% of your habits.`;
+    else text = `A tough ${word}: you did ${consistency.percent}% of your habits. Smaller targets can help.`;
+
+    const weakest = rates.filter(rate => rate.due >= 3).at(-1);
+    if (weakest && weakest.percent < 60) text += ` ${weakest.habit.name} needs attention.`;
+
+    const streak = getStreak();
+    if (streak >= 3) text += ` You're on a ${streak}-day streak 🔥`;
+    return text;
+}
+
+/* ════════════════════ 10. NOTES ════════════════════
+   Notes are things to keep (not tied to a day). Your goal and its habits work as folders. */
+
+// The name on a card: the title, or the first line of the text, or "Untitled".
+function getNoteTitle(note) {
+    if (note.title.trim()) return note.title.trim();
+    const firstLine = note.text.trim().split("\n")[0];
+    return firstLine || "Untitled";
+}
+
+// { kind: "habit", id: "h2" } → { name: "Revise last hizb", icon: "repeat" }     gone / none → null
+function describeNoteFolder(folder) {
+    if (!folder) return null;
+    if (folder.kind === "goal") {
+        const goal = getGoalById(folder.id);
+        return goal ? { name: goal.title, icon: "flag" } : null;
+    }
+    const habit = getHabitById(folder.id);
+    return habit ? { name: habit.name, icon: "repeat" } : null;
+}
+
+// Same folder?  sameFolder({kind:"habit",id:"h2"}, {kind:"habit",id:"h2"}) → true
+function sameFolder(a, b) {
+    return Boolean(a && b && a.kind === b.kind && a.id === b.id);
+}
+
+// The chips on top of Notes: your goal, then its habits, each with how many notes it has.
+//   → [ { folder: { kind: "goal", id }, name, icon, count }, … ]
+function getNoteFolders() {
+    const goal = getActiveGoal();
+    if (!goal) return [];
+    const notes = getNotes();
+    const folders = [{ kind: "goal", id: goal.id }, ...getHabitsForGoal(goal.id).map(habit => ({ kind: "habit", id: habit.id }))];
+    return folders.map(folder => ({
+        folder,
+        ...describeNoteFolder(folder),
+        count: notes.filter(note => sameFolder(note.folder, folder)).length
+    }));
+}
+
+// The notes to show: in this folder (null = all), matching the search, newest change first.
+//   getNoteList(null, "tajweed") → { pinned: [...], others: [...] }
+function getNoteList(folder = null, search = "") {
+    const words = search.trim().toLowerCase();
+    const notes = getNotes()
+        .filter(note => !folder || sameFolder(note.folder, folder))
+        .filter(note => !words || `${note.title} ${note.text}`.toLowerCase().includes(words))
+        .sort((a, b) => b.updatedAt - a.updatedAt);
+    return {
+        pinned: notes.filter(note => note.pinned),
+        others: notes.filter(note => !note.pinned)
     };
 }

@@ -1,0 +1,373 @@
+/* =========================================================
+   PROGRESS  (app/progress.html)
+
+   1. Range chips + summary
+   2. Panels         the shared look: question, big number, sentence
+   3. Goal           pace badge
+   4. Showing up     score ring, streak box, the squares
+   5. Habits         bars coloured by the same scale
+   6. Focus          ↑ / ↓ compared with before
+   7. Skips
+   Bigger screens    1200px: two columns of panels
+
+   ONE colour language for the whole page:
+     green = good news · white = fine · red = needs you · orange = your streak (only that)
+   Shared things (top bar, nav, .chip, .bar) live in app.css.
+   ========================================================= */
+
+
+/* ---------- 1. Range chips + summary ---------- */
+
+.range-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: var(--md);
+}
+
+/* The sentence: the first thing you read */
+.summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: var(--lg);
+    padding: var(--md);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+.summary-icon { font-size: 22px; color: var(--primary); }
+.summary-text {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--on-surface);
+}
+
+
+/* ---------- 2. Panels ---------- */
+
+.panels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+}
+
+.panel {
+    padding: 20px;
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+}
+.panel[hidden] { display: none; }
+
+.panel-title {
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.panel-empty {
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+.panel-empty[hidden] { display: none; }
+
+
+/* One plain sentence under the number: what it MEANS */
+.panel-says {
+    margin-top: 6px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--on-surface);
+}
+.panel-says[hidden] { display: none; }
+
+/* The one number that answers the question */
+.big-number {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+}
+
+
+/* ---------- 3. Goal ---------- */
+
+.goal-name {
+    margin-bottom: 12px;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+.panel-goal .panel-says { margin-top: 10px; }
+
+/* [ON TRACK] at this pace you finish around 29 Nov */
+.pace {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--surface-container);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--on-surface);
+}
+.pace[hidden] { display: none; }
+.pace-badge {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--surface-container-highest);
+    color: var(--on-surface);
+}
+/* Same colours as the score: green = good news, red = act now */
+.pace.is-ahead .pace-badge,
+.pace.is-done .pace-badge   { background: var(--success); color: var(--background); }
+.pace.is-behind .pace-badge { background: var(--error); color: var(--background); }
+
+
+/* ---------- 4. Showing up ---------- */
+
+/* The streak colour: warm, so a streak looks like FIRE, not like any other white square */
+.progress-page { --streak: #fb923c; --streak-soft: rgba(251, 146, 60, 0.18); }
+
+/* "77% of your habits done"  |  "🔥 7 days in a row" */
+.show-up {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+.big-label { margin-top: 4px; font-size: 13px; color: var(--on-surface-variant); }
+
+/* The score: a ring + the number + a word. The ring's colour tells you at a glance. */
+.score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-container);
+}
+/* The number sits in the middle of the ring */
+.score-dial { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.score-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-track,
+.score-fill { fill: none; stroke-width: 6; }
+.score-track { stroke: var(--surface-container-highest); }
+.score-fill {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    stroke-dasharray: 175.93;               /* 2 × π × 28 */
+    stroke-dashoffset: 175.93;              /* JS: 175.93 = empty, 0 = full */
+    transition: stroke-dashoffset 600ms ease-out;
+}
+.score-number {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary);
+}
+.score-word { font-size: 22px; font-weight: 700; line-height: 1.1; }
+.score .big-label { margin-top: 0; font-size: 12px; }
+
+/* Great ≥ 80 (green) · Good 60–79 (white) · Tough < 60 (red) */
+.score.is-great .score-fill, .score.is-great .score-word { stroke: var(--success); color: var(--success); }
+.score.is-good  .score-fill, .score.is-good  .score-word { stroke: var(--primary); color: var(--primary); }
+.score.is-tough .score-fill, .score.is-tough .score-word { stroke: var(--error);   color: var(--error); }
+
+.streak-box {
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    background: var(--streak-soft);
+}
+.streak-number { display: flex; align-items: center; gap: 4px; color: var(--streak); }
+.streak-flame { font-size: 34px; }
+.streak-box .big-label { color: var(--on-surface); }
+
+/* No streak right now: the box goes quiet (grey flame) */
+.streak-box.is-cold { background: var(--surface-container); }
+.streak-box.is-cold .streak-number { color: var(--on-surface-variant); }
+
+/* M T W T F S S over the squares */
+.squares-head,
+.squares {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.squares-head {
+    margin-top: 20px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--on-surface-variant);
+}
+.squares { padding: 0; list-style: none; }
+
+/* One square per day. Same language as the dots everywhere else. */
+.square {
+    position: relative;                  /* for the streak bridge and flame below */
+    aspect-ratio: 1;                     /* always a square, whatever the width */
+    max-height: 36px;
+    border-radius: 6px;
+    background: var(--surface-container-high);
+}
+.square.is-done    { background: var(--primary); }
+.square.is-partial { background: linear-gradient(135deg, var(--primary) 50%, var(--surface-container-high) 50%); }
+.square.is-missed  { background: transparent; border: 1.5px solid var(--outline); }
+.square.is-none    { background: transparent; border: 1.5px solid var(--primary); }      /* today, not yet */
+.square.is-rest    { background: var(--surface-container); }
+.square.is-before,
+.square.is-blank   { background: transparent; }                                        /* outside the range */
+.square.is-today   { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Streak days: orange and JOINED, so the run reads as one chain */
+.square.is-streak { background: var(--streak); }
+.square.is-linked::before {               /* fills the 6px gap to the day before: one long bar */
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -8px;
+    width: 10px;
+    background: var(--streak);
+}
+.square.is-streak-end::after {            /* 🔥 on the newest day of the streak */
+    content: "local_fire_department";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: "Material Symbols Outlined";
+    font-size: 18px;
+    color: var(--background);
+}
+
+/* The key under the squares */
+.squares-key {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--on-surface-variant);
+}
+.key {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: -6px;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+.key.is-streak  { background: var(--streak); }
+.key.is-done    { background: var(--primary); }
+.key.is-partial { background: linear-gradient(135deg, var(--primary) 50%, var(--surface-container-high) 50%); }
+.key.is-missed  { border: 1.5px solid var(--outline); }
+.key.is-rest    { background: var(--surface-container-high); }
+
+
+/* ---------- 5. Habits ---------- */
+
+.rates {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0;
+    list-style: none;
+}
+
+/* "Memorize new ……… Strong  93%" */
+.rate-top {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+.rate-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--on-surface); overflow-wrap: anywhere; }
+
+/* "Strong" / "Okay" / "Needs attention": the bar in words */
+.rate-word { font-size: 12px; font-weight: 600; color: var(--on-surface-variant); }
+.rate-percent { font-family: var(--font-time); font-size: 14px; color: var(--on-surface); }
+.rate-days { display: block; margin-top: 4px; font-size: 12px; color: var(--on-surface-variant); }
+
+/* The SAME scale and colours as the score ring: green ≥ 80 · white 60–79 · red < 60 */
+.rate.is-great .bar-fill  { background: var(--success); }
+.rate.is-great .rate-word { color: var(--success); }
+.rate.is-tough .bar-fill  { background: var(--error); }
+.rate.is-tough .rate-word,
+.rate.is-tough .rate-percent { color: var(--error); }
+
+.rates-says { margin: 0 0 14px; }
+
+
+/* ---------- 6. Focus ---------- */
+
+/* "↑ 1h 10m more than the 30 days before" */
+.change { margin-top: 10px; font-size: 13px; color: var(--on-surface-variant); }
+.change[hidden] { display: none; }
+.change.is-up   { color: var(--success); }
+.change.is-down { color: var(--error); }
+
+
+/* ---------- 7. Skips ---------- */
+
+.reasons {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    list-style: none;
+}
+
+.reason {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--outline-variant);
+    font-size: 15px;
+    color: var(--on-surface);
+}
+.reason:last-child { border-bottom: none; }
+.reason-text::first-letter { text-transform: uppercase; }
+.reason-count { font-family: var(--font-time); color: var(--on-surface-variant); }
+.reason:first-child .reason-text { font-weight: 600; }        /* the top reason stands out */
+
+.panel-skips .panel-says { margin: 0 0 8px; }
+
+
+/* ---------- Bigger screens ---------- */
+
+/* Two columns. "Showing up" is the tallest panel, so it takes the right column alone. */
+@media (min-width: 1200px) {
+    .panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "goal    consistency"
+            "habits  consistency"
+            "focus   skips";
+        align-items: start;
+    }
+    .panel-goal        { grid-area: goal; }
+    .panel-consistency { grid-area: consistency; }
+    .panel-habits      { grid-area: habits; }
+    .panel-focus       { grid-area: focus; }
+    .panel-skips       { grid-area: skips; }
+}

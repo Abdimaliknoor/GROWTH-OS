@@ -344,6 +344,15 @@ function buildRow(item, late) {
         button.textContent = "add";
         button.setAttribute("aria-label", `Add ${getStep(habit)} ${habit.unit} to ${habit.name}`);
     }
+     // In focus right now: the session owns the numbers, so the button opens it instead
+    if (getFocusFor(habit.id)) {
+        li.classList.add("is-focusing");
+        status.textContent = "In focus now";
+        button.hidden = false;
+        button.dataset.action = "focus";
+        button.textContent = "timer";
+        button.setAttribute("aria-label", `Open focus for ${habit.name}`);
+    }
     return li;
 }
 
@@ -374,9 +383,13 @@ function buildNow(item, badge) {
         return li;
     }
 
-    const active = getActiveFocus();
-    if (active && active.habitId === habit.id) {
+    // In focus right now: only "Resume focus". No +1 here, or the same pages count twice.
+    if (getFocusFor(habit.id)) {
+        li.classList.add("is-focusing");
+        li.querySelector(".now-amount").textContent = `${formatAmount(item)} · in focus now`;
         focusButton.querySelector(".focus-label").textContent = "Resume focus";
+        addButton.hidden = true;
+        return li;
     }
 
     if (habit.type === "completion") {
@@ -450,6 +463,7 @@ function updatePage() {
 function addOne(habitId) {
     const habit = getHabitById(habitId);
     if (!habit) return;
+        if (getFocusFor(habitId)) return openFocus(habitId);      
     if (habitId !== justFinishedId) justFinishedId = null;
 
     const before = getHabitStatus(habit);
@@ -525,10 +539,18 @@ function fillRecord() {
     recordAmount.value = amount;
     recordDone.checked = amount >= 1;
 
-    // ▶ Focus: today only (a session counts on the day it starts)
-    const active = getActiveFocus();
-    recordFocus.hidden = recordDate !== todayDate();
-    recordFocusText.textContent = active && active.habitId === habit.id ? "Resume focus" : "Start focus";
+       recordFocus.hidden = recordDate !== todayDate();
+    recordFocusText.textContent = "Start focus";
+
+    // In focus right now: nothing to type here. The session records it when you finish.
+    const inFocus = getFocusFor(habit.id, recordDate);
+    recordSheet.classList.toggle("is-focusing", Boolean(inFocus));
+    if (inFocus) {
+        recordNow.textContent = "In focus now. It's recorded when you finish the session.";
+        recordAmountBox.hidden = true;
+        recordDoneBox.hidden = true;
+        recordFocusText.textContent = "Resume focus";
+    }
 }
 
 function chooseRecordDay(day) {
@@ -547,6 +569,7 @@ function changeRecordAmount(direction) {
 // Save REPLACES the day's amount (12 means 12, not 12 more).
 function saveRecord() {
     const habit = getHabitById(recordHabitId);
+        if (getFocusFor(habit.id, recordDate)) return;           // the session owns it
     let amount;
     if (habit.type === "completion") {
         amount = recordDone.checked ? 1 : 0;

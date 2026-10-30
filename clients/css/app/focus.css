@@ -7,7 +7,7 @@
    4. Clock           ring + big time
    5. Counter         − 7 pages +
    6. Buttons         Start  /  Pause + Finish
-   7. Finish sheet    the <dialog> that slides up
+   7. Finish sheet    Skip, Discard (the sheet + mood pills are in app.css)
    8. Bigger screens + reduced motion
 
    focus.js sets data-stage on <main>: "setup", "running" or "paused".
@@ -325,68 +325,8 @@
 .focus-start { grid-column: 1 / -1; }      /* "1 / -1" = from the first line to the last = full width */
 
 
-
-/* <fieldset> has a border and padding by default. Remove them. */
-.sheet-mood {
-    margin-bottom: 20px;
-    padding: 0;
-    border: none;
-}
-
-.mood-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-}
-
-/* Each pill is a <label> with a real radio inside.
-   The radio is invisible but still there (so keyboards and screen readers work);
-   the <span> next to it is what you see. */
-.mood-pill {
-    position: relative;
-    cursor: pointer;
-}
-
-.mood-pill input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    margin: 0;
-    cursor: pointer;
-}
-
-.mood-pill span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1;                       /* as tall as it is wide = a circle */
-    border-radius: 50%;
-    background: var(--background);
-    font-size: 15px;
-    font-weight: 500;
-    transition: background-color 150ms, color 150ms, transform 150ms;
-}
-
-.mood-pill:hover span { background: var(--surface-container); }
-
-/* "input:checked + span" = the span right after a CHECKED radio */
-.mood-pill input:checked + span {
-    background: var(--primary);
-    color: var(--background);
-    font-weight: 700;
-    transform: scale(1.05);
-}
-
-.mood-pill input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-.mood-ends {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-size: 11px;
-    color: var(--outline);
-}
-
+/* ---------- 7. Finish sheet: Focus-only parts ---------- */
+/* The sheet itself and the mood pills are shared: they live in app.css. */
 
 .sheet-skip {
     padding: 0 22px;
@@ -414,7 +354,9 @@
 @media (max-height: 700px) {
     .focus { gap: var(--md); padding-top: calc(env(safe-area-inset-top) + 56px); }
     .focus-clock { width: 200px; height: 200px; }
-    .clock-time { font-size: 44px; }
+    .clock-time,
+    .clock-input { font-size: 44px; }
+    .clock-editor { padding-top: 74px; }
 }
 
 /* Tablet / desktop: everything centred in the screen, the sheet becomes a centred card */
@@ -428,16 +370,10 @@
     .focus-actions { margin-top: 0; }      /* no pushing to the bottom: it's all one centred group */
 
     .focus-clock { width: 260px; height: 260px; }
-        .clock-time,
-    .clock-input { font-size: 44px; }
-    .clock-editor { padding-top: 74px; }
     .clock-time,
     .clock-input { font-size: 56px; }
     .clock-editor { padding-top: 100px; }
-    
-
 }
-
 
 
 @media (prefers-reduced-motion: reduce) {

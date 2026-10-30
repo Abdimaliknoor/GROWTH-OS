@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#131313" />
+    <title>Me | Growth OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- tokens → the shared shell → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/me.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ═══════════════ NAVIGATION ═══════════════
+             Same as every page. Me has aria-current="page" (the highlighted tab). -->
+      <nav class="app-nav" aria-label="Main">
+        <p class="app-brand">
+          <span class="app-brand-mark icon" aria-hidden="true">north_east</span>
+          Growth OS
+        </p>
+        <ul class="app-tabs">
+          <li>
+            <a class="app-tab" href="today.html">
+              <span class="icon" aria-hidden="true">today</span>
+              Today
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="plan.html">
+              <span class="icon" aria-hidden="true">checklist</span>
+              Plan
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="journal.html">
+              <span class="icon" aria-hidden="true">edit_note</span>
+              Journal
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="progress.html">
+              <span class="icon" aria-hidden="true">trending_up</span>
+              Progress
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="me.html" aria-current="page">
+              <span class="icon" aria-hidden="true">person</span>
+              Me
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="app-page">
+        <!-- ═══════════════ TOP BAR ═══════════════ -->
+        <header class="app-topbar">
+          <div class="app-topbar-inner">
+            <h1 class="app-topbar-title">
+              <span class="icon" aria-hidden="true">person</span>
+              Me
+            </h1>
+          </div>
+        </header>
+
+        <main class="app-main me">
+          <!-- ═══════════════ 1. YOU ═══════════════
+                 "A"  Abdimalik  ·  Quran   (me.js fills it) -->
+          <section class="me-hero">
+            <span class="me-avatar" id="meAvatar" aria-hidden="true"></span>
+            <div>
+              <p class="me-name" id="meName"></p>
+              <p class="me-sub" id="meArea"></p>
+            </div>
+          </section>
+
+          <section class="me-section" aria-labelledby="youTitle">
+            <h2 class="me-section-title" id="youTitle">You</h2>
+            <div class="me-card">
+              <button class="me-row" id="nameRow" type="button">
+                <span class="me-row-icon icon" aria-hidden="true">badge</span>
+                <span class="me-row-text">
+                  <span class="me-row-title">Your name</span>
+                  <span class="me-row-sub" id="nameSub"></span>
+                </span>
+                <span class="me-row-go icon" aria-hidden="true"
+                  >chevron_right</span
+                >
+              </button>
+              <!-- A link: it goes to another page -->
+              <a class="me-row" href="plan.html">
+                <span class="me-row-icon icon" aria-hidden="true">flag</span>
+                <span class="me-row-text">
+                  <span class="me-row-title">Your goal</span>
+                  <span class="me-row-sub" id="goalSub"></span>
+                </span>
+                <span class="me-row-go icon" aria-hidden="true"
+                  >chevron_right</span
+                >
+              </a>
+            </div>
+          </section>
+
+          <!-- ═══════════════ 2. BACKUP ═══════════════
+                 Plain words: no "JSON", no "export". -->
+          <section class="me-section" aria-labelledby="backupTitle">
+            <h2 class="me-section-title" id="backupTitle">Backup</h2>
+            <div class="me-card">
+              <p class="me-note">
+                <span class="icon" aria-hidden="true">info</span>
+                Your data lives on this phone. Save a backup now and then, so
+                you never lose it.
+              </p>
+              <button class="me-row" id="saveBackup" type="button">
+                <span class="me-row-icon icon" aria-hidden="true"
+                  >download</span
+                >
+                <span class="me-row-text">
+                  <span class="me-row-title">Save a backup</span>
+                  <span class="me-row-sub"
+                    >A file with your goals, habits, journal and notes</span
+                  >
+                </span>
+              </button>
+              <!-- A <label> around a hidden file input: tapping it opens the file picker -->
+              <label class="me-row">
+                <span class="me-row-icon icon" aria-hidden="true"
+                  >settings_backup_restore</span
+                >
+                <span class="me-row-text">
+                  <span class="me-row-title">Bring back a backup</span>
+                  <span class="me-row-sub"
+                    >From a file you saved. Photos aren't in backups.</span
+                  >
+                </span>
+                <input
+                  class="visually-hidden"
+                  id="backupInput"
+                  type="file"
+                  accept=".json,application/json"
+                />
+              </label>
+              <!-- Only right after a restore -->
+              <button class="me-row" id="undoRestoreRow" type="button" hidden>
+                <span class="me-row-icon icon" aria-hidden="true">undo</span>
+                <span class="me-row-text">
+                  <span class="me-row-title">Undo the last restore</span>
+                  <span class="me-row-sub"
+                    >Go back to what you had before it</span
+                  >
+                </span>
+              </button>
+            </div>
+          </section>
+
+          <!-- ═══════════════ 3. START OVER ═══════════════
+                 At the bottom, in red, behind "Are you sure?" -->
+          <section class="me-section" aria-labelledby="resetTitle">
+            <h2 class="me-section-title" id="resetTitle">Start over</h2>
+            <div class="me-card">
+              <button class="me-row is-danger" id="resetRow" type="button">
+                <span class="me-row-icon icon" aria-hidden="true"
+                  >restart_alt</span
+                >
+                <span class="me-row-text">
+                  <span class="me-row-title">Reset everything</span>
+                  <span class="me-row-sub"
+                    >Deletes all your data and photos on this phone</span
+                  >
+                </span>
+              </button>
+            </div>
+          </section>
+
+          <p class="me-foot">Growth OS</p>
+        </main>
+      </div>
+      <!-- /app-page -->
+    </div>
+    <!-- /app -->
+
+    <!-- ═══════════════ SHEET · YOUR NAME ═══════════════ -->
+    <dialog class="sheet" id="nameSheet" aria-labelledby="nameTitle">
+      <h2 class="sheet-title" id="nameTitle">Your name</h2>
+      <p class="sheet-habit">What should Growth OS call you?</p>
+      <label class="visually-hidden" for="nameInput">Your name</label>
+      <input
+        class="sheet-note"
+        id="nameInput"
+        type="text"
+        maxlength="40"
+        autocomplete="given-name"
+      />
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="nameCancel" type="button">
+          Cancel
+        </button>
+        <button class="btn btn-primary" id="nameSave" type="button">
+          Save
+        </button>
+      </div>
+    </dialog>
+
+    <!-- ═══════════════ TOAST ═══════════════ -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span class="icon" aria-hidden="true">check_circle</span>
+      <span class="toast-text" id="toastText"></span>
+    </div>
+
+    <!-- storage → state → photos (Reset deletes them too) → insights → this page → mini focus bar -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/photos.js"></script>
+    <script src="../js/data/insight.js"></script>
+    <script src="../js/app/me.js"></script>
+    <script src="../js/app/focus-bar.js"></script>
+  </body>
+</html>

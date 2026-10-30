@@ -263,7 +263,7 @@
     width: 100%;
     min-height: 48px;
     padding: 0 16px;
-    border: 1px solid var(--outline-variant);
+    border: 1px solid var(--field-border);
     border-radius: var(--radius-md);
     background: var(--surface-container-low);
     color: var(--on-surface);
@@ -273,7 +273,7 @@
 }
 
 .ob-input::placeholder { color: var(--outline); }
-.ob-input:focus { border-color: var(--outline); }
+.ob-input:focus { border-color: var(--field-border); }
 
 /* ---------- Bigger screens ---------- */
 

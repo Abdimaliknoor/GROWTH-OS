@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#131313" />
+    <title>Note | Growth OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- tokens → shared shell → Journal (photos, 📷 button, note colours) → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/journal.css" />
+    <link rel="stylesheet" href="../css/app/note.css" />
+  </head>
+  <!-- Full screen, no menu: like Focus. Nothing between you and your words. -->
+  <body class="journal-page">
+    <!-- data-color = the note's colour (note.js). No colour → no attribute. -->
+    <div class="note-page" id="notePage">
+      <!-- ═══════════════ TOP BAR ═══════════════
+             ←  [⟳ Revise last hizb ▾]  ……  📌  🗑 -->
+      <header class="note-bar">
+        <a
+          class="note-round"
+          href="journal.html?view=notes"
+          aria-label="Back to notes"
+        >
+          <span class="icon" aria-hidden="true">arrow_back</span>
+        </a>
+
+        <!-- Where it lives: tap to move it (opens the folder sheet) -->
+        <button class="note-where" id="noteWhere" type="button">
+          <span class="icon" aria-hidden="true" id="noteWhereIcon"
+            >folder_open</span
+          >
+          <span id="noteWhereName">No folder</span>
+          <span class="icon" aria-hidden="true">expand_more</span>
+        </button>
+
+        <span class="note-bar-space"></span>
+
+        <!-- aria-pressed="true" = pinned (filled pin) -->
+        <button
+          class="note-round"
+          id="notePin"
+          type="button"
+          aria-pressed="false"
+          aria-label="Pin note"
+        >
+          <span class="icon" aria-hidden="true">keep</span>
+        </button>
+        <button
+          class="note-round"
+          id="noteDelete"
+          type="button"
+          aria-label="Delete note"
+        >
+          <span class="icon" aria-hidden="true">delete</span>
+        </button>
+      </header>
+
+      <!-- ═══════════════ THE NOTE ═══════════════
+             No Save button: note.js saves a moment after you stop typing. -->
+      <main class="note-content">
+        <label class="visually-hidden" for="noteTitle">Title</label>
+        <input
+          class="note-title"
+          id="noteTitle"
+          type="text"
+          maxlength="120"
+          placeholder="Title"
+          autocomplete="off"
+        />
+
+        <p class="note-meta" id="noteMeta"></p>
+
+        <label class="visually-hidden" for="noteText">Note</label>
+        <textarea
+          class="note-text"
+          id="noteText"
+          rows="6"
+          maxlength="10000"
+          placeholder="Write anything…"
+        ></textarea>
+
+        <!-- Up to 3 photos, each with ✕ (note.js) -->
+        <div class="journal-photos note-photos" id="notePhotos" hidden></div>
+      </main>
+
+      <!-- ═══════════════ BOTTOM ═══════════════
+             The colours row opens above the toolbar when you tap 🎨. -->
+      <div class="note-bottom">
+        <div
+          class="note-colors"
+          id="noteColors"
+          role="group"
+          aria-label="Note colour"
+          hidden
+        >
+          <button
+            class="note-swatch"
+            type="button"
+            data-color=""
+            aria-label="No colour"
+          ></button>
+          <button
+            class="note-swatch"
+            type="button"
+            data-color="amber"
+            aria-label="Amber"
+          ></button>
+          <button
+            class="note-swatch"
+            type="button"
+            data-color="rose"
+            aria-label="Rose"
+          ></button>
+          <button
+            class="note-swatch"
+            type="button"
+            data-color="sky"
+            aria-label="Sky"
+          ></button>
+          <button
+            class="note-swatch"
+            type="button"
+            data-color="sage"
+            aria-label="Sage"
+          ></button>
+          <button
+            class="note-swatch"
+            type="button"
+            data-color="lavender"
+            aria-label="Lavender"
+          ></button>
+        </div>
+
+        <div class="note-toolbar">
+          <!-- capture="environment" = open the back camera straight away -->
+          <label
+            class="photo-button"
+            id="cameraButton"
+            aria-label="Take a photo"
+          >
+            <span class="icon" aria-hidden="true">photo_camera</span>
+            <input
+              class="visually-hidden"
+              id="cameraInput"
+              type="file"
+              accept="image/*"
+              capture="environment"
+            />
+          </label>
+          <!-- No capture = the gallery -->
+          <label
+            class="photo-button"
+            id="galleryButton"
+            aria-label="Add from gallery"
+          >
+            <span class="icon" aria-hidden="true">image</span>
+            <input
+              class="visually-hidden"
+              id="galleryInput"
+              type="file"
+              accept="image/*"
+            />
+          </label>
+          <button
+            class="photo-button"
+            id="colorButton"
+            type="button"
+            aria-pressed="false"
+            aria-label="Colour"
+          >
+            <span class="icon" aria-hidden="true">palette</span>
+          </button>
+
+          <!-- "Saving…" → "✓ Saved" -->
+          <p class="note-saved" id="noteSaved" role="status" aria-live="polite">
+            <span class="icon" aria-hidden="true">cloud_done</span>
+            <span id="noteSavedText">Saved</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SHEET · MOVE TO ═══════════════
+         No folder · your goal · its habits. aria-pressed = where it is now. -->
+    <dialog class="sheet" id="folderSheet" aria-labelledby="folderTitle">
+      <h2 class="sheet-title" id="folderTitle">Move to</h2>
+      <p class="sheet-habit">Your goal and habits work as folders.</p>
+      <div class="folder-list" id="folderList"></div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="folderClose" type="button">
+          Close
+        </button>
+      </div>
+    </dialog>
+
+    <!-- ═══════════════ TOAST ═══════════════ -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span class="icon" aria-hidden="true">info</span>
+      <span class="toast-text" id="toastText"></span>
+    </div>
+
+    <!-- storage → state → photos → insights → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/photos.js"></script>
+    <script src="../js/data/insight.js"></script>
+    <script src="../js/app/note.js"></script>
+  </body>
+</html>

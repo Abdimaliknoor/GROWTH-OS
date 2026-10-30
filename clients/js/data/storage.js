@@ -24,3 +24,23 @@ function writeStorage(data) {
 function clearStorage() {
     localStorage.removeItem(STORAGE_KEY);
 }
+
+// ── Safety copy: what you had just before you brought back a backup (one "undo") ──
+const SAFETY_KEY = "growthOS-before-restore";
+
+function keepSafetyCopy(data) {
+    localStorage.setItem(SAFETY_KEY, JSON.stringify(data));
+}
+
+function readSafetyCopy() {
+    const text = localStorage.getItem(SAFETY_KEY);
+    try {
+        return text ? JSON.parse(text) : null;
+    } catch {
+        return null;
+    }
+}
+
+function clearSafetyCopy() {
+    localStorage.removeItem(SAFETY_KEY);
+}

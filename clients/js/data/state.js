@@ -18,6 +18,7 @@
             ├─ logs ────── log.habitId → habit      (WHAT you did)
             └─ focusSessions ── session.habitId → habit
      journal ─── your own written entries (by date)
+          notes ───── things to keep (note.folder → your goal or a habit, or none)
 
    MAP OF THIS FILE
       1. Shape of a new user ..... emptyData
@@ -33,6 +34,7 @@
      10. Logs .................... addLog, setDayAmount, skipHabit
      11. Focus sessions .......... start, pause, resume, stop, finish, cancel
      12. Journal ................. get, add, update, delete
+          13. Notes ................... get, add, update, pin, delete
    ══════════════════════════════════════════════════════════════════ */
 
 
@@ -49,7 +51,8 @@ function emptyData() {
         routine: [],                                      // WHEN things happen      (item.habitId → habit)
         logs: [],                                         // what was actually done  (log.habitId → habit)
         focusSessions: [],                                // focus timers            (session.habitId → habit)
-        journal: []                                       // your own written entries
+        journal: [],                                      // your own written entries
+        notes: []                                         // things to keep
     };
 }
 
@@ -131,7 +134,7 @@ function describeHabitAmount(habit) {
 
 /* ════════════════════ 4. SAVE INTO ANY LIST ════════════════════
    The two functions every section below uses.
-   listName = "goals", "habits", "routine", "logs", "focusSessions" or "journal". */
+   listName = "goals", "habits", "routine", "logs", "focusSessions"  "journal","notes"or "journal". */
 
 // Add the item, or replace the one with the same id.
 //   saveItem("habits", { id: "h1", … })   new id → added   ·   known id → replaced
@@ -398,10 +401,10 @@ function saveRoutine(items) {
 
 
 /* ════════════════════ 10. LOGS (what really happened) ════════════════════
-   One log = one record:
-     { id, habitId, date: "2026-10-10", amount: 1, status: "done" }
-     { id, habitId, date: "2026-10-10", amount: 0, status: "skipped", reason: "travel" }
-   "How much today?" is a calculation, so it lives in insight.js (getDayAmount). */
+     One log = one record:
+     { id, habitId, date: "2026-10-10", amount: 1, status: "done", source: "quick" }
+     { id, habitId, date: "2026-10-10", amount: 0, status: "skipped", reason: "travel", source: "record" }
+   source = HOW it was recorded:  "quick" (+ on Today) · "record" (the sheet) · "focus" (a session) */
 
 function getLogs() {
     return getData().logs;
@@ -409,8 +412,8 @@ function getLogs() {
 
 // +1: add progress.   addLog("h1", 1) → 1 page today.
 // Returns the log, so the page can offer Undo: removeItem("logs", log.id).
-function addLog(habitId, amount, date = todayDate()) {
-    const log = { id: generateId("log"), habitId, amount, date, status: "done" };
+function addLog(habitId, amount, date = todayDate(), source = "quick") {
+    const log = { id: generateId("log"), habitId, amount, date, status: "done", sourcecreatedAt: Date.now()  };
     saveItem("logs", log);
     return log;
 }
@@ -421,8 +424,7 @@ function setDayAmount(habitId, amount, date = todayDate()) {
     const data = getData();
     data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
     if (amount > 0) {
-        data.logs.push({ id: generateId("log"), habitId, amount, date, status: "done" });
-    }
+     data.logs.push({ id: generateId("log"), habitId, amount, date, status: "done", source: "record", createdAt: Date.now() });    }
     writeStorage(data);
 }
 
@@ -430,8 +432,7 @@ function setDayAmount(habitId, amount, date = todayDate()) {
 function skipHabit(habitId, reason, date = todayDate()) {
     const data = getData();
     data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
-    data.logs.push({ id: generateId("log"), habitId, amount: 0, date, status: "skipped", reason });
-    writeStorage(data);
+    data.logs.push({ id: generateId("log"), habitId, amount: 0, date, status: "skipped", reason, source: "record", createdAt: Date.now() });
 }
 
 
@@ -458,6 +459,12 @@ function getActiveFocus() {
     return getFocusSessions().find(session => !session.savedAt) || null;
 }
 
+// Is THIS habit in focus right now, on this day?   getFocusFor("h2") → the session, or null
+// While it is, the session owns the habit's numbers: Today sends you there instead of counting twice.
+function getFocusFor(habitId, date = todayDate()) {
+    const active = getActiveFocus();
+    return active && active.habitId === habitId && active.date === date ? active : null;
+}
 // ── Change ──
 
 // Start a new session NOW.   startFocus("h2", 25) → the new session
@@ -530,7 +537,7 @@ function finishFocus(id, { amount, mood = null, note = "" }) {
     if (!session || session.savedAt) return session;
     if (!session.endedAt) session = stopFocus(id);              // Save without Finish? Stop the clock first
 
-    const log = amount > 0 ? addLog(session.habitId, amount, session.date) : null;
+    const log = amount > 0 ? addLog(session.habitId, amount, session.date, "focus") : null;
     return updateFocus(id, {
         amount,
         mood,
@@ -539,7 +546,23 @@ function finishFocus(id, { amount, mood = null, note = "" }) {
         savedAt: Date.now()
     });
 }
+// ••• on a focus entry in the Journal → "Remove reflection".
+// The mood and note go; the minutes and pages STAY (they're your progress).
+function removeFocusReflection(id) {
+    return updateFocus(id, { mood: null, note: "" });
+}
 
+// ••• → "Undo this session": the session AND the pages it logged are removed.
+// Progress goes down, so the page asks "Are you sure?" first.
+function undoFocus(id) {
+    const session = getFocusById(id);
+    if (!session) return false;
+    const data = getData();
+    data.focusSessions = data.focusSessions.filter(item => item.id !== id);
+    data.logs = data.logs.filter(log => log.id !== session.logId);
+    writeStorage(data);
+    return true;
+}
 // "Discard this session": delete it, nothing logged.
 // Only while it's still open: a saved session has a log, and that's history now.
 function cancelFocus(id) {
@@ -551,7 +574,8 @@ function cancelFocus(id) {
 
 
 /* ════════════════════ 12. JOURNAL (your own written entries) ════════════════════
-   One entry: { id, date: "2026-10-17", createdAt: 1760…, text: "Long day", mood: 4 or null }
+     One entry: { id, date: "2026-10-17", createdAt: 1760…, text: "Long day", mood: 4 or null, photos: ["photo-…"] }
+   photos = ids only. The pictures themselves live in photos.js (IndexedDB): too big for here.
    Focus moods and skip reasons are NOT saved here: insight.js reads them from
    focusSessions and logs, and mixes them in (getJournal). */
 
@@ -560,10 +584,10 @@ function getJournalEntries() {
     return getData().journal;
 }
 
-// ADD an entry, written right now.   addJournalEntry("Long day at uni", 4)
-// Empty text (or only spaces) → nothing saved, returns null.
-function addJournalEntry(text, mood = null) {
-    if (!text.trim()) return null;
+// ADD an entry, written right now.   addJournalEntry("Long day at uni", 4, ["photo-…"])
+// No words AND no photos → nothing saved, returns null. (A photo alone is fine.)
+function addJournalEntry(text, mood = null, photos = []) {
+    if (!text.trim() && photos.length === 0) return null;
 
     const now = Date.now();
     const entry = {
@@ -571,7 +595,8 @@ function addJournalEntry(text, mood = null) {
         date: dateOf(now),              // which day: "2026-10-17"
         createdAt: now,                 // the exact moment: gives "21:02" and the order
         text: text.trim(),              // "  hi  " → "hi"
-        mood                            // 1–5, or null
+        mood,                            // 1–5, or null
+        photos                           // array of photo IDs
     };
     saveItem("journal", entry);
     return entry;
@@ -589,4 +614,106 @@ function updateJournalEntry(id, changes) {
 // DELETE an entry for good.
 function deleteJournalEntry(id) {
     removeItem("journal", id);
+}
+/* ════════════════════ 13. NOTES (things to keep) ════════════════════
+   One note:
+     { id, title: "Hizb 12 · mistakes", text: "Page 3 keeps…",
+       folder: { kind: "habit", id: "h2" }  or  { kind: "goal", id: "g1" }  or  null (none),
+       pinned: false, photos: ["photo-…"], createdAt: 1761…, updatedAt: 1761… }
+   A note is NOT tied to a day (that's the journal). updatedAt decides the order.
+   Your goal and habits work as folders automatically. Folders you make yourself: later.
+   ({ kind: "folder", id } will fit in the same field, so nothing has to change then.) */
+
+// All notes, as saved (oldest first). Sorting and search live in insight.js.
+function getNotes() {
+    return getData().notes;
+}
+
+function getNoteById(id) {
+    return getNotes().find(note => note.id === id) || null;
+}
+
+// A NEW note, empty, ready to type in.   addNote({ kind: "habit", id: "h2" })
+// The page opens it straight away. If you leave it empty, the page deletes it.
+function addNote(folder = null) {
+    const now = Date.now();
+    const note = { id: generateId("note"), title: "", text: "", folder, pinned: false, photos: [], createdAt: now, updatedAt: now };
+    saveItem("notes", note);
+    return note;
+}
+
+// Change any fields; updatedAt moves to NOW, so it jumps to the top of "Recent".
+//   updateNote(id, { title: "Tajweed rules" })
+function updateNote(id, changes) {
+    const note = getNoteById(id);
+    if (!note) return null;
+    const updated = { ...note, ...changes, updatedAt: Date.now() };
+    saveItem("notes", updated);
+    return updated;
+}
+
+// 📌 on / off. Doesn't touch updatedAt: pinning isn't editing.
+function togglePinNote(id) {
+    const note = getNoteById(id);
+    if (!note) return null;
+    const updated = { ...note, pinned: !note.pinned };
+    saveItem("notes", updated);
+    return updated;
+}
+
+// Delete for good. Returns the note, so the page can delete its photos too (photos.js).
+function deleteNote(id) {
+    const note = getNoteById(id);
+    removeItem("notes", id);
+    return note;
+}
+/* ════════════════════ 14. BACKUP (save a copy / bring it back) ════════════════════
+   Until accounts exist, your data lives on ONE phone. A backup is a file you keep.
+   Photos are NOT in it (too big): they stay on the phone they were taken on.
+
+   The file:  { app: "growth-os", version: 1, savedAt: "2026-10-30T10:15:00.000Z", data: { …everything… } } */
+
+const BACKUP_APP = "growth-os";
+const BACKUP_LISTS = ["goals", "habits", "routine", "logs", "focusSessions", "journal", "notes"];
+
+// Everything, as the text of one file.  null, 2 = nicely indented, so a person can read it.
+function exportData() {
+    const data = getData();
+    return JSON.stringify({ app: BACKUP_APP, version: data.version, savedAt: new Date().toISOString(), data }, null, 2);
+}
+
+// A file's text → its data, ONLY if it's really one of our backups.  Anything else → null.
+// A file is a stranger: anyone can edit it in Notepad. So we check before we trust it.
+function readBackupFile(text) {
+    let file;
+    try {
+        file = JSON.parse(text);
+    } catch {
+        return null;                                         // not JSON at all
+    }
+    if (!file || file.app !== BACKUP_APP || !file.data || typeof file.data !== "object") return null;
+
+    const data = { ...emptyData(), ...file.data };           // a backup from before notes existed still works
+    const listsOk = BACKUP_LISTS.every(name => Array.isArray(data[name]));
+    const profileOk = Boolean(data.profile) && typeof data.profile === "object";
+    return listsOk && profileOk ? { data, savedAt: file.savedAt || null } : null;
+}
+
+// Replace everything on this phone with the backup. What was here is kept once, for Undo.
+function restoreData(data) {
+    keepSafetyCopy(getData());
+    writeStorage(data);
+}
+
+// Put back what was here before the last restore.  → true if there was something to put back
+function undoRestore() {
+    const before = readSafetyCopy();
+    if (!before) return false;
+    writeStorage(before);
+    clearSafetyCopy();
+    return true;
+}
+
+function canUndoRestore() {
+    return readSafetyCopy() !== null;
 }

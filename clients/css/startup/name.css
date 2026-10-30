@@ -25,7 +25,7 @@
 .name-input::placeholder { color: var(--outline-variant); }
 
 /* Focus: a soft grey underline instead of a bright white one */
-.name-input:focus { border-bottom-color: var(--outline); }
+.name-input:focus { border-bottom-color: var(--field-border); }
 
 .name-input[aria-invalid="true"] { border-bottom-color: var(--error); }
 

@@ -458,7 +458,8 @@
 .upcoming-line { list-style: none; }               /* plain <li> now: no "1." */
 .upcoming-line:last-child .upcoming-row { border-bottom: none; }
 .upcoming-row:hover .upcoming-label { text-decoration: underline; text-underline-offset: 3px; }
-.upcoming-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--radius-md); }.upcoming-when { font-size: 12px; }
+.upcoming-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--radius-md); }
+.upcoming-when { font-size: 12px; }
 .upcoming-text { min-width: 0; }
 .upcoming-label { display: block; font-weight: 600; }
 .upcoming-note { display: block; font-size: 13px; color: var(--on-surface-variant); overflow-wrap: anywhere; }

@@ -122,8 +122,8 @@
 
 .goal-chip.is-selected {
     border-color: var(--primary);
-    background: var(--surface-container-high);
-    color: var(--primary);
+    background: var(--primary);
+    color: var(--background);
 }
 
 .goal-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -162,8 +162,25 @@
 /* "A card that contains a checked radio" → selected look. No JS. */
 .measure-card:has(input:checked) {
     border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);  /* 2px white edge, without moving anything */
     background: var(--surface-container-high);
     color: var(--primary);
+}
+
+/* ✓ on the right of the chosen card */
+.measure-card:has(input:checked)::after {
+    content: "✓";
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-left: auto;                     /* pushed to the right end of the row */
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--background);
+    font-size: 13px;
+    font-weight: 700;
 }
 
 /* The radio is hidden, so the card shows the keyboard focus ring */
@@ -253,7 +270,7 @@
 }
 
 .unit-chip:hover { color: var(--on-surface); border-color: var(--outline); }
-.unit-chip.is-selected { border-color: var(--primary); color: var(--primary); }
+ .unit-chip.is-selected { border-color: var(--primary); color: var(--primary); }
 .unit-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .current-field { margin-top: var(--md); }

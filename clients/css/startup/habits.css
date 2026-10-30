@@ -82,6 +82,7 @@
 }
 
 .type-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -100,10 +101,27 @@
 /* "A card that contains a checked radio" → selected look. No JS. */
 .type-card:has(input:checked) {
     border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);  /* 2px white edge, without moving anything */
     background: var(--surface-container-high);
     color: var(--primary);
 }
 
+/* ✓ in the top-right corner of the chosen card */
+.type-card:has(input:checked)::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--background);
+    font-size: 12px;
+    font-weight: 700;
+}
 .type-card:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .type-icon {

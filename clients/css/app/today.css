@@ -337,6 +337,15 @@
 /* Late, not logged: bright outlined dot so it gets noticed */
 .habit-row.is-late .line-dot { border-color: var(--primary); }
 .habit-row.is-late .row-status { color: var(--on-surface); }
+/* In focus right now: green, like the mini focus bar's ring */
+.habit-row.is-focusing .line-dot { border-color: var(--success); background: var(--success); }
+.habit-row.is-focusing .row-status,
+.habit-row.is-focusing .row-button { color: var(--success); }
+.now-item.is-focusing .now-amount { color: var(--success); }
+
+/* Record sheet while in focus: only "Resume focus" and Cancel are left */
+.sheet.is-focusing .record-skip,
+.sheet.is-focusing #recordSave { display: none; }
 
 
 /* --- The NOW card --- */
@@ -412,7 +421,7 @@
 .now-actions .btn-primary { flex: 1; }     /* Start focus takes the space, +1 stays compact */
 
 .now-add { min-width: 72px; }
-
+.now-add[hidden] { display: none; }       
 /* All done: the same card, a tick in the dot */
 .all-done .line-dot {
     width: 24px;

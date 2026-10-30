@@ -1,0 +1,324 @@
+<!doctype html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PROGRESS  ·  app/progress.html                              ║
+  ║  Looking back, in numbers: is it working?                    ║
+  ╚══════════════════════════════════════════════════════════════╝
+
+  WHAT'S IN THIS FILE (top → bottom)
+
+    PAGE
+      Navigation ......... Progress is the highlighted tab
+      Top bar ............ "📈 Progress        LAST 30 DAYS"
+      Range .............. [Week] [Month] [All]
+      Summary ............ one sentence: how it's going
+      1. Goal ............ closer to the finish line?
+      2. Showing up ...... score ring, 🔥 streak, a square per day
+      3. Habits .......... strongest → weakest
+      4. Focus ........... time, sessions, average mood
+      5. Skips ........... why you missed
+
+    TEMPLATES
+      rateTemplate ....... one habit bar
+      reasonTemplate ..... one skip reason
+
+  Who fills what: progress.js. Numbers: insight.js (section 9).
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#131313" />
+    <title>Progress | Growth OS</title>
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
+
+    <!-- Fonts: Geist for text, Geist Mono for numbers, Material icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles. Order matters: tokens → the shared shell → this page -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/app/app.css" />
+    <link rel="stylesheet" href="../css/app/progress.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- ═══════════════ NAVIGATION ═══════════════ -->
+      <nav class="app-nav" aria-label="Main">
+        <p class="app-brand">
+          <img
+            class="app-brand-mark"
+            src="../assets/icons/unnamed.png"
+            alt=""
+          />
+          Growth OS
+        </p>
+        <ul class="app-tabs">
+          <li>
+            <a class="app-tab" href="today.html">
+              <span class="icon" aria-hidden="true">today</span>
+              Today
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="plan.html">
+              <span class="icon" aria-hidden="true">checklist</span>
+              Plan
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="journal.html">
+              <span class="icon" aria-hidden="true">edit_note</span>
+              Journal
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="progress.html" aria-current="page">
+              <span class="icon" aria-hidden="true">trending_up</span>
+              Progress
+            </a>
+          </li>
+          <li>
+            <a class="app-tab" href="me.html">
+              <span class="icon" aria-hidden="true">person</span>
+              Me
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ═══════════════ PAGE BOX ═══════════════ -->
+      <div class="app-page">
+        <!-- ─── TOP BAR · progress.js writes the range ─── -->
+        <header class="app-topbar">
+          <div class="app-topbar-inner">
+            <h1 class="app-topbar-title">
+              <span class="icon" aria-hidden="true">trending_up</span>
+              Progress
+            </h1>
+            <p class="app-topbar-meta" id="rangeLabel"></p>
+          </div>
+        </header>
+
+        <main class="app-main progress-page">
+          <!-- ─── RANGE · the white chip is the chosen one ─── -->
+          <div
+            class="range-chips"
+            id="rangeChips"
+            role="group"
+            aria-label="Time range"
+          >
+            <button
+              class="chip"
+              type="button"
+              data-range="week"
+              aria-pressed="false"
+            >
+              Week
+            </button>
+            <button
+              class="chip"
+              type="button"
+              data-range="month"
+              aria-pressed="true"
+            >
+              Month
+            </button>
+            <button
+              class="chip"
+              type="button"
+              data-range="all"
+              aria-pressed="false"
+            >
+              All
+            </button>
+          </div>
+
+          <!-- ─── SUMMARY · one sentence ─── -->
+          <section class="summary" aria-label="Summary">
+            <span class="icon summary-icon" aria-hidden="true">insights</span>
+            <p class="summary-text" id="summaryText"></p>
+          </section>
+
+          <div class="panels">
+            <!-- ─── 1. GOAL · Are you getting closer? ─── -->
+            <section
+              class="panel panel-goal"
+              id="goalCard"
+              aria-labelledby="goalHeading"
+            >
+              <h2 class="panel-title" id="goalHeading">
+                Are you getting closer to your goal?
+              </h2>
+              <p class="goal-name" id="goalName"></p>
+              <div
+                class="bar"
+                id="goalBar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-label="Goal progress"
+              >
+                <span class="bar-fill" id="goalBarFill"></span>
+              </div>
+              <p class="panel-says" id="goalSays"></p>
+              <!-- On track? A badge (On track / Behind / Reached) + one line -->
+              <div class="pace" id="goalPace" hidden>
+                <span class="pace-badge" id="paceBadge"></span>
+                <span class="pace-text" id="paceText"></span>
+              </div>
+            </section>
+
+            <!-- ─── 2. SHOWING UP · % of habits done + streak + a square per day ─── -->
+            <section
+              class="panel panel-consistency"
+              aria-labelledby="consistencyHeading"
+            >
+              <h2 class="panel-title" id="consistencyHeading">
+                Are you showing up?
+              </h2>
+
+              <!-- Two big answers side by side: how much, and how long in a row -->
+              <div class="show-up">
+                <!-- The % inside a ring (fills like Today's day ring) + a word: Great / Good / Tough -->
+                <div class="score" id="scoreBox">
+                  <div class="score-dial">
+                    <svg
+                      class="score-ring"
+                      viewBox="0 0 64 64"
+                      aria-hidden="true"
+                    >
+                      <circle class="score-track" cx="32" cy="32" r="28" />
+                      <circle
+                        class="score-fill"
+                        id="scoreRing"
+                        cx="32"
+                        cy="32"
+                        r="28"
+                      />
+                    </svg>
+                    <p class="score-number" id="consistencyPercent"></p>
+                  </div>
+                  <div>
+                    <p class="score-word" id="scoreWord"></p>
+                    <p class="big-label">habits done</p>
+                  </div>
+                </div>
+                <div class="streak-box" id="streakBox">
+                  <p class="big-number streak-number">
+                    <span class="icon streak-flame" aria-hidden="true"
+                      >local_fire_department</span
+                    >
+                    <span id="streakNumber"></span>
+                  </p>
+                  <p class="big-label" id="streakLabel"></p>
+                </div>
+              </div>
+              <p class="panel-says" id="consistencySays"></p>
+
+              <!-- Mon…Sun + one square per day (progress.js) -->
+              <div class="squares-head" aria-hidden="true">
+                <span>M</span><span>T</span><span>W</span><span>T</span
+                ><span>F</span><span>S</span><span>S</span>
+              </div>
+              <ol class="squares" id="squares"></ol>
+              <p class="squares-key" aria-hidden="true">
+                <span class="key is-streak"></span> streak
+                <span class="key is-done"></span> everything done
+                <span class="key is-partial"></span> some
+                <span class="key is-missed"></span> nothing
+                <span class="key is-rest"></span> day off
+              </p>
+            </section>
+
+            <!-- ─── 3. HABITS · strongest → weakest ─── -->
+            <section class="panel panel-habits" aria-labelledby="habitsHeading">
+              <h2 class="panel-title" id="habitsHeading">
+                Which habits are strong?
+              </h2>
+              <p class="panel-says rates-says" id="ratesSays" hidden></p>
+              <ol class="rates" id="rateList"></ol>
+              <p class="panel-empty" id="ratesEmpty" hidden>
+                No habit days in this range yet.
+              </p>
+            </section>
+
+            <!-- ─── 4. FOCUS · time, sessions, mood ─── -->
+            <section class="panel panel-focus" aria-labelledby="focusHeading">
+              <h2 class="panel-title" id="focusHeading">
+                How much did you focus?
+              </h2>
+              <p class="big-number" id="focusTime"></p>
+              <p class="panel-says" id="focusSays"></p>
+              <!-- ↑ / ↓ compared with the period before (same length) -->
+              <p class="change" id="focusChange" hidden></p>
+            </section>
+
+            <!-- ─── 5. SKIPS · why you missed ─── -->
+            <section class="panel panel-skips" aria-labelledby="skipsHeading">
+              <h2 class="panel-title" id="skipsHeading">Why did you skip?</h2>
+              <p class="panel-says" id="reasonsSays" hidden></p>
+              <ol class="reasons" id="reasonList"></ol>
+              <p class="panel-empty" id="reasonsEmpty" hidden>
+                No skips in this range. 👏
+              </p>
+            </section>
+          </div>
+          <!-- /panels -->
+        </main>
+      </div>
+      <!-- /app-page -->
+    </div>
+    <!-- /app -->
+
+    <!-- ═══════════════ TEMPLATES ═══════════════ -->
+
+    <!-- RATE · "Memorize new   Strong 92%"  bar  "22 of 24 days" -->
+    <template id="rateTemplate">
+      <li class="rate">
+        <div class="rate-top">
+          <span class="rate-name"></span>
+          <span class="rate-word"></span>
+          <span class="rate-percent"></span>
+        </div>
+        <div
+          class="bar rate-bar"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <span class="bar-fill"></span>
+        </div>
+        <span class="rate-days"></span>
+      </li>
+    </template>
+
+    <!-- REASON · "travelling ×3" -->
+    <template id="reasonTemplate">
+      <li class="reason">
+        <span class="reason-text"></span>
+        <span class="reason-count"></span>
+      </li>
+    </template>
+
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/data/insight.js"></script>
+    <script src="../js/app/progress.js"></script>
+    <script src="../js/app/focus-bar.js"></script>
+  </body>
+</html>

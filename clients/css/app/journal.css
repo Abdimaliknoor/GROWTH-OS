@@ -1,18 +1,54 @@
 /* =========================================================
    JOURNAL  (app/journal.html)
 
-   1. Write box     textarea + mood + Save
-   2. Empty state
-   3. Days          "Today", "Yesterday", "Friday 16 October"
-   4. Entries       ✍️ write · 🎯 focus · ⏭ skip
-   5. Edit sheet    only the Journal-only parts (the sheet is in app.css)
+   1. Days | Notes switch
+   2. Write box        prompt, text, photos, mood, Save
+   3. Photos           in the write box, entries, notes, sheets
+   4. Empty states
+   5. Days             title + date, summary, entries
+   6. Entries          ✍️ write · 🎯 focus · ⏭ skip · ⊕ records
+   7. Notes            search, folders, cards, + button
+   8. Sheets           Journal-only parts (the sheet itself is in app.css)
+   9. Colours          Journal's warm amber, mood colours, note colours
+  10. Bigger screens
 
-   The shared things (top bar, nav, .btn, .tag, .sheet, mood pills)
-   all live in app.css. This file is only what's new.
+   Shared things (top bar, nav, .btn, .tag, .chip, .sheet, mood pills) live in app.css.
+   New names start with journal- / note- / entry- so nothing collides
+   (.card and .summary are already taken in base.css).
    ========================================================= */
 
 
-/* ---------- 1. Write box ---------- */
+/* ---------- 1. Days | Notes switch ---------- */
+
+.journal-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-bottom: var(--lg);
+    padding: 4px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+}
+
+.journal-switch-tab {
+    min-height: 40px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+}
+.journal-switch-tab:hover { color: var(--on-surface); }
+.journal-switch-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* The chosen tab: white, like every "selected" thing in the app */
+.journal-switch-tab[aria-selected="true"] { background: var(--primary); color: var(--background); }
+
+/* Views and boxes hidden by journal.js */
+.journal [hidden] { display: none !important; }
+
+
+/* ---------- 2. Write box ---------- */
 
 .write-card {
     margin-bottom: var(--xl);
@@ -22,61 +58,115 @@
     background: var(--surface-container-low);
 }
 
-/* :focus-within = "something INSIDE me has focus" → brighter border while you type */
-.write-card:focus-within { border-color: var(--outline); }
-
-.write-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--primary);
+/* Today's question: changes every day (journal.js) */
+.write-prompt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    font-size: 13px;
+    color: var(--on-surface-variant);
 }
+.write-prompt .icon { font-size: 16px; }
 
+/* Grey edge = you can type here; white edge = you're typing here */
 .write-text {
     display: block;
     width: 100%;
-    min-height: 88px;
-    padding: 0;
-    border: none;
-    background: transparent;
+    min-height: 96px;
+    padding: 12px 14px;
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-lg);
+    background: var(--background);
     font-size: 15px;
     line-height: 1.55;
     color: var(--on-surface);
-    resize: vertical;                      /* drag down to make it taller, never wider */
+    resize: none;                          /* no drag dot in the corner on phones */
 }
 .write-text::placeholder { color: var(--outline); }
-.write-text:focus-visible { outline: none; }    /* the card's border shows the focus instead */
+.write-text:focus-visible { outline: none; border-color: var(--primary); }
 
-/* Mood on the left, Save on the right */
-.write-bottom {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--md);
-    margin-top: var(--md);
-    padding-top: var(--md);
-    border-top: 1px solid var(--outline-variant);
-}
-
-/* The mood pills are 1fr each: in a wide card that's huge.
-   Cap the whole row so each circle stays about 36px. */
 .write-mood {
-    flex: 1;
-    max-width: 220px;
-    margin-bottom: 0;
+    max-width: 260px;                      /* each circle stays about 44px, even in a wide card */
+    margin: var(--md) 0 14px;
 }
-.write-mood .mood-row { gap: 6px; }
-.write-mood .mood-pill span { font-size: 13px; }
+
+/* 📷 on the left, Save on the right */
+.write-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
 .write-save {
     min-height: 44px;
-    padding-inline: 24px;
+    padding-inline: 28px;
 }
 
+/* Round outlined button: 📷 here and in the note editor */
+.photo-button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: 1px solid var(--field-border);
+    border-radius: 50%;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+}
+.photo-button:hover { color: var(--on-surface); border-color: var(--primary); }
+.photo-button:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* ---------- 2. Empty state ---------- */
+/* Full (3 photos): still visible, clearly not usable */
+.photo-button.is-full { opacity: 0.35; pointer-events: none; }
+
+
+/* ---------- 3. Photos ---------- */
+
+/* Up to 3 side by side. One photo: bigger, but never wider than a phone. */
+.journal-photos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+}
+.journal-photos.is-one { grid-template-columns: 1fr; max-width: 360px; }
+
+.journal-photo {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-high);
+}
+
+.journal-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;                     /* fills the box, cut to fit, never stretched */
+}
+
+.journal-photo-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+}
+.journal-photo-remove .icon { font-size: 18px; }
+
+
+/* ---------- 4. Empty states ---------- */
 
 .journal-empty {
     padding: var(--xl) var(--lg);
@@ -84,7 +174,6 @@
     background: var(--surface-container-low);
     text-align: center;
 }
-.journal-empty[hidden] { display: none; }
 
 .journal-empty-icon {
     margin-bottom: 12px;
@@ -107,7 +196,7 @@
 }
 
 
-/* ---------- 3. Days ---------- */
+/* ---------- 5. Days ---------- */
 
 .journal-days {
     display: flex;
@@ -115,14 +204,49 @@
     gap: var(--xl);                        /* a clear gap between days */
 }
 
+/* "TODAY ……… Tue 27 Oct" */
+.journal-day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
 .journal-day-title {
-    margin-bottom: 12px;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--on-surface-variant);
 }
+
+.journal-day-date {
+    font-size: 12px;
+    color: var(--outline);
+}
+
+/* "✓ 3 of 4 habits · ⏱ 25 min focus · ● Good day" */
+.journal-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.journal-stats:empty { display: none; }
+
+.journal-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-low);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+.journal-stat .icon { font-size: 15px; }
+.journal-stat.is-good { color: var(--success); }    /* every habit done: green */
 
 .journal-list {
     display: flex;
@@ -131,8 +255,8 @@
 }
 
 
-/* ---------- 4. Entries ----------
-   Every entry is a grid: [36px icon] [body] [••• button, write only] */
+/* ---------- 6. Entries ----------
+   Every entry: [icon] [body] [••• button] */
 
 .entry {
     display: grid;
@@ -140,8 +264,7 @@
     align-items: start;
     gap: 12px;
     padding: 14px var(--md);
-    /* border-radius: var(--radius-lg);   later   */
-     border-radius:dotted;
+    border-radius: var(--radius-lg);
     background: var(--surface-container-low);
 }
 
@@ -156,7 +279,7 @@
 
 .entry-body { min-width: 0; }              /* long words wrap instead of pushing out */
 
-/* "You wrote  21:02  [Good]" */
+/* "You wrote  21:02  ● Good" */
 .entry-top {
     display: flex;
     flex-wrap: wrap;
@@ -178,8 +301,6 @@
     color: var(--on-surface-variant);
 }
 
-.entry-mood[hidden] { display: none; }
-
 /* Your words. pre-wrap keeps the line breaks you typed. */
 .entry-text {
     font-size: 15px;
@@ -188,7 +309,6 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
-.entry-text[hidden] { display: none; }
 
 /* "25 min · 4 pages"  or  "sick" */
 .entry-detail {
@@ -197,35 +317,199 @@
     overflow-wrap: anywhere;
 }
 
-/* A focus note comes after the detail line: a little space between them */
 .entry-focus .entry-text { margin-top: 6px; }
 
-/* Skips are quieter: no box, a dashed border */
+/* Skips are quieter: no box, a dashed edge */
 .entry-skip { background: transparent; border: 1px dashed var(--outline-variant); }
 .entry-skip .entry-icon { background: transparent; color: var(--on-surface-variant); }
 .entry-skip .entry-kind { color: var(--on-surface-variant); font-weight: 500; }
 
-/* The ••• button on your own entries */
+/* ••• on entries you can change */
 .entry-edit {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
-    margin: -6px -8px 0 0;                 /* tucked into the corner, still 36px to tap */
+    margin: -6px -8px 0 0;                 /* sits in the corner, still 36px to tap */
     border-radius: 50%;
     color: var(--on-surface-variant);
 }
 .entry-edit:hover { background: var(--surface-container-high); color: var(--on-surface); }
 .entry-edit:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* ⊕ "Memorize new · 3 pages": logged with + or the sheet. One quiet line, no box. */
+.entry-record {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px var(--md);
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+.entry-record .icon { font-size: 18px; color: var(--success); }
 
-/* ---------- 5. Edit sheet (Journal-only parts) ---------- */
+
+/* ---------- 7. Notes ---------- */
+
+/* Search: grey edge = you can type here */
+.note-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-bottom: 12px;
+    padding: 0 14px;
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-full);
+    color: var(--outline);
+}
+.note-search:focus-within { border-color: var(--primary); }
+.note-search .icon { font-size: 20px; }
+
+.note-search-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 42px;
+    border: none;
+    background: none;
+    font-size: 15px;
+    color: var(--on-surface);
+}
+.note-search-input::placeholder { color: var(--outline); }
+.note-search-input:focus { outline: none; }
+
+/* Folder chips: one line that scrolls sideways on phones (not 3 wrapped lines) */
+.note-folders {
+    display: flex;
+    gap: 8px;
+    margin: 0 calc(-1 * var(--margin-mobile)) var(--lg);
+    padding: 0 var(--margin-mobile);
+    overflow-x: auto;
+    scrollbar-width: none;                 /* no scrollbar line under the chips */
+}
+.note-folders::-webkit-scrollbar { display: none; }
+
+.note-folders .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.note-folders .chip .icon { font-size: 16px; }
+.note-count { font-weight: 500; opacity: 0.7; }
+
+/* "📌 PINNED" / "RECENT" */
+.note-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+.note-section .icon { font-size: 16px; }
+
+/* Two columns on phones (three on desktop, section 10) */
+.note-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+    margin-bottom: var(--lg);
+}
+
+.note-card {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+    color: inherit;
+    text-decoration: none;
+}
+.note-card:hover { border-color: var(--outline); }
+.note-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.note-card-photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    background: var(--surface-container-high);
+}
+
+.note-card-body { padding: 12px; }
+
+.note-card-title {
+    margin-bottom: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+/* At most 3 lines of text, then "…" */
+.note-card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--on-surface-variant);
+    overflow-wrap: anywhere;
+}
+.note-card-text:empty { display: none; }
+
+.note-card-where {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--outline);
+}
+.note-card-where .icon { font-size: 14px; }
+
+/* + New note: a big button above the bottom bar, where the thumb is */
+.note-add {
+    position: fixed;
+    right: var(--margin-mobile);
+    bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 16px);
+    z-index: var(--z-fixed);
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: var(--primary);
+    color: var(--background);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.note-add .icon { font-size: 28px; }
+.note-add:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+/* A focus session is running: the mini bar sits there, so + moves up */
+.has-focus-bar .note-add { bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 96px); }
+
+/* Room at the end of the list, so + never covers the last card */
+#notesView { padding-bottom: 72px; }
+
+
+/* ---------- 8. Sheets (Journal-only parts) ---------- */
 
 .edit-text {
     line-height: 1.55;
     resize: vertical;
 }
+
+.edit-photos { margin: -8px 0 var(--lg); }
 
 /* Small, red and quiet on purpose: you shouldn't hit it by accident */
 .edit-delete {
@@ -239,15 +523,133 @@
 .edit-delete:hover { background: var(--surface-container); }
 .edit-delete:focus-visible { outline: 2px solid var(--error); outline-offset: 2px; }
 
+/* Focus sheet: "Remove reflection" (grey) and "Undo this session" (red) side by side */
+.focus-sheet-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--md);
+    margin-top: var(--md);
+}
+.focus-sheet-links .edit-delete { margin: 0; }
 
-/* ---------- Bigger screens ---------- */
+.sheet-link {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--on-surface-variant);
+}
+.sheet-link:hover { background: var(--surface-container); color: var(--on-surface); }
+.sheet-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+
+/* ---------- 9. Colours ----------
+   The rest of the app is about DOING (white = selected, green = done).
+   The Journal is about FEELING, so it gets one warm colour of its own: amber, like lamp light on paper.
+   It's set on <body class="journal-page">, so the sheets (outside <main>) get it too. */
+
+.journal-page {
+    --journal: #f2c48d;
+    --journal-soft: rgba(242, 196, 141, 0.12);
+    --journal-edge: rgba(242, 196, 141, 0.25);
+    /* Mood 1 → 5: soft red → green. Muted, and always next to a number or word. */
+    --mood-1: #f19a9a;
+    --mood-2: #f5b47a;
+    --mood-3: #f2d27a;
+    --mood-4: #b5dd7e;
+    --mood-5: #5fd3a5;
+}
+
+/* The write box: a lit page, not a form */
+.journal-page .write-card {
+    border-color: var(--journal-edge);
+    background: linear-gradient(180deg, rgba(242, 196, 141, 0.09), var(--surface-container-low) 55%);
+}
+.journal-page .write-card:focus-within { border-color: var(--journal); }
+.journal-page .write-prompt { background: var(--journal-soft); color: var(--journal); }
+
+.write-streak {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--journal);
+}
+.write-streak[hidden] { display: none; }
+.write-streak .icon { font-size: 17px; }
+
+/* Today's title in amber; your own words get a warm edge on the left */
+.journal-page .journal-day:first-child .journal-day-title { color: var(--journal); }
+.journal-page .entry-write { box-shadow: inset 3px 0 0 var(--journal); }
+.journal-page .entry-write .entry-icon { background: var(--journal-soft); color: var(--journal); }
+
+/* Mood pills: each number has its colour; the chosen one fills with it.
+   :nth-child(1) = the 1st pill in its row, and so on. */
+.journal-page .mood-pill:nth-child(1) { --mood: var(--mood-1); }
+.journal-page .mood-pill:nth-child(2) { --mood: var(--mood-2); }
+.journal-page .mood-pill:nth-child(3) { --mood: var(--mood-3); }
+.journal-page .mood-pill:nth-child(4) { --mood: var(--mood-4); }
+.journal-page .mood-pill:nth-child(5) { --mood: var(--mood-5); }
+.journal-page .mood-pill span { color: var(--mood); }
+.journal-page .mood-pill input:checked + span {
+    border-color: var(--mood);
+    background: var(--mood);
+    color: var(--background);
+}
+
+/* Mood on an entry: "● Good". journal.js sets data-mood="4". */
+.mood-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px 2px 7px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+.mood-tag[hidden] { display: none; }
+.mood-tag::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mood, var(--outline));
+}
+.mood-tag[data-mood="1"] { --mood: var(--mood-1); }
+.mood-tag[data-mood="2"] { --mood: var(--mood-2); }
+.mood-tag[data-mood="3"] { --mood: var(--mood-3); }
+.mood-tag[data-mood="4"] { --mood: var(--mood-4); }
+.mood-tag[data-mood="5"] { --mood: var(--mood-5); }
+.journal-stat .mood-tag { padding: 0; background: none; }   /* inside a day's summary pill */
+
+/* Note colours: dark tints, so white text stays easy to read on every one.
+   journal.js sets data-color="amber" on the card (null = no colour = the normal card). */
+[data-color="amber"]    { --note-bg: #2a2219; --note-edge: #5a4630; }
+[data-color="rose"]     { --note-bg: #2a1c20; --note-edge: #5b3540; }
+[data-color="sky"]      { --note-bg: #17222c; --note-edge: #2f4a5e; }
+[data-color="sage"]     { --note-bg: #19241d; --note-edge: #34513d; }
+[data-color="lavender"] { --note-bg: #221e2c; --note-edge: #45395e; }
+.note-card[data-color] { border-color: var(--note-edge); background: var(--note-bg); }
+
+
+/* ---------- 10. Bigger screens ---------- */
 
 @media (min-width: 600px) {
     .write-card { padding: 20px var(--lg); }
 }
 
+@media (min-width: 900px) {
+    .note-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .note-folders { flex-wrap: wrap; margin-inline: 0; padding: 0; }     /* room to wrap: no sideways scroll */
+    .note-add { bottom: var(--lg); right: var(--lg); }             /* no bottom bar on desktop */
+    .has-focus-bar .note-add { bottom: 96px; }
+}
+
 /* A journal is for reading: long lines are tiring.
    On big screens keep the page at 760px instead of Today's 1040px.
-   (journal.css loads AFTER app.css, so this one wins.) */
+   (journal.css loads after app.css, so this wins.) */
 @media (min-width: 1200px) {
+    .app { --page-width: 760px; }
 }

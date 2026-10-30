@@ -1,0 +1,152 @@
+/* =========================================================
+   ME  (app/me.html)
+
+   1. You        avatar, name, area
+   2. Sections   "YOU", "BACKUP", "START OVER"
+   3. Rows       [icon] title + small line [›]
+   4. Small things
+
+   Shared things (top bar, nav, .sheet, .toast) live in app.css.
+   ========================================================= */
+
+
+/* ---------- 1. You ---------- */
+
+.me [hidden] { display: none !important; }     /* the [hidden] trap, solved for this page */
+
+.me-hero {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+    margin-bottom: var(--xl);
+}
+
+/* Your first letter in a white circle */
+.me-avatar {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--background);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.me-name {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+.me-sub {
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+}
+
+
+/* ---------- 2. Sections ---------- */
+
+.me-section { margin-bottom: var(--xl); }
+
+.me-section-title {
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+/* One card per section; the rows inside are split by thin lines */
+.me-card {
+    overflow: hidden;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+}
+
+/* "Your data lives on this phone…": a gentle note, not an alarm */
+.me-note {
+    display: flex;
+    gap: 10px;
+    padding: 14px var(--md);
+    border-bottom: 1px solid var(--outline-variant);
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--on-surface-variant);
+}
+.me-note .icon { font-size: 18px; flex-shrink: 0; }
+
+
+/* ---------- 3. Rows ---------- */
+
+/* Buttons, links and labels all look the same here */
+.me-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 64px;
+    padding: 12px var(--md);
+    border-top: 1px solid var(--outline-variant);
+    color: var(--on-surface);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+.me-row:first-child,
+.me-note + .me-row { border-top: none; }
+.me-row:hover { background: var(--surface-container); }
+.me-row:focus-visible,
+.me-row:focus-within { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+.me-row-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-high);
+    font-size: 22px;
+}
+
+.me-row-text { min-width: 0; }
+
+.me-row-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.me-row-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--on-surface-variant);
+    overflow-wrap: anywhere;
+}
+
+.me-row-go {
+    margin-left: auto;
+    color: var(--outline);
+}
+
+/* Reset: red, so it's clearly different */
+.me-row.is-danger { color: var(--error); }
+.me-row.is-danger .me-row-icon { background: rgba(255, 180, 171, 0.12); }
+
+
+/* ---------- 4. Small things ---------- */
+
+.me-foot {
+    text-align: center;
+    font-size: 12px;
+    color: var(--outline);
+}

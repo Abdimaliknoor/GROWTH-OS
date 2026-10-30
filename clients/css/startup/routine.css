@@ -94,7 +94,7 @@
     width: 140px;                  /* room for "06:00 AM" on 12-hour phones */
     min-height: 44px;
     padding: 0 10px;
-    border: 1px solid var(--outline-variant);
+    border: 1px solid var(--field-border);
     border-radius: var(--radius-md);
     background: var(--surface-container-lowest);
     color: var(--on-surface);
@@ -104,7 +104,7 @@
     outline: none;
 }
 
-.slot-time:focus { border-color: var(--outline); }
+.slot-time:focus { border-color: var(--field-border); }
 
 /* A time box still empty, after the user has touched this card */
 .slot-time.is-missing { border-color: var(--error); }
@@ -121,7 +121,7 @@
 .slot-day {
     aspect-ratio: 1;
     max-width: 40px;
-    border: 1px solid var(--outline-variant);
+    border: 1px solid var(--field-border);
     border-radius: var(--radius-full);
     font-size: 12px;
     font-weight: 600;
