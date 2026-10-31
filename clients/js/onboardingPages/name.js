@@ -1,70 +1,79 @@
 /* =========================================================
-   NAME PAGE
+   NAME PAGE  (startup/name.html)
+
+   What this page does:
+     Asks for a first name, saves it with saveName(),
+     then goes to identity.html (Step 01: Direction).
+
+   How this file is organized:
+     1. Guard  2. Elements  3. Settings  4. Readers
+     5. Renderers  6. Actions  7. Page load  8. Events
    ========================================================= */
+
+
+/* ---------- 1. Guard ---------- */
+
+// Already set up → this page has nothing to do.
+if (isOnboardingComplete()) {
+    window.location.replace("../app/today.html");
+}
+
+
+/* ---------- 2. Elements ---------- */
 
 const nameForm = document.getElementById("nameForm");
 const nameInput = document.getElementById("nameInput");
-const nameError = document.getElementById("nameError");
+const namePreview = document.getElementById("namePreview");
+const namePreviewText = document.getElementById("namePreviewText");
 const continueButton = document.getElementById("continueButton");
 
-const MIN_LENGTH = 2;
 
-/* ---------- Small helpers ---------- */
+/* ---------- 3. Settings ---------- */
 
-function isValidName(name) {
-    return name.length >= MIN_LENGTH;
+const NEXT_PAGE = "identity.html";
+
+
+/* ---------- 4. Readers ---------- */
+
+// "  amina  " → "amina". Spaces alone don't count as a name.
+function readName() {
+    return nameInput.value.trim();
 }
 
-function updateContinueButton() {
-    continueButton.disabled = !isValidName(nameInput.value.trim());
+
+/* ---------- 5. Renderers ---------- */
+
+function renderForm() {
+    const name = readName();
+    continueButton.disabled = name === "";
+
+    namePreview.hidden = name === "";
+    namePreviewText.textContent = name;        // textContent: whatever they type stays plain text
 }
 
-function showError(message) {
-    nameError.textContent = message;
-    nameError.hidden = false;
-    nameInput.setAttribute("aria-invalid", "true");
-}
 
-function clearError() {
-    nameError.textContent = "";
-    nameError.hidden = true;
-    nameInput.removeAttribute("aria-invalid");
-}
+/* ---------- 6. Actions ---------- */
 
-/* ---------- On page load ---------- */
-
-// If the user came back with the Back button, show what they already typed.
-nameInput.value = getName();
-updateContinueButton();
-nameInput.focus();
-
-/* ---------- Events ---------- */
-
-// While typing: hide any old error, enable/disable Continue.
-nameInput.addEventListener("input", () => {
-    clearError();
-    updateContinueButton();
-});
-
-// When leaving the field: explain the problem instead of failing silently.
-nameInput.addEventListener("blur", () => {
-    const name = nameInput.value.trim();
-    if (name.length > 0 && !isValidName(name)) {
-        showError("Please enter at least 2 characters.");
-    }
-});
-
-// Continue button or Enter key.
-nameForm.addEventListener("submit", (event) => {
-    event.preventDefault(); // stop the browser from reloading the page
-
-    const name = nameInput.value.trim();
-    if (!isValidName(name)) {
-        showError("Please enter at least 2 characters.");
-        return;
-    }
+function submitName(event) {
+    event.preventDefault();                    // stop the browser reloading the page
+    const name = readName();
+    if (!name) return;
 
     saveName(name);
     setCurrentStep(2);
-    window.location.href = "identity.html";
-});
+    window.location.href = NEXT_PAGE;
+}
+
+
+/* ---------- 7. Page load ---------- */
+
+// Came back with Back? Their name is still there.
+nameInput.value = getName() || "";
+renderForm();
+nameInput.focus();
+
+
+/* ---------- 8. Events ---------- */
+
+nameInput.addEventListener("input", renderForm);
+nameForm.addEventListener("submit", submitName);

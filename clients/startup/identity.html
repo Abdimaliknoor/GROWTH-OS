@@ -6,8 +6,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
     />
+    <meta name="theme-color" content="#131313" />
     <title>Direction | Growth OS</title>
-    <link rel="icon" type="image/png" href="./assets/icons/unnamed.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,11 +19,21 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
 
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/startup/onboarding.css" />
     <link rel="stylesheet" href="../css/startup/identity.css" />
   </head>
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+     ║  DIRECTION  ·  startup/identity.html  (Step 01 of 04)        ║
+     ║  Two questions: which part of life? who do you want to be?   ║
+     ╚══════════════════════════════════════════════════════════════╝
+     MAP
+       1. Area cards      ← drawn from AREAS (areas.js)
+       2. Identity list   ← appears after an area is picked
+       3. Footer          Back → name.html · Continue → goal.html
+     Saves with saveDirection({ area, areaLabel, identity }). -->
   <body>
     <div class="ob-page">
       <header class="ob-topbar">
@@ -44,78 +54,50 @@
       </nav>
 
       <main class="ob-content ob-content-top">
-        <p class="ob-eyebrow">IDENTITY</p>
-        <h1 class="ob-title" id="directionTitle">
-          What area of your life do you want to improve?
-        </h1>
-        <p class="ob-subtitle">
-          Pick the one that matters most right now. You can add more later.
-        </p>
+        <form id="directionForm" novalidate>
+          <h1 class="ob-title">
+            <span id="greeting">Hi</span>. Where do you want to grow?
+          </h1>
+          <p class="ob-subtitle">
+            Pick one part of your life to start with. You can add more later.
+          </p>
 
-        <form class="direction-form" id="directionForm" novalidate>
-          <!-- 1. Life area: real radio buttons, styled as cards -->
-          <fieldset class="area-fieldset">
-            <legend class="visually-hidden">Life area</legend>
+          <!-- ═══════════ 1. AREA CARDS ═══════════ -->
+          <fieldset class="dir-fieldset">
+            <legend class="visually-hidden">Area of life</legend>
             <div class="area-grid" id="areaGrid"></div>
           </fieldset>
 
-          <!-- 1b. Only shown when "Something else" is picked -->
-          <div class="direction-field" id="customAreaField" hidden>
-            <label class="ob-label" for="customAreaInput">Which area?</label>
-            <input
-              class="ob-input"
-              id="customAreaInput"
-              type="text"
-              maxlength="40"
-              placeholder="e.g. Music, Writing, Languages"
-              autocomplete="off"
-            />
-          </div>
-
-          <!-- 2. Identity: shown once an area is picked -->
-          <section class="identity-card" id="identitySection" hidden>
-            <label class="ob-label" for="identityInput"
-              >Who are you becoming?</label
-            >
-            <p class="identity-help">
-              Pick one, or describe it in your own words.
+          <!-- ═══════════ 2. IDENTITY ═══════════ -->
+          <fieldset
+            class="dir-fieldset identity-block"
+            id="identityBlock"
+            hidden
+          >
+            <legend class="ob-label identity-legend">I am…</legend>
+            <p class="ob-hint identity-hint">
+              Pick the person you want to become. Your goal and habits will
+              follow from this.
             </p>
-            <div class="identity-chips" id="identityChips"></div>
-            <input
-              class="ob-input"
-              id="identityInput"
-              type="text"
-              maxlength="80"
-              placeholder="Or write your own..."
-              autocomplete="off"
-            />
-          </section>
-        </form>
 
-        <!-- 3. Live summary -->
-        <aside
-          class="direction-summary"
-          id="directionSummary"
-          aria-live="polite"
-          hidden
-        >
-          <p class="ob-eyebrow">Your direction</p>
-          <p class="summary-row">
-            <span class="summary-key">Area</span>
-            <span class="summary-value">
-              <span
-                class="icon icon-sm"
-                id="summaryIcon"
-                aria-hidden="true"
-              ></span>
-              <span id="summaryArea"></span>
-            </span>
-          </p>
-          <p class="summary-row">
-            <span class="summary-key">Identity</span>
-            <span class="summary-value" id="summaryIdentity"></span>
-          </p>
-        </aside>
+            <div class="identity-list" id="identityList"></div>
+
+            <!-- Shown when "Write my own" is picked (or the area has no suggestions) -->
+            <div class="identity-own" id="identityOwn" hidden>
+              <label class="visually-hidden" for="identityInput"
+                >Write who you want to become</label
+              >
+              <input
+                class="ob-input"
+                id="identityInput"
+                type="text"
+                maxlength="80"
+                placeholder="e.g. Someone who reads every night"
+                autocomplete="off"
+              />
+            </div>
+          </fieldset>
+        </form>
       </main>
 
       <footer class="ob-footer">
@@ -133,9 +115,26 @@
       </footer>
     </div>
 
-    <script src="../js//data/storage.js"></script>
-    <script src="../js//data/state.js"></script>
+    <!-- ═══════════ TEMPLATES (copied by direction.js) ═══════════ -->
+    <template id="areaTemplate">
+      <label class="area-card">
+        <input class="visually-hidden" type="radio" name="area" />
+        <span class="icon area-icon" aria-hidden="true"></span>
+        <span class="area-name"></span>
+      </label>
+    </template>
+
+    <template id="identityTemplate">
+      <label class="identity-option">
+        <input class="visually-hidden" type="radio" name="identity" />
+        <span class="identity-text"></span>
+      </label>
+    </template>
+
+    <!-- storage → state → areas → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
     <script src="../js/onboardingPages/areas.js"></script>
-    <script src="../js/onboardingPages/identity.js"></script>
+    <script src="../js/onboardingPages/direction.js"></script>
   </body>
 </html>

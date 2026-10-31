@@ -1,38 +1,23 @@
 /* =========================================================
-   NAME PAGE
-   Only what's unique to this page. Everything shared
-   lives in onboarding.css.
+   NAME  (startup/name.html)
+   The shared pieces (.ob-title, .ob-input, .ob-footer…) are in onboarding.css.
    ========================================================= */
 
-.name-form {
-    margin-top: var(--xl);
-}
+.name-label { margin-top: var(--xl); }
 
+/* Bigger than a normal field: it's the only thing on the page */
 .name-input {
-    width: 100%;
-    padding: 12px 0;
-    border: none;
-    border-bottom: 2px solid var(--outline-variant);
-    background: transparent;
-    color: var(--on-surface);          /* soft off-white, not pure white */
-    caret-color: var(--on-surface);    /* the blinking cursor matches */
-    font-size: 28px;
-    font-weight: 500;                  /* slightly lighter weight = less glare */
-    outline: none;
-    transition: border-color var(--transition-normal);
+    min-height: 56px;
+    font-size: 18px;
 }
 
-.name-input::placeholder { color: var(--outline-variant); }
-
-/* Focus: a soft grey underline instead of a bright white one */
-.name-input:focus { border-bottom-color: var(--field-border); }
-
-.name-input[aria-invalid="true"] { border-bottom-color: var(--error); }
-
-/* Stop Chrome autofill from painting a light background */
-.name-input:-webkit-autofill,
-.name-input:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--on-surface);
-    -webkit-box-shadow: 0 0 0 1000px var(--background) inset;
-    transition: background-color 5000s ease-in-out 0s;
+/* "Good morning, Amina." under the field */
+.name-preview {
+    margin-top: var(--md);
+    font-size: 15px;
+    color: var(--on-surface-variant);
 }
+.name-preview strong { color: var(--primary); font-weight: 600; }
+
+/* The [hidden] trap: a class with display would beat the attribute */
+.name-preview[hidden] { display: none; }

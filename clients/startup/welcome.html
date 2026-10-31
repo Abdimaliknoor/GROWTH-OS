@@ -2,9 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#131313" />
     <title>Welcome | Growth OS</title>
-    <link rel="icon" type="image/png" href="./assets/icons/unnamed.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,64 +19,57 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
 
     <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/startup/onboarding.css" />
     <link rel="stylesheet" href="../css/startup/welcome.css" />
   </head>
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+     ║  WELCOME  ·  startup/welcome.html                            ║
+     ║  The first screen after "Start free". One promise, one button.║
+     ╚══════════════════════════════════════════════════════════════╝
+     Already set up? welcome.js sends you straight to Today. -->
   <body>
-    <main class="welcome">
-      <!-- Brand -->
-      <div class="brand">
-        <span class="brand-mark icon" aria-hidden="true">north_east</span>
-        <span class="brand-name">Growth OS</span>
-      </div>
+    <div class="ob-page welcome">
+      <main class="ob-content welcome-content">
+        <img
+          class="welcome-logo"
+          src="../assets/icons/unnamed.png"
+          alt="Growth OS"
+        />
 
-      <!-- Message -->
-      <h1 class="welcome-title">
-        Build the life you want through consistent action.
-      </h1>
-      <p class="welcome-subtitle">
-        Turn your goals into habits, your habits into routines, and your
-        routines into progress.
-      </p>
-
-      <!-- How Growth OS works -->
-      <ol class="growth-path" aria-label="How Growth OS works">
-        <li class="growth-step is-active">
-          <span class="growth-dot" aria-hidden="true"></span>
-          <span class="growth-label">Goal</span>
-        </li>
-        <li class="growth-step">
-          <span class="growth-dot" aria-hidden="true"></span>
-          <span class="growth-label">Habit</span>
-        </li>
-        <li class="growth-step">
-          <span class="growth-dot" aria-hidden="true"></span>
-          <span class="growth-label">Routine</span>
-        </li>
-        <li class="growth-step">
-          <span class="growth-dot growth-dot-star icon" aria-hidden="true"
-            >star</span
-          >
-          <span class="growth-label">Progress</span>
-        </li>
-      </ol>
-
-      <!-- Action -->
-      <div class="welcome-actions">
-        <button type="button" class="welcome-start" id="startButton">
-          Get Started
-          <span class="icon" aria-hidden="true">arrow_forward</span>
-        </button>
-        <p class="welcome-hint">
-          <span class="icon icon-sm" aria-hidden="true">schedule</span>
-          Takes about 3 minutes
+        <h1 class="welcome-title">Your goals, built into your day.</h1>
+        <p class="ob-subtitle">
+          Pick one goal. Turn it into small daily habits. Give each one a place
+          in your day. Growth OS shows you what to do next.
         </p>
-      </div>
-    </main>
 
-    <script src="../js//data/storage.js"></script>
-    <script src="../js//data/state.js"></script>
-    <script src="../js/onboardingPages/welcome.js"></script>
+        <!-- What the next 5 minutes look like: a real sequence, so it's a numbered list -->
+        <ol class="welcome-steps">
+          <li>
+            <span class="icon" aria-hidden="true">explore</span>Your direction
+          </li>
+          <li><span class="icon" aria-hidden="true">flag</span>One goal</li>
+          <li>
+            <span class="icon" aria-hidden="true">checklist</span>Small habits
+          </li>
+          <li><span class="icon" aria-hidden="true">schedule</span>Your day</li>
+        </ol>
+      </main>
+
+      <footer class="ob-footer welcome-footer">
+        <a class="ob-btn ob-btn-primary" href="name.html">
+          Get started
+          <span class="icon" aria-hidden="true">arrow_forward</span>
+        </a>
+        <p class="welcome-note">About 5 minutes. Free during beta.</p>
+      </footer>
+    </div>
+
+    <!-- storage → state → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
+    <script src="../js/onboarding/welcome.js"></script>
   </body>
 </html>

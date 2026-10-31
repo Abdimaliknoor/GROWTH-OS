@@ -1,31 +1,41 @@
 /* =========================================================
-   DIRECTION PAGE (identity.html)
+   DIRECTION  (startup/identity.html)
+   The shared pieces (.ob-title, .ob-input, .ob-footer…) are in onboarding.css.
+
+   MAP
+     1. Fieldsets      no browser border
+     2. Area cards     2 columns everywhere (10 areas = 5 even rows)
+     3. Identity list  one row per sentence, ✓ when chosen
    ========================================================= */
 
-.direction-form {
-    margin-top: var(--lg);
-}
 
-/* ---------- Area cards ---------- */
+/* ═══════════ 1. FIELDSETS ═══════════ */
 
-/* A fieldset refuses to shrink below its content by default.
-   min-width: 0 stops it from causing sideways scroll on phones. */
-.area-fieldset {
-    min-width: 0;
-    border: none;
-}
+.dir-fieldset { min-width: 0; margin: 0; padding: 0; border: none; }
+.dir-fieldset legend { padding: 0; }
+
+/* The [hidden] trap: our display rules must not beat the attribute */
+.dir-fieldset[hidden],
+.identity-own[hidden] { display: none; }
+
+
+/* ═══════════ 2. AREA CARDS ═══════════ */
 
 .area-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: var(--lg);
 }
 
 .area-card {
+    position: relative;
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px 10px 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 88px;
+    padding: 14px;
     border: 1px solid var(--outline-variant);
     border-radius: var(--radius-lg);
     background: var(--surface-container-low);
@@ -33,195 +43,91 @@
     cursor: pointer;
     transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
 }
+.area-card:hover { border-color: var(--outline); }
 
-.area-card:hover {
-    border-color: var(--outline);
-}
+.area-icon { font-size: 24px; }
+.area-name { font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--on-surface); }
 
-/* :has() = "a card that contains a checked radio". No JS needed. */
+/* Chosen: the same style as the Goal page cards (white edge + ✓) */
 .area-card:has(input:checked) {
     border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
     background: var(--surface-container-high);
     color: var(--primary);
 }
-
-.area-card:has(input:focus-visible) {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-/* Icon tile. Fixed size + overflow: hidden so the icon's raw
-   text (e.g. "self_improvement") can't stretch the card
-   before the icon font has loaded. */
-.area-icon {
-    width: 36px;
-    height: 36px;
-    flex-shrink: 0;
-    overflow: hidden;
-    border-radius: var(--radius-md);
-    background: var(--surface-container);
-    font-size: 20px;
-    transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.area-card:has(input:checked) .area-icon {
+.area-card:has(input:checked)::after {
+    content: "✓";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
     background: var(--primary);
     color: var(--background);
-    font-variation-settings: 'FILL' 1;
+    font-size: 13px;
+    font-weight: 700;
 }
+.area-card:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-.area-label {
-    flex: 1;
-    font-size: 15px;
-    font-weight: 500;
+
+/* ═══════════ 3. IDENTITY LIST ═══════════ */
+
+.identity-block {
+    margin-top: var(--xl);
+    padding-top: var(--lg);
+    border-top: 1px solid var(--outline-variant);
 }
-
-.area-check {
-    width: 20px;
-    flex-shrink: 0;
-    overflow: hidden;
-    font-size: 20px;
-    opacity: 0;
-    transition: opacity var(--transition-fast);
-}
-
-.area-card:has(input:checked) .area-check {
-    opacity: 1;
-    font-variation-settings: 'FILL' 1;
-}
-
-/* ---------- Custom area ---------- */
-
-.direction-field {
-    margin-top: var(--lg);
-}
-
-/* ---------- Identity card ---------- */
-.identity-card.selected {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary), 0 0 24px rgba(255, 255, 255, .05);
-    background: var(--surface-container-high);
-}
-
-.identity-card {
-    margin-top: var(--lg);
-    padding: var(--md);
-    border-radius: var(--radius-xl);
-    background: var(--surface-container-low);
-}
-
-.identity-card .ob-label {
+.identity-legend {
+    float: left;                         /* a legend sits ON the fieldset border; float lets it sit under it */
+    width: 100%;
     margin-bottom: 4px;
-}
-
-.identity-help {
-    margin-bottom: var(--md);
-    font-size: 14px;
-    color: var(--on-surface-variant);
-}
-
-.identity-chips {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.identity-chips:empty {
-    display: none;
-}
-
-.identity-chip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 44px;
-    padding: 10px 14px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-lg);
-    background: var(--surface-container);
-    color: var(--on-surface-variant);
-    font-size: 14px;
-    text-align: left;
-    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
-}
-
-.identity-chip:hover {
-    color: var(--on-surface);
-}
-
-.identity-chip.is-selected {
-    border-color: var(--primary);
-    background: var(--surface-container-high);
-    color: var(--primary);
-}
-
-.identity-chip:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.identity-chip-check {
-    width: 18px;
-    flex-shrink: 0;
-    overflow: hidden;
     font-size: 18px;
-    opacity: 0;
-    font-variation-settings: 'FILL' 1;
 }
+.identity-hint { clear: both; margin: 0 0 var(--md); }
 
-.identity-chip.is-selected .identity-chip-check {
-    opacity: 1;
-}
+.identity-list { display: grid; gap: 8px; }
 
-.identity-card .ob-input {
-    background: var(--surface-container-lowest);
-}
-
-/* ---------- Summary ---------- */
-
-.direction-summary {
-    margin-top: var(--lg);
-    padding: var(--md);
-    border-left: 3px solid var(--primary);
-    border-radius: var(--radius-md);
-    background: var(--surface-container-low);
-}
-
-.summary-row {
+.identity-option {
     display: flex;
-    gap: 12px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.summary-row + .summary-row {
-    margin-top: 6px;
-}
-
-.summary-key {
-    width: 64px;
-    flex-shrink: 0;
-    color: var(--outline);
-}
-
-.summary-value {
-    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    min-width: 0;
-    color: var(--on-surface);
+    gap: 12px;
+    min-height: 52px;
+    padding: 12px 14px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
 }
+.identity-option:hover { border-color: var(--outline); }
+.identity-text { font-size: 15px; line-height: 1.4; color: var(--on-surface); }
 
-/* ---------- Bigger screens ---------- */
+/* "Write my own" looks a little quieter: it's the way out, not a suggestion */
+.identity-option.is-own .identity-text { color: var(--on-surface-variant); }
 
-@media (min-width: 600px) {
-    .area-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .identity-card {
-        padding: var(--lg);
-    }
+.identity-option:has(input:checked) {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+    background: var(--surface-container-high);
 }
+.identity-option:has(input:checked) .identity-text { color: var(--primary); }
+.identity-option:has(input:checked)::after {
+    content: "✓";
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-left: auto;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--background);
+    font-size: 13px;
+    font-weight: 700;
+}
+.identity-option:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.identity-own { margin-top: 8px; }

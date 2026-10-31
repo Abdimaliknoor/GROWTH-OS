@@ -2,11 +2,11 @@
    APP SHELL  (app/*.html: Today, Plan, Journal, Progress, Me)
 
    Everything the 5 app tabs SHARE:
-     1.  Page layout      phone: one column · desktop: sidebar + column
-     1b. Top bar          "you are here": page title + date
-     2.  Navigation       phone: bottom bar · desktop: left sidebar
-     3.  Shared pieces    buttons, tag, progress bar, toast, confetti
-     4.  Sheets           the pop-ups that slide up (Focus finish, Today record)
+     1. Page layout       phone: one column · desktop: sidebar + column
+     1b. Top bar          "you are here": page title + a short note on the right
+     2. Navigation        phone: bottom bar · desktop: left sidebar
+     3. Shared pieces     buttons, tag, progress bar, toast, confetti
+     4. Sheets            the pop-ups that slide up (Focus finish, Today record), mood pills, chips
 
    Mobile first: the normal rules are for phones.
    @media (min-width: 900px) changes them for desktop.
@@ -80,7 +80,11 @@
 }
 
 
-/* ---------- 2. Navigation: phone = bottom bar ---------- */
+/* ---------- 2. Navigation: phone = bottom bar ----------
+   nav.js draws what's inside <nav id="appNav">. These rules only style it.
+     .app-tab       one tab (icon + word)
+     .app-me        the Me tab: a letter circle on phone, a profile card on desktop
+   ------------------------------------------------------------------------- */
 
 .app-nav {
     position: fixed;
@@ -88,6 +92,7 @@
     right: 0;
     bottom: 0;
     z-index: var(--z-fixed);
+    min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));   /* holds its place before nav.js draws */
     padding-bottom: env(safe-area-inset-bottom);
     background: rgba(19, 19, 19, 0.92);
     backdrop-filter: blur(14px);
@@ -100,7 +105,7 @@
 
 .app-tabs {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);   /* 5 equal tabs */
+    grid-template-columns: repeat(5, 1fr);   /* 4 tabs + Me */
     height: var(--nav-height);
 }
 
@@ -118,7 +123,7 @@
 
 .app-tab .icon { font-size: 22px; }
 
-/* The page you're on. aria-current="page" is in the HTML, so CSS and
+/* The page you're on. aria-current="page" is set by nav.js, so CSS and
    screen readers both use the same signal. */
 .app-tab[aria-current="page"] {
     color: var(--primary);
@@ -127,40 +132,58 @@
     font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;   /* filled icon */
 }
 
-/* Not built yet: quieter, not clickable */
-.app-tab.is-soon {
-    color: var(--outline);
-    cursor: default;
-}
-
 .app-tab:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: -4px;
     border-radius: var(--radius-md);
 }
 
+/* ── Me on phone: the first letter of your name in a circle, "Me" under it ── */
+.app-me-avatar {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;     /* grey normally, white when you're on Me */
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+.app-me[aria-current="page"] .app-me-avatar {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--background);
+}
+.app-me-text,
+.app-me .icon { display: none; }          /* name, area and › are for desktop */
+
+
 /* ---------- 2b. Navigation: desktop = left sidebar ---------- */
 
 @media (min-width: 900px) {
-    /* Two columns: a 240px sidebar, then the page box (.app-page) */
+    /* Two columns: a 240px sidebar, then the page */
     .app {
         display: grid;
         grid-template-columns: 240px 1fr;
         min-height: 100vh;
-        --page-width: 720px;              /* wider on desktop (phone stays 600px) */
     }
 
     .app-nav {
         position: sticky;                 /* stays put while the page scrolls */
         top: 0;
+        display: flex;
+        flex-direction: column;           /* logo, tabs, then Me pushed to the bottom */
         height: 100vh;
-        padding: var(--lg) var(--md);
+        padding: var(--lg) var(--md) var(--md);
         background: var(--surface-container-lowest);
         backdrop-filter: none;
         border-top: none;
         border-right: 1px solid var(--outline-variant);
     }
 
+    /* ── Logo + Beta ── */
     .app-brand {
         display: flex;
         align-items: center;
@@ -170,22 +193,33 @@
         font-weight: 600;
         color: var(--primary);
     }
-
     .app-brand-mark {
         width: 26px;
         height: 26px;
         border-radius: var(--radius-full);
-        object-fit: cover;                /* your logo image fills the circle without stretching */
+    }
+    .app-beta {
+        padding: 2px 7px;
+        border: 1px solid var(--outline-variant);
+        border-radius: var(--radius-full);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--on-surface-variant);
     }
 
+    /* ── Tabs, stacked ── */
     .app-tabs {
+        flex: 1;                          /* fills the height, so Me can sit at the bottom */
         display: flex;
-        flex-direction: column;           /* tabs stacked */
+        flex-direction: column;
         gap: 4px;
         height: auto;
     }
 
     .app-tab {
+        position: relative;
         flex-direction: row;              /* icon left, word right */
         justify-content: flex-start;
         gap: 12px;
@@ -195,19 +229,77 @@
         font-size: 15px;
     }
 
-    .app-tab:not(.is-soon):hover { background: var(--surface-container); color: var(--on-surface); }
+    .app-tab:hover { background: var(--surface-container); color: var(--on-surface); }
     .app-tab[aria-current="page"] { background: var(--surface-container-high); }
 
+    /* A short white bar on the left of the page you're on */
+    .app-tab[aria-current="page"]::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 12px;
+        bottom: 12px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background: var(--primary);
+    }
+
+    /* ── Me: a profile card at the very bottom ── */
+    .app-me-item {
+        margin-top: auto;                 /* all the free space goes ABOVE it */
+        padding-top: var(--md);
+        border-top: 1px solid var(--outline-variant);
+    }
+
+    .app-me {
+        height: auto;
+        min-height: 56px;
+        padding: 8px 10px;
+    }
+    .app-me[aria-current="page"]::before { display: none; }   /* the card shows it with its fill */
+
+    .app-me-avatar {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: var(--primary);
+        color: var(--background);
+        font-size: 15px;
+    }
+
+    .app-me-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;                     /* lets a long name shrink and get "…" */
+    }
+    .app-me-name,
+    .app-me-area {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .app-me-name { font-size: 14px; font-weight: 600; color: var(--on-surface); }
+    .app-me-area { font-size: 12px; font-weight: 400; color: var(--on-surface-variant); }
+
+    .app-me-short { display: none; }      /* "Me" is only the phone label */
+    .app-me .icon {
+        display: block;
+        margin-left: auto;
+        font-size: 20px;
+        color: var(--outline);
+    }
+
+    .app { --page-width: 720px; }        /* wider on desktop (phone stays 600px) */
+
     .app-main {
-        padding: var(--lg) var(--margin-desktop) var(--xxl);   /* top = 24px: the top bar already gives room */
+        padding: var(--lg) var(--margin-desktop) var(--xxl);   /* top = 24px: the top bar already gives breathing room */
     }
 
     .app-topbar-inner { padding-inline: var(--margin-desktop); }
-
-    .toast { bottom: var(--lg); }          /* no bottom bar on desktop */
 }
 
-/* 1200px+: wider page, room for Today's right column */
+/* Big screens: an even wider page (Today gets its side column).
+   Must come AFTER the 900px block: same strength, so the later rule wins. */
 @media (min-width: 1200px) {
     .app { --page-width: 1040px; }
 }
@@ -223,7 +315,7 @@
 }
 .btn-secondary:hover { background: var(--surface-container-highest); }
 
-/* Not available yet: clearly quieter, but still readable */
+/* Not available yet (e.g. Start focus before Focus exists): clearly quieter, but still readable */
 .btn:disabled {
     background: var(--surface-container-high);
     border-color: var(--outline-variant);
@@ -308,6 +400,10 @@
     from { opacity: 0; transform: translate(-50%, 8px); }
 }
 
+@media (min-width: 900px) {
+    .toast { bottom: var(--lg); }          /* no bottom bar on desktop */
+}
+
 /* Confetti: JS adds small pieces here, each falls and fades, then JS removes them.
    Each piece gets its own --x (sideways drift) and --turn (spin) from JS. */
 .confetti {
@@ -332,7 +428,6 @@
     to   { opacity: 0; transform: translate(var(--x), 160px) rotate(var(--turn)); }
 }
 
-
 /* ---------- 4. Sheets: the pop-ups that slide up ----------
    Used by Focus (finish sheet) and Today (record sheet).
    One look for every sheet in the app: <dialog class="sheet">. */
@@ -349,9 +444,10 @@
     border-radius: 28px 28px 0 0;
     background: var(--surface-container-low);
     color: var(--on-surface);
-    max-height: 92dvh;                    
-    overflow-y: auto;                      
-    overscroll-behavior: contain;         
+    max-height: 92dvh;                     /* never taller than the screen */
+    overflow-y: auto;                      /* too much inside? the sheet scrolls */
+    overscroll-behavior: contain;          /* scrolling the sheet doesn't scroll the page behind */
+    animation: sheet-up 250ms ease-out;
 }
 
 /* ::backdrop = the dimmed page behind an open dialog. The browser makes it, we style it. */
@@ -420,13 +516,15 @@
     width: 100%;
     margin-bottom: var(--lg);
     padding: 12px 14px;
-    border: 1px solid var(--field-border);    border-radius: var(--radius-lg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-lg);
     background: var(--background);
     font-size: 14px;
     resize: none;                          /* no drag handle in the corner */
 }
 .sheet-note::placeholder { color: var(--outline); }
 .sheet-note:focus-visible { outline: none; border-color: var(--primary); }
+
 /* The buttons stay stuck to the bottom of the sheet, even when it scrolls.
    bottom: minus the sheet's padding = right down to the sheet's edge. */
 .sheet-actions {
@@ -478,6 +576,7 @@
 @keyframes sheet-pop {
     from { transform: scale(0.96); opacity: 0; }
 }
+
 /* Mood 1–5: Focus's finish sheet and the Journal.
    <fieldset> has a border and padding by default. Remove them. */
 .sheet-mood {
@@ -558,12 +657,15 @@
 .chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .chip[aria-pressed="true"] { border-color: var(--primary); background: var(--primary); color: var(--background); }
 
+
 /* Animations off for people who turned them off on their device */
 @media (prefers-reduced-motion: reduce) {
     .toast, .bar-fill { animation: none; transition: none; }
     .confetti { display: none; }
     .sheet { animation: none; }
 }
+
+
 /* ═════════════════════════════════════════════════════════
    MINI FOCUS BAR  (js/app/focus-bar.js)
    Phone: just above the bottom menu.  Desktop: bottom-right card.

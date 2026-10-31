@@ -1,18 +1,10 @@
 /* =========================================================
-   WELCOME PAGE
+   WELCOME  (startup/welcome.html)
+
+   Someone who already finished setup taps "Start free" on the
+   landing page again → no welcome screen, straight to their day.
    ========================================================= */
 
-// Redirect guard: someone who already finished onboarding
-// doesn't belong here. Send them to Today, keep their data.
-// replace (not href): the Back button won't bring them back to welcome.
 if (isOnboardingComplete()) {
-    window.location.replace("../app/today.html");   // ✅ ../ = up out of startup/, then into app/
+    window.location.replace("../app/today.html");
 }
-
-const startButton = document.getElementById("startButton");
-
-startButton.addEventListener("click", () => {
-    // New user: start from a clean, empty user object.
-    resetUser();
-    window.location.href = "name.html";
-});

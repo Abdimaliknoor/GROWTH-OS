@@ -65,48 +65,15 @@
       <!-- ═══════════════ NAVIGATION ═══════════════
            Same on every app page. Only aria-current="page" moves.
            Tabs not built yet: no href + a hidden "(soon)". -->
-      <nav class="app-nav" aria-label="Main">
-        <p class="app-brand">
-          <img
-            class="app-brand-mark"
-            src="../assets/icons/unnamed.png"
-            alt=""
-          />
-          Growth OS
-        </p>
-        <ul class="app-tabs">
-          <li>
-            <a class="app-tab" href="today.html" aria-current="page">
-              <span class="icon" aria-hidden="true">today</span>
-              Today
-            </a>
-          </li>
-          <li>
-            <a class="app-tab" href="plan.html">
-              <span class="icon" aria-hidden="true">checklist</span>
-              Plan
-            </a>
-          </li>
-          <li>
-            <a class="app-tab" href="journal.html">
-              <span class="icon" aria-hidden="true">edit_note</span>
-              Journal
-            </a>
-          </li>
-          <li>
-            <a class="app-tab" href="progress.html">
-              <span class="icon" aria-hidden="true">trending_up</span>
-              Progress
-            </a>
-          </li>
-          <li>
-            <a class="app-tab" href="me.html">
-              <span class="icon" aria-hidden="true">person</span>
-              Me
-            </a>
-          </li>
-        </ul>
-      </nav>
+      <!-- ═══════════════ NAVIGATION ═══════════════
+     Drawn by js/app/nav.js (the same menu on every page).
+     data-page = which tab is lit up. -->
+      <nav
+        class="app-nav"
+        id="appNav"
+        data-page="today"
+        aria-label="Main"
+      ></nav>
 
       <!-- ═══════════════ PAGE BOX ═══════════════ -->
       <div class="app-page">
@@ -472,6 +439,7 @@
          → this page → the mini focus bar (last) -->
     <script src="../js/data/storage.js"></script>
     <script src="../js/data/state.js"></script>
+    <script src="../js/app/nav.js"></script>
     <script src="../js/data/insight.js"></script>
     <script src="../js/app/item-sheet.js"></script>
     <script src="../js/app/today.js"></script>

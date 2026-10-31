@@ -2,9 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#131313" />
     <title>Your name | Growth OS</title>
-    <link rel="icon" type="image/png" href="./assets/icons/unnamed.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,11 +19,17 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/png" href="../assets/icons/unnamed.png" />
 
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/startup/onboarding.css" />
     <link rel="stylesheet" href="../css/startup/name.css" />
   </head>
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+     ║  NAME  ·  startup/name.html                                  ║
+     ║  One question before the 4 steps: what should we call you?   ║
+     ╚══════════════════════════════════════════════════════════════╝
+     Saves with saveName() → identity.html (Step 01: Direction). -->
   <body>
     <div class="ob-page">
       <header class="ob-topbar">
@@ -31,25 +40,28 @@
       </header>
 
       <main class="ob-content">
-        <p class="ob-eyebrow">Let's begin</p>
-        <h1 class="ob-title">What should we call you?</h1>
-        <p class="ob-subtitle">
-          We'll use your name throughout your Growth OS journey.
-        </p>
+        <form id="nameForm" novalidate>
+          <h1 class="ob-title">What should we call you?</h1>
+          <p class="ob-subtitle">
+            Your first name is enough. It's how Today says good morning.
+          </p>
 
-        <form class="name-form" id="nameForm" novalidate>
-          <label class="visually-hidden" for="nameInput">Your name</label>
+          <label class="ob-label name-label" for="nameInput">Your name</label>
           <input
-            class="name-input"
+            class="ob-input name-input"
             id="nameInput"
             type="text"
-            placeholder="Your name"
+            maxlength="30"
+            placeholder="e.g. Amina"
             autocomplete="given-name"
-            maxlength="40"
-            aria-describedby="nameHint nameError"
+            autocapitalize="words"
+            enterkeyhint="next"
           />
-          <p class="ob-hint" id="nameHint">First name is fine.</p>
-          <p class="ob-error" id="nameError" role="alert" hidden></p>
+
+          <!-- A live preview: the user sees their name in the app before they start -->
+          <p class="name-preview" id="namePreview" aria-live="polite" hidden>
+            Good morning, <strong id="namePreviewText"></strong>.
+          </p>
         </form>
       </main>
 
@@ -68,8 +80,9 @@
       </footer>
     </div>
 
-    <script src="../js//data/storage.js"></script>
-    <script src="../js//data/state.js"></script>
+    <!-- storage → state → this page -->
+    <script src="../js/data/storage.js"></script>
+    <script src="../js/data/state.js"></script>
     <script src="../js/onboardingPages/name.js"></script>
   </body>
 </html>
