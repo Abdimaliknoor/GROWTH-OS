@@ -25,6 +25,18 @@
     <link rel="stylesheet" href="../css/app/app.css" />
     <link rel="stylesheet" href="../css/app/journal.css" />
     <link rel="stylesheet" href="../css/app/note.css" />
+    <!-- Install as an app: name, icon, colours (manifest) + iPhone home screen -->
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link
+      rel="apple-touch-icon"
+      href="../assets/app-icons/apple-touch-icon.png"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Growth OS" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <script src="../js/pwa.js"></script>
+    <!-- offline + install -->
   </head>
   <!-- Full screen, no menu: like Focus. Nothing between you and your words. -->
   <body class="journal-page">
