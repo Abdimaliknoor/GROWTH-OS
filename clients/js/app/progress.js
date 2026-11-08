@@ -29,7 +29,7 @@ if (!progressReady) {
 const rangeLabel = document.getElementById("rangeLabel");
 const rangeChips = document.getElementById("rangeChips");
 const summaryText = document.getElementById("summaryText");
-
+const summaryLink = document.getElementById("summaryLink");
 // ── 1. Goal ──
 const goalCard = document.getElementById("goalCard");
 const goalName = document.getElementById("goalName");
@@ -166,8 +166,9 @@ function renderConsistency(consistency) {
 
     // The ring fills to the %, and its colour + word say how good that is
     const level = consistency.planned ? levelOf(consistency.percent) : "";
-    scoreBox.className = `score ${level ? "is-" + level : ""}`;
-    scoreWord.textContent = { great: "Great", good: "Good", tough: "Tough", "": "" }[level];
+    const gentle = level === "tough" && isFirstWeek();      // week 1: amber "Warming up", not red "Tough"
+    scoreBox.className = `score ${gentle ? "is-warming" : level ? "is-" + level : ""}`;
+    scoreWord.textContent = gentle ? "Warming up" : { great: "Great", good: "Good", tough: "Tough", "": "" }[level];
     scoreRing.style.strokeDashoffset = SCORE_RING * (1 - consistency.percent / 100);
     consistencySays.textContent = consistency.planned
         ? `You did ${consistency.done} of the ${consistency.planned} habits you planned. Best streak so far: ${best} ${best === 1 ? "day" : "days"}.`
@@ -214,6 +215,12 @@ function renderRates(rates) {
     // One line on top: the best one, and the one to fix (if any)
     const weakest = shown.at(-1);
     ratesSays.hidden = shown.length < 2;
+    
+     if (isFirstWeek()) {
+        ratesSays.hidden = shown.length === 0;
+        ratesSays.textContent = "Too early to judge a habit. After your first week, this shows which ones are strong.";
+        return;
+    }
     ratesSays.textContent = weakest && weakest.percent < WEAK_PERCENT
         ? `${shown[0].habit.name} is your strongest. ${weakest.habit.name} needs attention: try a smaller target or a better time.`
         : `${shown[0]?.habit.name} is your strongest. No habit is below ${WEAK_PERCENT}%.`;
@@ -221,12 +228,15 @@ function renderRates(rates) {
 
 function buildRate(rate) {
     const li = copyTemplate(rateTemplate);
+
     const level = levelOf(rate.percent);
-    li.classList.add(`is-${level}`);
+    const gentle = level === "tough" && isFirstWeek();      // week 1: "Early days", not red "Needs attention"
+    li.classList.add(gentle ? "is-warming" : `is-${level}`);
     li.querySelector(".rate-name").textContent = rate.habit.name;
-    li.querySelector(".rate-word").textContent = { great: "Strong", good: "Okay", tough: "Needs attention" }[level];
+    li.querySelector(".rate-word").textContent = gentle ? "Early days" : { great: "Strong", good: "Okay", tough: "Needs attention" }[level];
     li.querySelector(".rate-percent").textContent = `${rate.percent}%`;
     li.querySelector(".rate-days").textContent = `${rate.done} of ${rate.due} days`;
+
     const bar = li.querySelector(".bar");
     bar.setAttribute("aria-label", `${rate.habit.name}: ${rate.percent}%`);
     bar.setAttribute("aria-valuenow", rate.percent);
@@ -286,6 +296,9 @@ function updatePage() {
     });
 
     summaryText.textContent = getProgressSummary(rangeName, consistency, rates);
+    // Week 1 with nothing done yet → a way straight to Today
+    const sinceStart = getConsistency({ from: getStartDate(), to: todayDate() });
+    summaryLink.hidden = !(isFirstWeek() && sinceStart.done === 0);
     renderGoal();
     renderConsistency(consistency);
     renderRates(rates);

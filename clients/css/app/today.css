@@ -730,7 +730,80 @@
     display: flex;
     margin: 8px 0 0 auto;                  /* margin-left: auto = pushed to the right */
 }
+/* ---------- Tip: "This is your day" (first visit only) ----------
+   Warm amber, like the landing page: it's a welcome, not a warning.
+   --tip is only used inside this card. */
 
+.today-tip {
+    --tip: #f2c48d;
+    margin-bottom: var(--lg);
+    padding: 20px;
+    border: 1px solid rgba(242, 196, 141, 0.35);
+    border-radius: var(--radius-lg);
+    background: rgba(242, 196, 141, 0.06);
+    animation: tip-in 300ms ease-out;
+}
+.today-tip[hidden] { display: none; }    /* the [hidden] trap */
+
+@keyframes tip-in {
+    from { opacity: 0; transform: translateY(8px); }
+}
+
+.today-tip-eyebrow {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tip);
+}
+
+.today-tip-title {
+    margin-bottom: var(--md);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+}
+
+.today-tip-list {
+    display: grid;
+    gap: 12px;
+    margin-bottom: var(--lg);
+    list-style: none;
+}
+
+/* Each line: a small amber icon, then the sentence */
+.today-tip-list li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: start;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--on-surface-variant);
+}
+.today-tip-list .icon {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(242, 196, 141, 0.12);
+    color: var(--tip);
+    font-size: 18px;
+}
+.today-tip-list b { font-weight: 600; color: var(--on-surface); }
+
+.today-tip-ok {
+    min-height: 44px;
+    padding-inline: 24px;
+    border-radius: var(--radius-full);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .today-tip { animation: none; }
+}
 
 /* ---------- Bigger screens ---------- */
 
@@ -766,16 +839,19 @@
     .today {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 300px;   /* minmax(0, …): long names wrap instead of stretching the column */
-        grid-template-rows: auto auto 1fr;
+        grid-template-rows: auto auto auto 1fr;
         grid-template-areas:
             "header side"
+            "tip    side"
             "day    side"
             "review side";
         column-gap: var(--xl);
         align-items: start;
     }
 
+       
     .today-header { grid-area: header; }
+    .today-tip    { grid-area: tip; }
     .day          { grid-area: day; }
     .review-card  { grid-area: review; }
 

@@ -41,6 +41,23 @@
     color: var(--on-surface);
 }
 
+/* "Go to Today →" under the sentence (week 1, nothing done yet) */
+.summary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    color: var(--background);
+    font-size: 14px;
+    font-weight: 600;
+}
+.summary-link .icon { font-size: 18px; }
+.summary-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.summary-link[hidden] { display: none; }   /* the [hidden] trap */
 
 /* ---------- 2. Panels ---------- */
 
@@ -188,7 +205,8 @@
 .score.is-great .score-fill, .score.is-great .score-word { stroke: var(--success); color: var(--success); }
 .score.is-good  .score-fill, .score.is-good  .score-word { stroke: var(--primary); color: var(--primary); }
 .score.is-tough .score-fill, .score.is-tough .score-word { stroke: var(--error);   color: var(--error); }
-
+/* Week 1: amber "Warming up", the same warm colour as Today's welcome tip */
+.score.is-warming .score-fill, .score.is-warming .score-word { stroke: #f2c48d; color: #f2c48d; }
 .streak-box {
     padding: 12px 14px;
     border-radius: var(--radius-lg);
@@ -313,7 +331,9 @@
 .rate.is-tough .bar-fill  { background: var(--error); }
 .rate.is-tough .rate-word,
 .rate.is-tough .rate-percent { color: var(--error); }
-
+/* Week 1: amber "Early days" instead of red */
+.rate.is-warming .bar-fill  { background: #f2c48d; }
+.rate.is-warming .rate-word { color: #f2c48d; }
 .rates-says { margin: 0 0 14px; }
 
 

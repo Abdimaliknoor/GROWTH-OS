@@ -18,23 +18,26 @@
             ├─ logs ────── log.habitId → habit      (WHAT you did)
             └─ focusSessions ── session.habitId → habit
      journal ─── your own written entries (by date)
-          notes ───── things to keep (note.folder → your goal or a habit, or none)
+     notes ───── things to keep (note.folder → your goal or a habit, or none)
 
    MAP OF THIS FILE
       1. Shape of a new user ..... emptyData
+      1b. Upgrade old data ....... DATA_VERSION, upgradeData
       2. Read / reset ............ getData, resetUser
       3. Dates and words ......... generateId, todayDate, weekdayOf, dateOf,
                                    addDaysTo, describeDays, describeHabitAmount
       4. Save into ANY list ...... saveItem, removeItem
       5. Profile ................. name, direction
       6. Onboarding .............. step, complete
-      7. Goals ................... get, save, toggleMilestone
-      8. Habits .................. get, save, replaceGoalHabits, archive / restore
+      6b. Tips ................... hasSeenTip, markTipSeen, showTipAgain
+      7. Goals ................... colours, limit, active / main, save, setMain, finish, milestones
+      8. Habits .................. startBreak / endBreak, get, save, replaceGoalHabits, archive / restore
       9. Routine ................. get, day, add / update / remove, replaceRoutinePlan
      10. Logs .................... addLog, setDayAmount, skipHabit
      11. Focus sessions .......... start, pause, resume, stop, finish, cancel
      12. Journal ................. get, add, update, delete
-          13. Notes ................... get, add, update, pin, delete
+     13. Notes ................... get, add, update, pin, delete
+     14. Backup .................. export, read file, restore, undo
    ══════════════════════════════════════════════════════════════════ */
 
 
@@ -43,7 +46,7 @@
 // Each list is like a database table. Each item in it has an id.
 function emptyData() {
     return {
-        version: 1,                                       // bump this when the shape changes
+        version: DATA_VERSION,                            // which shape this data has (see 1b)
         profile: { name: "", area: "", areaLabel: "", identity: "" },
         onboarding: { step: 1, completed: false },
         goals: [],                                        // the finish lines
@@ -52,8 +55,34 @@ function emptyData() {
         logs: [],                                         // what was actually done  (log.habitId → habit)
         focusSessions: [],                                // focus timers            (session.habitId → habit)
         journal: [],                                      // your own written entries
-        notes: []                                         // things to keep
+        notes: [],                                        // things to keep
+        tips: []                                          // first-time tips already closed: ["today"]
     };
+}
+
+
+/* ════════════════════ 1b. UPGRADE OLD DATA ════════════════════
+   When the SHAPE of the data changes, old users' data must still fit.
+   Each step upgrades one version to the next. It runs on every read,
+   so a phone with old data (or an old backup file) just works.
+
+     v1 → v2   multiple goals: each goal gets a colour and an order
+               (your first goal becomes the main one: order 0) */
+
+const DATA_VERSION = 2;
+
+function upgradeData(data) {
+    if ((data.version || 1) < 2) {
+        const byAge = [...data.goals].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        data.goals = data.goals.map(goal => ({
+            ...goal,
+            color: goal.color || GOAL_COLORS[byAge.indexOf(goal) % GOAL_COLORS.length],
+            order: goal.order ?? byAge.indexOf(goal)
+        }));
+        data.version = 2;
+    }
+    // Next change: if (data.version < 3) { … data.version = 3; }
+    return data;
 }
 
 
@@ -64,7 +93,7 @@ function emptyData() {
 function getData() {
     const saved = readStorage();
     if (!saved) return emptyData();
-    return { ...emptyData(), ...saved };
+    return upgradeData({ ...emptyData(), ...saved });
 }
 
 // Start over: a brand-new, empty user.
@@ -134,7 +163,7 @@ function describeHabitAmount(habit) {
 
 /* ════════════════════ 4. SAVE INTO ANY LIST ════════════════════
    The two functions every section below uses.
-   listName = "goals", "habits", "routine", "logs", "focusSessions"  "journal","notes"or "journal". */
+   listName = "goals", "habits", "routine", "logs", "focusSessions", "journal" or "notes". */
 
 // Add the item, or replace the one with the same id.
 //   saveItem("habits", { id: "h1", … })   new id → added   ·   known id → replaced
@@ -211,22 +240,107 @@ function isOnboardingComplete() {
 }
 
 
-/* ════════════════════ 7. GOALS ════════════════════ */
+/* ════════════════════ 6b. TIPS (first-time help) ════════════════════ */
+
+// The ids of the tips the user closed with "Got it", like ["today"].
+// One list for every tip, so Journal or Plan can get their own later.
+function hasSeenTip(tipId) {
+    const tips = getData().tips;
+    return Array.isArray(tips) && tips.includes(tipId);   // a damaged backup can't break Today
+}
+
+function markTipSeen(tipId) {
+    const data = getData();
+    if (!Array.isArray(data.tips)) data.tips = [];
+    if (!data.tips.includes(tipId)) data.tips.push(tipId);
+    writeStorage(data);
+}
+
+// The "?" button: forget it was closed, so it shows again.
+function showTipAgain(tipId) {
+    const data = getData();
+    data.tips = Array.isArray(data.tips) ? data.tips.filter(id => id !== tipId) : [];
+    writeStorage(data);
+}
+
+
+/* ════════════════════ 7. GOALS ════════════════════
+   One goal: { id, title, measure, target, …,
+               status: "active" | "done",
+               color: "sky",          ← its colour everywhere (dots, bars, edges)
+               order: 0 }             ← 0 = the MAIN goal, then 1, 2… */
+
+// The colour names. CSS turns each into a real colour (--goal-sky…).
+const GOAL_COLORS = ["sky", "violet", "pink", "lime", "sand", "teal"];
+
+// Free plan: this many ACTIVE goals at once. Finished goals don't count.
+// Pro (later) lifts it. The ONE place to change the number.
+const GOAL_LIMIT = 3;
 
 function getGoals() {
     return getData().goals;
 }
+
+// The goals you're working on now, main first.
+function getActiveGoals() {
+    return getGoals()
+        .filter(goal => goal.status === "active")
+        .sort((a, b) => a.order - b.order);
+}
+
+// The main goal = the first active one.  → the goal, or null
+function getMainGoal() {
+    return getActiveGoals()[0] || null;
+}
+
+// Old name, from when there was only one goal. Pages switch to
+// getMainGoal / getActiveGoals step by step; until then this keeps them working.
 function getActiveGoal() {
-    return getGoals().find(goal => goal.status === "active") || null;
+    return getMainGoal();
+}
+
+// Room for one more active goal?
+function canAddGoal() {
+    return getActiveGoals().length < GOAL_LIMIT;
+}
+
+// The first colour no active goal is using (so two goals never look the same).
+function nextGoalColor() {
+    const used = getActiveGoals().map(goal => goal.color);
+    return GOAL_COLORS.find(color => !used.includes(color)) || GOAL_COLORS[0];
 }
 
 function getGoalById(id) {
     return getGoals().find(goal => goal.id === id) || null;
 }
 
+// Save a goal. Fields it doesn't bring are KEPT from the saved one,
+// so editing the title never loses the goal's colour or order.
+// A brand-new goal gets the next free colour and goes last.
 function saveGoal(goal) {
-    saveItem("goals", goal);
+    const saved = getGoalById(goal.id);
+    const isNew = !saved;
+    saveItem("goals", {
+        ...saved,
+        ...goal,
+        color: goal.color || (saved && saved.color) || nextGoalColor(),
+        order: goal.order ?? (saved ? saved.order : getActiveGoals().length)
+    });
+    return isNew;
 }
+
+// Make this the main goal: it moves to the top, the others keep their order.
+function setMainGoal(goalId) {
+    const data = getData();
+    const others = data.goals
+        .filter(goal => goal.id !== goalId && goal.status === "active")
+        .sort((a, b) => a.order - b.order);
+    const order = [goalId, ...others.map(goal => goal.id)];
+    data.goals = data.goals.map(goal =>
+        order.includes(goal.id) ? { ...goal, order: order.indexOf(goal.id) } : goal);
+    writeStorage(data);
+}
+
 // Close a goal: it gets the "done" sticker, its habits go to the archive.
 // Nothing is deleted: logs, focus sessions and journal stay for history.
 //   finishGoal("goal-1") → Juz 30 is now { status: "done", finishedAt: … }
@@ -235,7 +349,7 @@ function finishGoal(goalId) {
     data.goals = data.goals.map(goal =>
         goal.id === goalId ? { ...goal, status: "done", finishedAt: Date.now() } : goal);
     data.habits = data.habits.map(habit =>
-        habit.goalId === goalId ? { ...habit, archived: true } : habit);
+        habit.goalId === goalId && !habit.archived ? startBreak(habit) : habit);
     writeStorage(data);
 }
 
@@ -253,7 +367,18 @@ function toggleMilestone(goalId, stepId) {
 
 
 /* ════════════════════ 8. HABITS ════════════════════
-   archived: true = hidden from Today and Plan's list, but its history (logs) is kept. */
+   archived: true = hidden from Today and Plan's list, but its history (logs) is kept.
+   breaks: [{ from, to }] = WHEN it was archived, so past days stay fair (insight.js isDueOn). */
+
+// ── Start / end a break: archived ↔ active, with the date written down ──  archived ↔ active, with the date written down.
+function startBreak(habit) {
+    return { ...habit, archived: true, breaks: [...(habit.breaks || []), { from: todayDate(), to: null }] };
+}
+
+function endBreak(habit) {
+    const breaks = (habit.breaks || []).map(gap => gap.to === null ? { ...gap, to: todayDate() } : gap);
+    return { ...habit, archived: false, breaks };
+}
 
 // ── Read ──
 function getHabits() {
@@ -293,7 +418,7 @@ function replaceGoalHabits(goalId, habits) {
     const leaving = data.habits.filter(habit => habit.goalId === goalId && !keptIds.includes(habit.id));
     const toArchive = leaving
         .filter(habit => habit.archived || usedIds.includes(habit.id))
-        .map(habit => ({ ...habit, archived: true }));
+        .map(habit => habit.archived ? habit : startBreak(habit));
 
     data.habits = others.concat(habits, toArchive);
 
@@ -309,7 +434,8 @@ function replaceGoalHabits(goalId, habits) {
 function archiveHabit(id) {
     const habit = getHabitById(id);
     if (!habit) return null;
-    const updated = { ...habit, archived: true };
+    if (habit.archived) return habit;
+    const updated = startBreak(habit);
     saveHabit(updated);
     return updated;
 }
@@ -318,7 +444,11 @@ function archiveHabit(id) {
 function restoreHabit(id) {
     const habit = getHabitById(id);
     if (!habit) return null;
-    const updated = { ...habit, archived: false };
+    if (!habit.archived) return habit;
+    // Archived before breaks were recorded: we don't know when → the whole past is a break
+    // (forgiving: it can't break your streak, it just doesn't count before today).
+    const known = habit.breaks && habit.breaks.length ? habit : { ...habit, breaks: [{ from: "0000-01-01", to: null }] };
+    const updated = endBreak(known);
     saveHabit(updated);
     return updated;
 }
@@ -413,7 +543,7 @@ function getLogs() {
 // +1: add progress.   addLog("h1", 1) → 1 page today.
 // Returns the log, so the page can offer Undo: removeItem("logs", log.id).
 function addLog(habitId, amount, date = todayDate(), source = "quick") {
-    const log = { id: generateId("log"), habitId, amount, date, status: "done", sourcecreatedAt: Date.now()  };
+    const log = { id: generateId("log"), habitId, amount, date, status: "done", source, createdAt: Date.now() };
     saveItem("logs", log);
     return log;
 }
@@ -424,7 +554,8 @@ function setDayAmount(habitId, amount, date = todayDate()) {
     const data = getData();
     data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
     if (amount > 0) {
-     data.logs.push({ id: generateId("log"), habitId, amount, date, status: "done", source: "record", createdAt: Date.now() });    }
+        data.logs.push({ id: generateId("log"), habitId, amount, date, status: "done", source: "record", createdAt: Date.now() });
+    }
     writeStorage(data);
 }
 
@@ -433,6 +564,7 @@ function skipHabit(habitId, reason, date = todayDate()) {
     const data = getData();
     data.logs = data.logs.filter(log => !(log.habitId === habitId && log.date === date));
     data.logs.push({ id: generateId("log"), habitId, amount: 0, date, status: "skipped", reason, source: "record", createdAt: Date.now() });
+    writeStorage(data);
 }
 
 
@@ -465,6 +597,7 @@ function getFocusFor(habitId, date = todayDate()) {
     const active = getActiveFocus();
     return active && active.habitId === habitId && active.date === date ? active : null;
 }
+
 // ── Change ──
 
 // Start a new session NOW.   startFocus("h2", 25) → the new session
@@ -615,6 +748,8 @@ function updateJournalEntry(id, changes) {
 function deleteJournalEntry(id) {
     removeItem("journal", id);
 }
+
+
 /* ════════════════════ 13. NOTES (things to keep) ════════════════════
    One note:
      { id, title: "Hizb 12 · mistakes", text: "Page 3 keeps…",
@@ -667,6 +802,8 @@ function deleteNote(id) {
     removeItem("notes", id);
     return note;
 }
+
+
 /* ════════════════════ 14. BACKUP (save a copy / bring it back) ════════════════════
    Until accounts exist, your data lives on ONE phone. A backup is a file you keep.
    Photos are NOT in it (too big): they stay on the phone they were taken on.
@@ -693,7 +830,7 @@ function readBackupFile(text) {
     }
     if (!file || file.app !== BACKUP_APP || !file.data || typeof file.data !== "object") return null;
 
-    const data = { ...emptyData(), ...file.data };           // a backup from before notes existed still works
+    const data = upgradeData({ ...emptyData(), ...file.data });   // an old backup gets today's shape
     const listsOk = BACKUP_LISTS.every(name => Array.isArray(data[name]));
     const profileOk = Boolean(data.profile) && typeof data.profile === "object";
     return listsOk && profileOk ? { data, savedAt: file.savedAt || null } : null;

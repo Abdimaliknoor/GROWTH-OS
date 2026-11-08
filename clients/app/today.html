@@ -96,7 +96,19 @@
               <span class="icon" aria-hidden="true">today</span>
               Today
             </h1>
-            <p class="app-topbar-meta" id="todayDate"></p>
+            <div class="app-topbar-end">
+              <p class="app-topbar-meta" id="todayDate"></p>
+              <!-- Brings the first-time tip back -->
+              <button
+                class="topbar-help"
+                id="tipHelp"
+                type="button"
+                aria-label="How Today works"
+                title="How Today works"
+              >
+                <span class="icon" aria-hidden="true">help</span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -124,6 +136,51 @@
               <p class="day-count-text" id="dayCount">0 of 0 done</p>
             </div>
           </header>
+          <!-- ─── 1b. TIP · first visit only ───
+               Shown until "Got it" (saved with markTipSeen in state.js).
+               The ? in the top bar brings it back. today.js fills the name
+               and their first habit, so the example is THEIR habit. -->
+          <section
+            class="today-tip"
+            id="todayTip"
+            aria-labelledby="tipTitle"
+            hidden
+          >
+            <p class="today-tip-eyebrow">New here?</p>
+            <h2 class="today-tip-title" id="tipTitle">
+              This is your day, <span id="tipName"></span>.
+            </h2>
+            <ul class="today-tip-list">
+              <li>
+                <span class="icon" aria-hidden="true">schedule</span>
+                <span
+                  >Your habits sit at the times you chose, from wake-up to
+                  sleep.</span
+                >
+              </li>
+              <li>
+                <span class="icon" aria-hidden="true">add</span>
+                <span
+                  >Tap <b>+1</b> on <b id="tipHabit">a habit</b> each time you
+                  do some. A little still counts.</span
+                >
+              </li>
+              <li>
+                <span class="icon" aria-hidden="true">play_arrow</span>
+                <span
+                  >Or tap <b>Start focus</b>: a timer that records it for
+                  you.</span
+                >
+              </li>
+            </ul>
+            <button
+              class="btn btn-primary today-tip-ok"
+              id="tipOk"
+              type="button"
+            >
+              Got it
+            </button>
+          </section>
 
           <!-- ─── 2. SIDE · goal + this week + coming up ───
                Phone: above the day line.  Tablet: 2 columns.

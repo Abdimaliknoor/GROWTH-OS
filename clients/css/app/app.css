@@ -78,6 +78,25 @@
     color: var(--on-surface-variant);
     white-space: nowrap;
 }
+/* Right side of the bar: the date + small round buttons like "?" */
+.app-topbar-end {
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+}
+
+.topbar-help {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--on-surface-variant);
+}
+.topbar-help .icon { font-size: 20px; }
+.topbar-help:hover { background: var(--surface-container); color: var(--on-surface); }
+.topbar-help:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 
 /* ---------- 2. Navigation: phone = bottom bar ----------

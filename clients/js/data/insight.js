@@ -527,6 +527,17 @@ function getPreviousRange({ from, to }) {
     const prevFrom = addDaysTo(from, -length);
     return prevTo < getStartDate() ? null : { from: prevFrom, to: prevTo };
 }
+// ── First week: kind words, no red. Judging needs a few days of data. ──
+const FIRST_WEEK_DAYS = 7;
+
+// Day 1 = the day you started.  → 5 on your fifth day
+function getDaysSinceStart() {
+    return datesBetween(getStartDate(), todayDate()).length;
+}
+
+function isFirstWeek() {
+    return getDaysSinceStart() <= FIRST_WEEK_DAYS;
+}
 
 // Every date from → to:  ("2026-10-26", "2026-10-28") → ["…26", "…27", "…28"]
 function datesBetween(from, to) {
@@ -626,11 +637,19 @@ function getSkipReasons({ from, to }) {
 function getProgressSummary(rangeName, consistency, rates) {
     const word = { week: "week", month: "month", all: "run" }[rangeName];
 
-    // New user: too few days to judge anything yet
-    const sinceStart = getConsistency({ from: getStartDate(), to: todayDate() }).days
-        .filter(day => ["done", "partial", "missed"].includes(day.state)).length;
-    if (sinceStart < 3) {
+       // New user: too few days to judge anything yet
+    const sinceStart = getConsistency({ from: getStartDate(), to: todayDate() });
+    const countedDays = sinceStart.days.filter(day => ["done", "partial", "missed"].includes(day.state)).length;
+    if (countedDays < 3) {
         return "You're just getting started. After a few days, this page shows how it's going.";
+    }
+
+    // First week: count from day 1 (not "a tough month"), and one kind next step
+    if (isFirstWeek()) {
+        const text = `Your first ${getDaysSinceStart()} days: ${sinceStart.done} of ${sinceStart.planned} habits done.`;
+        return sinceStart.done === 0
+            ? `${text} One check-in today starts your streak.`
+            : `${text} Keep going: habits take a few weeks to settle.`;
     }
     if (consistency.planned === 0) return "Nothing to count yet in this range. Today counts once it's done.";
 

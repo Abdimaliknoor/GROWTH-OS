@@ -41,6 +41,12 @@ const dayRing = document.getElementById("dayRing");
 const dayCount = document.getElementById("dayCount");
 const dayCountBox = document.getElementById("dayCountBox");
 
+// ── Tip (first visit) + the ? that brings it back ──
+const todayTip = document.getElementById("todayTip");
+const tipName = document.getElementById("tipName");
+const tipHabit = document.getElementById("tipHabit");
+const tipOk = document.getElementById("tipOk");
+const tipHelp = document.getElementById("tipHelp");
 // ── Side: goal, week, coming up ──
 const goalStrip = document.getElementById("goalStrip");
 const goalTitle = document.getElementById("goalTitle");
@@ -102,6 +108,7 @@ const SMALL_CONFETTI = 14;           // one habit done
 const BIG_CONFETTI = 40;             // whole day done
 const UPCOMING_DAYS = 7;             // Coming up: look one week ahead…
 const UPCOMING_MAX = 3;              // …and show at most 3
+const TIP_ID = "today";              // this page's tip, in state.js's tips list
 
 const MARKER_ICONS = { wake: "wb_sunny", sleep: "bedtime", activity: "event" };
 
@@ -437,7 +444,16 @@ function renderLine(plan, summary) {
 
     if (!now && !allDoneShown) dayLine.append(buildAllDone(summary));   // no Sleep: at the end
 }
+// ── Tip: shown until "Got it". The example is THEIR first habit today. ──
+function renderTip(plan) {
+    todayTip.hidden = hasSeenTip(TIP_ID);
+    if (todayTip.hidden) return;
 
+    const firstItem = plan.find(item => item.kind === "habit");
+    const firstHabit = firstItem ? getHabitById(firstItem.habitId) : null;   // the habit's own name, even if renamed
+    tipName.textContent = getName() || "friend";                            // textContent: names stay plain text
+    tipHabit.textContent = firstHabit ? firstHabit.name : "a habit";
+}
 function renderReviewCard() {
     reviewCard.hidden = new Date().getHours() < REVIEW_HOUR;
 }
@@ -451,6 +467,7 @@ function updatePage() {
     renderWeek();
     renderUpcoming();
     renderLine(plan, summary);
+    renderTip(plan);
     renderReviewCard();
 }
 
@@ -639,6 +656,19 @@ function refresh() {
     updatePage();
     if (focused) focusHabit(focused.dataset.habitId);
 }
+// ── Tip ──
+function closeTip() {
+    markTipSeen(TIP_ID);
+    todayTip.hidden = true;
+    showToast("Tip hidden. Tap ? at the top to see it again.", false);
+}
+
+function openTip() {
+    showTipAgain(TIP_ID);
+    renderTip(getDayPlan());
+    todayTip.scrollIntoView({ behavior: "smooth", block: "center" });
+    tipOk.focus({ preventScroll: true });       // keyboard users land on "Got it"
+}
 
 // canUndo = false hides Undo (sheet saves can't be undone with it).
 function showToast(message, canUndo = true) {
@@ -720,6 +750,10 @@ recordFocus.addEventListener("click", () => openFocus(recordHabitId));
 recordSave.addEventListener("click", saveRecord);
 recordSkip.addEventListener("click", skipRecord);
 recordCancel.addEventListener("click", () => recordSheet.close());
+
+// ── Tip ──
+tipOk.addEventListener("click", closeTip);
+tipHelp.addEventListener("click", openTip);
 
 // ── Schedule ──
 addItemButton.addEventListener("click", () => openAddItem(afterItemChange));
