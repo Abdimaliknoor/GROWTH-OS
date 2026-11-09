@@ -246,6 +246,8 @@ function updatePage() {
     syncTicker();
     renderSheet();
 }
+
+
 /* ---------- 7. Actions ---------- */
 
 // Set the focus length. Before start: just remember it.
@@ -286,6 +288,7 @@ function start() {
     currentSession = startFocus(currentHabit.id, chosenTarget);
     updatePage();
 }
+
 // Pause ⇄ Resume. The data functions do the maths (state.js), we just redraw.
 function togglePause() {
     if (getFocusStage(currentSession) === "paused") currentSession = resumeFocus(currentSession.id);
@@ -303,6 +306,7 @@ function changeCount(direction) {
     currentSession = updateFocus(currentSession.id, { amount });
     renderCounter();
 }
+
 // Finish: freeze the clock (stopFocus) → the stage becomes "finishing" → the sheet opens.
 function finish() {
     currentSession = stopFocus(currentSession.id);
@@ -327,13 +331,12 @@ function chosenMood() {
     return checked ? Number(checked.value) : null;
 }
 
-// − / + in the sheet: change the number in the box by one step.
-// − / + in the record sheet: change the number in the box by one step.
-function changeRecordAmount(direction) {
-    const habit = getHabitById(recordHabitId);
-    const current = Number(recordAmount.value) || 0;
-    const next = Math.max(0, current + direction * getStep(habit));
-    recordAmount.value = Math.round(next * 100) / 100;
+// − / + in the finish sheet: change the number in the box by one step.
+// direction is -1 or +1. Never below 0.
+function changeSheetAmount(direction) {
+    const current = Number(amountInput.value) || 0;
+    const next = Math.max(0, current + direction * getStep(currentHabit));
+    amountInput.value = Math.round(next * 100) / 100;
 }
 
 // Save: log the progress + keep the mood and note. Then back to Today.
@@ -376,8 +379,8 @@ function syncTicker() {
         clearInterval(tickTimer);
         tickTimer = null;
     }
-    if (running) keepAwake()
-       else letSleep();
+    if (running) keepAwake();
+    else letSleep();
 }
 // Ask the browser to keep the screen on while you focus.
 // async + await: asking takes a moment, "await" waits for the answer.
@@ -386,7 +389,7 @@ async function keepAwake() {
     if (!("wakeLock" in navigator) || wakeLock) return;      // can't, or already on
     try {
         wakeLock = await navigator.wakeLock.request("screen");
-        // The browser drops the lock when you leave the  tab. Forget it, so we ask again when you're back.
+        // The browser drops the lock when you leave the tab. Forget it, so we ask again when you're back.
         wakeLock.addEventListener("release", () => { wakeLock = null; });
     } catch {
         wakeLock = null;                                     // said no: fine, the timer still works
@@ -398,13 +401,15 @@ function letSleep() {
     if (wakeLock) wakeLock.release();
     wakeLock = null;
 }
-/* ---------- 8. Page load ---------- */
+
 
 /* ---------- 8. Page load ---------- */
 
 if (pageOk) {
     updatePage();
 }
+
+
 /* ---------- 9. Events ---------- */
 
 // One listener for all 3 chips (event delegation, like Today's line).

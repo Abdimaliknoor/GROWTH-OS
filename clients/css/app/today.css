@@ -121,9 +121,10 @@
     background: var(--surface-container-low);
 }
 
+/* flex-start: with a long title (2–3 lines) the dot and "days left" stay on the FIRST line */
 .goal-strip-top {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     margin-bottom: 10px;
 }
@@ -150,6 +151,7 @@
 
 .goal-strip-days {
     flex-shrink: 0;
+    padding-top: 2px;
     font-size: 12px;
     color: var(--on-surface-variant);
 }
@@ -176,6 +178,7 @@
 .goal-dot {
     width: 10px;
     height: 10px;
+    margin-top: 6px;                       /* centres it on the title's first line */
     flex-shrink: 0;
     border-radius: 50%;
     background: var(--goal, var(--primary));
@@ -355,10 +358,9 @@
 .now-item[data-color] .line-dot { background: var(--goal); }
 
 /* "● Pass Data Structures": which goal this habit is for (only with 2+ goals) */
+/* inline-block, not flex: "…" (text-overflow) only works on a block with plain text inside */
 .goal-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
+    display: inline-block;
     max-width: 180px;
     overflow: hidden;
     white-space: nowrap;
@@ -368,6 +370,9 @@
 }
 .goal-tag::before {
     content: "";
+    display: inline-block;
+    vertical-align: middle;
+    margin: -2px 5px 0 0;
     width: 6px;
     height: 6px;
     flex-shrink: 0;
@@ -481,6 +486,7 @@
 .now-actions .btn {
     min-height: 48px;
     font-size: 15px;
+    white-space: nowrap;                   /* "Start focus" stays on one line on small phones */
 }
 
 .now-actions .btn-primary { flex: 1; }     /* Start focus takes the space, +1 stays compact */

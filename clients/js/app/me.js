@@ -6,7 +6,7 @@
    Start over .... reset everything (data AND photos)
 
    Where the data comes from:
-     getName, saveName, getDirection, getActiveGoal          → state.js
+     getName, saveName, getDirection, getActiveGoals         → state.js
      exportData, readBackupFile, restoreData, undoRestore   → state.js (14. Backup)
      cleanUnusedPhotos                                      → photos.js
 
@@ -30,6 +30,7 @@ const meName = document.getElementById("meName");
 const meArea = document.getElementById("meArea");
 const nameRow = document.getElementById("nameRow");
 const nameSub = document.getElementById("nameSub");
+const goalRowTitle = document.getElementById("goalRowTitle");
 const goalSub = document.getElementById("goalSub");
 
 const saveBackup = document.getElementById("saveBackup");
@@ -70,12 +71,16 @@ function describeSavedAt(savedAt) {
 
 function updatePage() {
     const name = getName() || "You";
-    const goal = getActiveGoal();
+    const goals = getActiveGoals();                      // main goal first
     meAvatar.textContent = name.trim()[0].toUpperCase();
     meName.textContent = name;
     meArea.textContent = getDirection().areaLabel || "";
     nameSub.textContent = name;
-    goalSub.textContent = goal ? goal.title : "No goal yet";
+    // 1 goal → "Your goal · Run 5 km"   3 goals → "Your goals · Run 5 km + 2 more"
+    goalRowTitle.textContent = goals.length > 1 ? "Your goals" : "Your goal";
+    if (goals.length === 0) goalSub.textContent = "No goal yet";
+    else if (goals.length === 1) goalSub.textContent = goals[0].title;
+    else goalSub.textContent = `${goals[0].title} + ${goals.length - 1} more`;
     undoRestoreRow.hidden = !canUndoRestore();
 }
 

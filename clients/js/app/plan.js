@@ -292,8 +292,13 @@ function buildHabit(habit, goal) {
     const li = copyTemplate(habitTemplate);
     li.dataset.habitId = habit.id;
     li.querySelector(".habit-item-title").textContent = habit.name;
-    const time = habitTimes(habit.id) || "Anytime";
-    li.querySelector(".habit-item-detail").textContent = `${describeHabitAmount(habit)} · ${describeDays(habit.days)} · ${time}`;
+    const time = habitTimes(habit.id);
+    li.querySelector(".habit-item-detail").textContent = `${describeHabitAmount(habit)} · ${describeDays(habit.days)} · ${time || "No time yet"}`;
+
+    // No time → "Set a time" opens Routine with THIS habit's time box ready
+    const setTime = li.querySelector(".habit-set-time");
+    setTime.hidden = Boolean(time);
+    setTime.href = `../startup/routine.html?mode=edit&habit=${encodeURIComponent(habit.id)}`;
     li.querySelector(".habit-item-tag").hidden = !countsTowardGoal(habit, goal);
 
     // 🔥 its own streak (insight.js). Hidden at 0: no "🔥 0" shaming.

@@ -138,6 +138,11 @@ function formatToday() {
     return new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 }
 
+// "Abdimalik Noor Sheikh Ali" → "Abdimalik": a greeting uses the first name only.
+function firstName() {
+    return (getName() || "").trim().split(/\s+/)[0];
+}
+
 function greetingWord(hour) {
     if (hour >= 5 && hour < 12) return "Good morning";
     if (hour >= 12 && hour < 17) return "Good afternoon";
@@ -197,7 +202,7 @@ function copyTemplate(template) {
 // ── Header: date, greeting, "2 of 5 done", ring, ✓ ──
 function renderHeader(summary) {
     todayDateText.textContent = formatToday();
-    const name = getName();
+    const name = firstName();
     const word = greetingWord(new Date().getHours());
     greeting.textContent = name ? `${word}, ${name}` : word;
 
@@ -473,7 +478,7 @@ function renderTip(plan) {
 
     const firstItem = plan.find(item => item.kind === "habit");
     const firstHabit = firstItem ? getHabitById(firstItem.habitId) : null;   // the habit's own name, even if renamed
-    tipName.textContent = getName() || "friend";                            // textContent: names stay plain text
+    tipName.textContent = firstName() || "friend";                            // textContent: names stay plain text
     tipHabit.textContent = firstHabit ? firstHabit.name : "a habit";
 }
 function renderReviewCard() {
@@ -502,7 +507,7 @@ function updatePage() {
 function addOne(habitId) {
     const habit = getHabitById(habitId);
     if (!habit) return;
-        if (getFocusFor(habitId)) return openFocus(habitId);      
+    if (getFocusFor(habitId)) return openFocus(habitId);   // a timer is running: open it instead
     if (habitId !== justFinishedId) justFinishedId = null;
 
     const before = getHabitStatus(habit);

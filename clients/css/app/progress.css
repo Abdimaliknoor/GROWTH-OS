@@ -225,9 +225,11 @@
 .progress-page { --streak: #fb923c; --streak-soft: rgba(251, 146, 60, 0.18); }
 
 /* "77% of your habits done"  |  "🔥 7 days in a row" */
+/* Side by side when each box gets 150px+; on a very narrow phone they stack
+   (auto-fit makes as many columns as fit, minmax keeps each at least 150px) */
 .show-up {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     margin-bottom: 4px;
 }
@@ -378,13 +380,23 @@
 }
 
 /* "Memorize new ……… Strong  93%" */
+/* Two parts: the name, and .rate-meta (🔥 · word · %) kept together.
+   flex-wrap + a 120px minimum for the name: when both can't fit, the WHOLE meta group
+   moves under the name, instead of squeezing it until words break ("Memoriz / e") */
 .rate-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-bottom: 6px;
+}
+.rate-name { flex: 1 1 120px; min-width: 0; font-size: 15px; font-weight: 600; color: var(--on-surface); overflow-wrap: break-word; }
+.rate-meta {
     display: flex;
     align-items: baseline;
     gap: 12px;
-    margin-bottom: 6px;
+    white-space: nowrap;
 }
-.rate-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--on-surface); overflow-wrap: anywhere; }
 
 /* "Strong" / "Okay" / "Needs attention": the bar in words */
 .rate-word { font-size: 12px; font-weight: 600; color: var(--on-surface-variant); }

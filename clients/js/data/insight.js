@@ -736,13 +736,14 @@ function sameFolder(a, b) {
     return Boolean(a && b && a.kind === b.kind && a.id === b.id);
 }
 
-// The chips on top of Notes: your goal, then its habits, each with how many notes it has.
+// The chips on top of Notes: each goal (main first), then its habits, each with how many notes it has.
 //   → [ { folder: { kind: "goal", id }, name, icon, count }, … ]
 function getNoteFolders() {
-    const goal = getActiveGoal();
-    if (!goal) return [];
     const notes = getNotes();
-    const folders = [{ kind: "goal", id: goal.id }, ...getHabitsForGoal(goal.id).map(habit => ({ kind: "habit", id: habit.id }))];
+    const folders = getActiveGoals().flatMap(goal => [
+        { kind: "goal", id: goal.id },
+        ...getHabitsForGoal(goal.id).map(habit => ({ kind: "habit", id: habit.id }))
+    ]);
     return folders.map(folder => ({
         folder,
         ...describeNoteFolder(folder),

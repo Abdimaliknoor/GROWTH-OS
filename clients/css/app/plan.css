@@ -405,11 +405,29 @@
 
 .habit-item-tag[hidden] { display: none; }
 
+/* "Set a time": only on habits with no time in the routine */
+.habit-set-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+}
+.habit-set-time .icon { font-size: 16px; }
+.habit-set-time:hover { text-decoration: underline; }
+.habit-set-time[hidden] { display: none; }
+
 /* This week: 7 small dots (Mon → Sun) + "4 / 5". Same dot language as Today's week card. */
+/* flex-wrap: on a very narrow phone "0 / 7 this week" drops UNDER the dots
+   (one line) instead of squeezing into a tall column beside them */
 .habit-week {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
+    gap: 6px 10px;
     margin-top: 8px;
 }
 
@@ -435,6 +453,7 @@
 .habit-dot.is-before  { border: none; background: var(--surface-container-high); transform: scale(0.5); }  /* not planned: a tiny dot */
 
 .habit-week-count {
+    white-space: nowrap;
     font-family: var(--font-time);
     font-size: 12px;
     color: var(--on-surface-variant);

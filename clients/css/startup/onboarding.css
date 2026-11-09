@@ -275,6 +275,78 @@
 .ob-input::placeholder { color: var(--outline); }
 .ob-input:focus { border-color: var(--field-border); }
 
+/* ---------- Chain card: "the step before" (Goal · Habit · Routine) ----------
+   Shared: goal.html shows Direction, habit.html the Goal, routine.html the Habits. */
+
+.chain-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-low);
+}
+
+/* Fixed size + overflow: hidden, so the icon's raw text
+   ("menu_book") can't stretch the card before the font loads. */
+.chain-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--surface-container-high);
+    color: var(--primary);
+    font-size: 20px;
+}
+
+/* min-width: 0 lets this column shrink, so long text can be
+   cut with "..." instead of pushing the Edit link off screen. */
+.chain-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chain-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--outline);
+}
+
+/* One line, then "..." */
+.chain-value {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    color: var(--on-surface);
+}
+
+.chain-edit {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+}
+
+.chain-edit:hover { color: var(--primary); background: var(--surface-container-high); }
+.chain-edit:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* The little vertical line connecting the card to the question */
+.chain-line {
+    width: 2px;
+    height: 24px;
+    margin: 6px 0 var(--md) 31px;   /* 31px = lines up under the icon's centre */
+    border-radius: 2px;
+    background: var(--surface-container-highest);
+}
+
 /* ---------- Bigger screens ---------- */
 
 @media (min-width: 768px) {

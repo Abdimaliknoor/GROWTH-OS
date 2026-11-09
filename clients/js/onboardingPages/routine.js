@@ -35,6 +35,11 @@
 // Routine needs habits. No habits saved = they skipped the Habit step.
 // ONE day, so EVERY active goal's habits are here: saving (replaceRoutinePlan)
 // replaces all habit times, so a goal left out here would lose its times.
+// "?new=1": Habit sent us here because a new habit has no time yet.
+const fromNewHabit = new URLSearchParams(window.location.search).get("new") === "1";
+// "?habit=h3": Plan's "Set a time" link → open with THAT habit's time box ready.
+const habitToTime = new URLSearchParams(window.location.search).get("habit");
+
 const goals = getActiveGoals();
 const goal = goals[0] || null;                                   // the main goal (for the card)
 const habits = goals.flatMap(item => getHabitsForGoal(item.id));
@@ -506,6 +511,19 @@ function buildRoutineItems() {
 }
 
 
+// Jump to the first habit with no time (the new one) so they see what's missing.
+// With ?habit=…, that habit first; otherwise the first one missing a time.
+function focusFirstMissingTime() {
+    const missing = plans.filter(item => item.kind === "habit" && item.slots.some(slot => !slot.time));
+    const plan = missing.find(item => item.habitId === habitToTime) || missing[0];
+    if (!plan) return;
+    const index = plan.slots.findIndex(slot => !slot.time);
+    const input = document.getElementById(`time-${plan.key}-${index}`);
+    input.scrollIntoView({ block: "center" });
+    input.focus({ preventScroll: true });
+}
+
+
 /* ---------- 9. Page load ---------- */
 
 if (habits.length > 0) {
@@ -515,7 +533,8 @@ if (habits.length > 0) {
     plans = buildPlans();
     renderPreviewDays();
     renderPlans();
-    if (editMode) applyEditMode("Editing your times", finishButton);
+    if (editMode) applyEditMode(fromNewHabit ? "Pick a time for your new habit" : "Editing your times", finishButton);
+    if (fromNewHabit || habitToTime) focusFirstMissingTime();
 
 }
 
