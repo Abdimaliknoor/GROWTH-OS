@@ -9,21 +9,20 @@
 
     PAGE
       Navigation ......... same as Today (Plan is the highlighted tab)
-      Top bar ............ "☑ Plan             3 HABITS"
+      Top bar ............ "☑ Plan     2 GOALS · 5 HABITS"
       1. Direction ....... "I am someone who…"
-      No goal ............ "No goal right now → Start a new goal" (only after closing one)
-      2. Goal ............ bar, deadline, pace, end box, milestones, why     [Edit]
-      3. Habits .......... rows + "＋ Add a habit"                          [Edit]
+      No goal ............ "No goal right now → Start a new goal" (every goal closed)
+      2. Goals ........... one block per goal (main first): the goal card + ITS habits
+                           + 🔥 per habit + archived · ⋯ menu · "＋ Add a goal" (limit 3)
       SIDE (right column on desktop)
         4a. Coming up .... one-day items, next 30 days
         4b. My week ...... Mon…Sun chips → that day's plan              [Edit times]
-      5. Archived ........ old habits + Restore (hidden when empty)
 
     ALWAYS THERE, SHOWN BY JS
       Toast
 
     TEMPLATES
-      habitTemplate · milestoneTemplate · weekItemTemplate · upcomingTemplate · archivedTemplate
+      goalTemplate · habitTemplate · milestoneTemplate · weekItemTemplate · upcomingTemplate · archivedTemplate
 
   [Edit] links open the onboarding pages in edit mode (?mode=edit): Save comes back here.
   Who fills what: plan.js. Data: state.js + insight.js.
@@ -75,12 +74,7 @@
       <!-- ═══════════════ NAVIGATION ═══════════════
      Drawn by js/app/nav.js (the same menu on every page).
      data-page = which tab is lit up. -->
-      <nav
-        class="app-nav"
-        id="appNav"
-        data-page="today"
-        aria-label="Main"
-      ></nav>
+      <nav class="app-nav" id="appNav" data-page="plan" aria-label="Main"></nav>
 
       <!-- ═══════════════ PAGE BOX ═══════════════ -->
       <div class="app-page">
@@ -102,7 +96,7 @@
             <p class="direction-identity" id="directionIdentity"></p>
           </section>
 
-          <!-- ─── NO GOAL · after closing one, before picking the next ─── -->
+          <!-- ─── NO GOAL · every goal is closed: pick the next one ─── -->
           <section class="plan-section no-goal" id="noGoal" hidden>
             <span class="icon no-goal-icon" aria-hidden="true">flag</span>
             <h2 class="no-goal-title">No goal right now</h2>
@@ -110,129 +104,41 @@
               Pick your next finish line. Your old goals and their history are
               kept.
             </p>
-            <a class="btn btn-primary" href="../startup/goal.html?mode=edit"
+            <a
+              class="btn btn-primary"
+              href="../startup/goal.html?mode=edit&goal=new"
               >Start a new goal</a
             >
           </section>
 
-          <!-- ─── 2. GOAL · bar, deadline, pace, end box, milestones, why ─── -->
+          <!-- ─── 2. GOALS · one block per active goal: the goal + ITS habits ───
+               plan.js copies #goalTemplate once per goal (main goal first). -->
           <section
-            class="plan-section plan-goal"
-            id="planGoal"
-            aria-labelledby="goalHeading"
+            class="plan-section plan-goals"
+            id="planGoals"
+            aria-labelledby="goalsHeading"
           >
             <div class="section-top">
-              <h2 class="section-title" id="goalHeading">Goal</h2>
-              <a class="section-link" href="../startup/goal.html?mode=edit">
-                <span class="icon" aria-hidden="true">edit</span>
-                Edit
-              </a>
-            </div>
-
-            <article class="goal-card">
-              <div class="goal-card-top">
-                <span class="icon goal-card-icon" aria-hidden="true">flag</span>
-                <div class="goal-card-text">
-                  <h3 class="goal-card-title" id="goalTitle"></h3>
-                  <p class="goal-card-finish" id="goalFinish"></p>
-                </div>
-              </div>
-              <div
-                class="bar"
-                id="goalBar"
-                role="progressbar"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                aria-label="Goal progress"
-              >
-                <span class="bar-fill" id="goalBarFill"></span>
-              </div>
-              <p class="goal-card-numbers">
-                <span id="goalNumbers"></span>
-                <span id="goalDeadline"></span>
-              </p>
-
-              <!-- On track? (total goals only) -->
-              <p class="goal-pace" id="goalPace" hidden>
-                <span
-                  class="icon goal-pace-icon"
-                  id="goalPaceIcon"
-                  aria-hidden="true"
-                ></span>
-                <span id="goalPaceText"></span>
-              </p>
-
-              <!-- The end: reached 🎉 or date passed. "Change the date" only when the date passed. -->
-              <div class="goal-end" id="goalEnd" hidden>
-                <div class="goal-end-top">
-                  <span
-                    class="icon goal-end-icon"
-                    id="goalEndIcon"
-                    aria-hidden="true"
-                  ></span>
-                  <div>
-                    <p class="goal-end-title" id="goalEndTitle"></p>
-                    <p class="goal-end-hint" id="goalEndHint"></p>
-                  </div>
-                </div>
-                <div class="goal-end-actions">
-                  <a
-                    class="btn btn-secondary"
-                    id="goalExtend"
-                    href="../startup/goal.html?mode=edit"
-                    >Change the date</a
-                  >
-                  <button
-                    class="btn btn-primary"
-                    id="newGoalButton"
-                    type="button"
-                  >
-                    Start a new goal
-                  </button>
-                </div>
-              </div>
-
-              <!-- Milestone goals: tick the steps here -->
-              <ul class="milestone-list" id="milestoneList" hidden></ul>
-
-              <p class="goal-card-why" id="goalWhy" hidden></p>
-            </article>
-          </section>
-
-          <!-- ─── 3. HABITS · archive = hidden from Today, history kept ─── -->
-          <section
-            class="plan-section plan-habits"
-            id="planHabits"
-            aria-labelledby="habitsHeading"
-          >
-            <div class="section-top">
-              <h2 class="section-title" id="habitsHeading">
-                Habits <span class="section-count" id="habitCount"></span>
+              <h2 class="section-title" id="goalsHeading">
+                Goals <span class="section-count" id="goalCount"></span>
               </h2>
-              <a class="section-link" href="../startup/habit.html?mode=edit">
-                <span class="icon" aria-hidden="true">edit</span>
-                Edit
-              </a>
             </div>
-            <ul class="habit-list" id="habitList"></ul>
-            <p class="plan-empty" id="habitsEmpty" hidden>
-              No habits yet. One is enough to start.
-            </p>
 
-            <!-- ＋ Add a habit → habit page in edit mode, cursor ready. At 5 / 5 → the hint instead. -->
+            <div class="goal-list" id="goalList"></div>
+
+            <!-- ＋ Add a goal. At the limit (3 / 3) → the hint instead. -->
             <a
-              class="add-habit"
-              id="addHabit"
-              href="../startup/habit.html?mode=edit&add=1"
+              class="add-habit add-goal"
+              id="addGoal"
+              href="../startup/goal.html?mode=edit&goal=new"
             >
               <span class="icon" aria-hidden="true">add</span>
-              <span class="add-habit-text" id="addHabitText">Add a habit</span>
-              <span class="add-habit-left" id="addHabitLeft"></span>
+              <span>Add a goal</span>
+              <span class="add-habit-left" id="addGoalLeft"></span>
             </a>
-            <p class="plan-hint" id="habitsFull" hidden>
+            <p class="plan-hint" id="goalsFull" hidden>
               <span class="icon" aria-hidden="true">info</span>
-              5 / 5 habits. Archive one to add another.
+              <span id="goalsFullText"></span>
             </p>
           </section>
 
@@ -349,15 +255,6 @@
             </section>
           </div>
           <!-- /plan-side -->
-
-          <!-- ─── 5. ARCHIVED · hidden when empty ─── -->
-          <details class="plan-section archived" id="archived" hidden>
-            <summary class="archived-summary">
-              Archived habits
-              <span class="section-count" id="archivedCount"></span>
-            </summary>
-            <ul class="habit-list" id="archivedList"></ul>
-          </details>
         </main>
       </div>
       <!-- /app-page -->
@@ -374,13 +271,135 @@
     <!-- ═══════════════ TEMPLATES ═══════════════
          Copied and filled by plan.js (copy → fill → return). -->
 
-    <!-- HABIT · name (+ tag), "1 page · Every day · 05:30", this week's dots, Archive -->
+    <!-- GOAL · one block: the goal card on top, ITS habits under it.
+         data-goal-id + data-color are set by plan.js. Buttons use data-action
+         (one listener on #goalList handles every block: event delegation). -->
+    <template id="goalTemplate">
+      <article class="goal-card goal-block">
+        <div class="goal-card-top">
+          <span class="goal-dot" aria-hidden="true"></span>
+          <div class="goal-card-text">
+            <h3 class="goal-card-title">
+              <span class="goal-title"></span>
+              <span class="tag goal-main-tag" hidden>Main</span>
+            </h3>
+            <p class="goal-card-finish"></p>
+          </div>
+
+          <!-- ⋯ menu: <details> opens and closes by itself, no JS needed -->
+          <details class="goal-menu">
+            <summary class="icon-button goal-menu-button">
+              <span class="icon" aria-hidden="true">more_horiz</span>
+            </summary>
+            <div class="goal-menu-list">
+              <a class="goal-menu-item" data-link="goal">
+                <span class="icon" aria-hidden="true">edit</span>Edit goal
+              </a>
+              <a class="goal-menu-item" data-link="habits">
+                <span class="icon" aria-hidden="true">checklist</span>Edit
+                habits
+              </a>
+              <button
+                class="goal-menu-item"
+                type="button"
+                data-action="make-main"
+              >
+                <span class="icon" aria-hidden="true">star</span>Make it my main
+                goal
+              </button>
+              <button
+                class="goal-menu-item is-danger"
+                type="button"
+                data-action="close-goal"
+              >
+                <span class="icon" aria-hidden="true">flag</span>Close this goal
+              </button>
+            </div>
+          </details>
+        </div>
+
+        <div
+          class="bar goal-bar"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          aria-label="Goal progress"
+        >
+          <span class="bar-fill"></span>
+        </div>
+        <p class="goal-card-numbers">
+          <span class="goal-numbers"></span>
+          <span class="goal-deadline"></span>
+        </p>
+
+        <!-- On track? (total goals only) -->
+        <p class="goal-pace" hidden>
+          <span class="icon goal-pace-icon" aria-hidden="true"></span>
+          <span class="goal-pace-text"></span>
+        </p>
+
+        <!-- The end: reached 🎉 or date passed -->
+        <div class="goal-end" hidden>
+          <div class="goal-end-top">
+            <span class="icon goal-end-icon" aria-hidden="true"></span>
+            <div>
+              <p class="goal-end-title"></p>
+              <p class="goal-end-hint"></p>
+            </div>
+          </div>
+          <div class="goal-end-actions">
+            <a class="btn btn-secondary goal-extend" data-link="goal"
+              >Change the date</a
+            >
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-action="close-goal"
+            >
+              Close this goal
+            </button>
+          </div>
+        </div>
+
+        <!-- Milestone goals: tick the steps here -->
+        <ul class="milestone-list" hidden></ul>
+
+        <p class="goal-card-why" hidden></p>
+
+        <!-- ── This goal's habits ── -->
+        <div class="goal-habits">
+          <ul class="habit-list goal-habit-list"></ul>
+          <p class="plan-empty goal-habits-empty" hidden>
+            No habits yet. One is enough to start.
+          </p>
+          <a class="add-habit goal-add-habit" data-link="add-habit">
+            <span class="icon" aria-hidden="true">add</span>
+            <span>Add a habit to this goal</span>
+          </a>
+          <details class="goal-archived" hidden>
+            <summary class="archived-summary">
+              Archived habits
+              <span class="section-count goal-archived-count"></span>
+            </summary>
+            <ul class="habit-list goal-archived-list"></ul>
+          </details>
+        </div>
+      </article>
+    </template>
+
+    <!-- HABIT · name (+ tag) + 🔥, "1 page · Every day · 05:30", this week's dots, Archive -->
     <template id="habitTemplate">
       <li class="habit-item">
         <div class="habit-item-text">
           <p class="habit-item-name">
             <span class="habit-item-title"></span>
             <span class="tag habit-item-tag" hidden>Feeds your goal</span>
+            <!-- 🔥 this habit's own streak (hidden at 0) -->
+            <span class="habit-streak" hidden>
+              <span class="icon" aria-hidden="true">local_fire_department</span>
+              <span class="habit-streak-count"></span>
+            </span>
           </p>
           <p class="habit-item-detail"></p>
           <div class="habit-week">

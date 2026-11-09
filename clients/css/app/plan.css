@@ -4,12 +4,13 @@
    1. Direction     "I am someone who…"
    2. Sections      title + Edit link (Goal, Habits, My week)
    3. Goal card     bar, pace line, milestones, why
+   3b. Goal blocks  one per goal: colour edge, ⋯ menu, ITS habits, 🔥 per habit
    4. Habit rows    active + archived, this week's dots
    5. My week       day chips + that day's list
-   6. Archived      the folding section
+   6. Archived      the folding section (inside each goal block)
    Bigger screens   900px: bigger identity · 1200px: two columns
 
-   Shared things (top bar, nav, .btn, .tag, .bar, .chip, .toast) live in app.css.
+   Shared things (top bar, nav, .btn, .tag, .bar, .chip, .toast, goal colours) live in app.css.
    ========================================================= */
 
 
@@ -265,6 +266,103 @@
 .goal-card-why[hidden] { display: none; }
 
 
+/* ---------- 3b. Goal blocks (one per goal: the card + ITS habits) ---------- */
+
+.goal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+    margin-bottom: var(--md);
+}
+
+/* The goal's colour on the left edge: you can tell goals apart at a glance */
+.goal-block {
+    position: relative;
+    border-left: 3px solid var(--goal, var(--outline-variant));
+}
+
+.goal-dot {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: var(--goal, var(--outline));
+}
+
+.goal-card-top .goal-card-text { flex: 1; }
+.goal-main-tag { vertical-align: middle; margin-left: 6px; }
+.goal-main-tag[hidden] { display: none; }
+
+/* The bar in the goal's colour */
+.goal-bar .bar-fill { background: var(--goal, var(--primary)); }
+
+/* ⋯ menu: <details> + a small floating list */
+.goal-menu { position: relative; flex-shrink: 0; }
+.goal-menu-button { list-style: none; cursor: pointer; }
+.goal-menu-button::-webkit-details-marker { display: none; }   /* Safari's ▸ arrow */
+
+.goal-menu-list {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container-high);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.goal-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--on-surface);
+    text-align: left;
+    cursor: pointer;
+}
+.goal-menu-item .icon { font-size: 18px; color: var(--on-surface-variant); }
+.goal-menu-item:hover { background: var(--surface-container-highest); }
+.goal-menu-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.goal-menu-item[hidden] { display: none; }
+.goal-menu-item.is-danger,
+.goal-menu-item.is-danger .icon { color: var(--error); }
+
+/* The habits part, under a thin line */
+.goal-habits {
+    margin-top: var(--md);
+    padding-top: var(--md);
+    border-top: 1px solid var(--outline-variant);
+}
+.goal-habits .habit-item { background: var(--surface-container); }
+.goal-habits .add-habit { margin-top: 8px; }
+.goal-habits-empty[hidden],
+.goal-archived[hidden] { display: none; }
+.goal-archived { margin-top: 8px; }
+
+/* 🔥 a habit's own streak, next to its name */
+.habit-streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fb923c;                        /* the same orange as the streak squares */
+}
+.habit-streak .icon { font-size: 16px; }
+.habit-streak[hidden] { display: none; }
+
+.add-goal[hidden] { display: none; }
+
+
 /* ---------- 4. Habit rows ---------- */
 
 .habit-list {
@@ -497,19 +595,15 @@
         grid-template-areas:
             "direction direction"
             "nogoal    side"
-            "goal      side"
-            "habits    side"
-            "archived  side";
-        grid-template-rows: auto auto auto auto 1fr;
+            "goals     side";
+        grid-template-rows: auto auto 1fr;
         column-gap: var(--xl);
         align-items: start;
     }
 
     .direction    { grid-area: direction; }
     .no-goal      { grid-area: nogoal; }
-    .plan-goal    { grid-area: goal; }
-    .plan-habits  { grid-area: habits; }
-    .archived     { grid-area: archived; }
+    .plan-goals   { grid-area: goals; }
     .plan-side {         
         grid-area: side;
         position: sticky;                  /* stays in view while the left side scrolls */

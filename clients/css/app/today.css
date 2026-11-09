@@ -2,7 +2,7 @@
    TODAY  (app/today.html)
 
    1. Header        greeting + "2 of 5 done" ring
-   2. Goal strip    the goal and its bar
+   2. Goal strip    your goals: one row each (dot + bar in the goal's colour)
    3. Day line      one vertical line, a dot per item
         markers     Wake up / Sleep / Class (+ your note)
         rows        small habits (done, partial, skipped, late, later)
@@ -153,6 +153,34 @@
     font-size: 12px;
     color: var(--on-surface-variant);
 }
+
+/* Several goals: a small title, then one row per goal with a line between */
+.goal-strip-heading {
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+.goal-strip-heading[hidden] { display: none; }
+
+.goal-rows { display: flex; flex-direction: column; list-style: none; }
+.goal-row + .goal-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--outline-variant);
+}
+
+/* The goal's colour (app.css: data-color → --goal) on the dot and the bar */
+.goal-dot {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--goal, var(--primary));
+}
+.goal-row-bar .bar-fill { background: var(--goal, var(--primary)); }
 
 .goal-strip-numbers {
     margin-top: 6px;
@@ -315,6 +343,43 @@
 .row-button:hover { background: var(--surface-container-high); }
 .row-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .row-button[hidden] { display: none; }
+
+/* Its goal's colour on the dot (data-color on the row → --goal, app.css).
+   No colour (an old goal) → the plain look below. */
+.habit-row[data-color] .line-dot { border-color: var(--goal); }
+.habit-row[data-color].is-done .line-dot { border-color: var(--goal); background: var(--goal); }
+.habit-row[data-color].is-partial .line-dot {
+    border-color: var(--goal);
+    background: linear-gradient(90deg, var(--goal) 50%, var(--background) 50%);
+}
+.now-item[data-color] .line-dot { background: var(--goal); }
+
+/* "● Pass Data Structures": which goal this habit is for (only with 2+ goals) */
+.goal-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 180px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    color: var(--goal, var(--on-surface-variant));
+}
+.goal-tag::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: currentColor;
+}
+.goal-tag[hidden] { display: none; }
+
+/* Now card: badge · time · goal on one line; on a narrow phone the goal moves under them */
+.now-label { flex-wrap: wrap; row-gap: 6px; }
+.now-badge { white-space: nowrap; }
+.now-label .goal-tag { max-width: 100%; }
 
 /* Done: filled white dot, quieter text. No strikethrough:
    a line through text reads as "cancelled", and this was DONE. */

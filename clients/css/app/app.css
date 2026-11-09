@@ -2,6 +2,7 @@
    APP SHELL  (app/*.html: Today, Plan, Journal, Progress, Me)
 
    Everything the 5 app tabs SHARE:
+     0. Goal colours      data-color="sky" → var(--goal)
      1. Page layout       phone: one column · desktop: sidebar + column
      1b. Top bar          "you are here": page title + a short note on the right
      2. Navigation        phone: bottom bar · desktop: left sidebar
@@ -18,6 +19,19 @@
     --topbar-height: 56px;                                 /* the "you are here" bar */
     --page-width: 600px;                                   /* how wide the page gets (grows on desktop) */
 }
+
+
+/* ---------- 0. Goal colours ----------
+   Each goal saves a colour NAME (state.js GOAL_COLORS). Any element with
+   data-color="sky" gets --goal = that colour; inside it, use var(--goal)
+   for dots, bars and edges. One place to change a colour. */
+
+[data-color="sky"]    { --goal: #7cb7ff; }
+[data-color="violet"] { --goal: #b79cff; }
+[data-color="pink"]   { --goal: #ff8fb8; }
+[data-color="lime"]   { --goal: #b5e36b; }
+[data-color="sand"]   { --goal: #e2c39b; }
+[data-color="teal"]   { --goal: #6fd3d0; }
 
 
 /* ---------- 1. Page layout ---------- */

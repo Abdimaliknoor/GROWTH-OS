@@ -3,12 +3,13 @@
 
    1. Range chips + summary
    2. Panels         the shared look: question, big number, sentence
-   3. Goal           pace badge
+   2b. Two columns   left: your goals · right: showing up, focus, skips
+   3. Goals          one panel per goal (its colour), 🔥 goal streak, pace badge
    4. Showing up     score ring, streak box, the squares
-   5. Habits         bars coloured by the same scale
-   6. Focus          ↑ / ↓ compared with before
+   5. Habits         bars coloured by the same scale, 🔥 per habit
+   6. Focus          ↑ / ↓ compared with before, split by goal
    7. Skips
-   Bigger screens    1200px: two columns of panels
+   Bigger screens    1200px: goals left, the rest in a column on the right
 
    ONE colour language for the whole page:
      green = good news · white = fine · red = needs you · orange = your streak (only that)
@@ -109,7 +110,72 @@
 }
 
 
-/* ---------- 3. Goal ---------- */
+/* ---------- 2b. Two columns: your goals | everything else ---------- */
+
+.progress-goals,
+.progress-side,
+.goal-panels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md);
+    min-width: 0;
+}
+
+/* "YOUR GOALS, AND THE HABITS UNDER EACH": the same look as a panel title */
+.column-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+
+/* ---------- 3. Goals ---------- */
+
+/* Each goal in its own colour (app.css: data-color → --goal) */
+.goal-panel { border-left: 3px solid var(--goal, var(--outline-variant)); }
+.goal-panel .goal-bar .bar-fill { background: var(--goal, var(--primary)); }
+
+.goal-panel-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.goal-panel-top .goal-name { flex: 1; margin-bottom: 0; }
+.goal-dot {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--goal, var(--primary));
+}
+
+/* 🔥 5 days: ALL its habits done, days in a row */
+.goal-streak,
+.rate-streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--streak);
+}
+.goal-streak .icon { font-size: 18px; }
+.rate-streak .icon { font-size: 15px; }
+.goal-streak[hidden],
+.rate-streak[hidden] { display: none; }
+
+/* Its habits, under a thin line */
+.goal-rates {
+    margin-top: var(--md);
+    padding-top: var(--md);
+    border-top: 1px solid var(--outline-variant);
+}
+.goal-rates:empty { display: none; }
+.goal-rates-empty { margin-top: 12px; }
 
 .goal-name {
     margin-bottom: 12px;
@@ -339,6 +405,37 @@
 
 /* ---------- 6. Focus ---------- */
 
+/* Which goal got the time: one bar split by goal colour, then a list */
+.focus-split { margin-top: var(--md); }
+.focus-split[hidden] { display: none; }
+.focus-stack {
+    display: flex;
+    gap: 2px;
+    height: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+}
+.focus-stack span { background: var(--goal); }
+.focus-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    list-style: none;
+}
+.focus-legend li {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--on-surface);
+}
+.focus-legend .goal-dot { width: 8px; height: 8px; }
+.focus-legend-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.focus-legend-time { font-family: var(--font-time); font-size: 13px; color: var(--on-surface-variant); }
+
 /* "↑ 1h 10m more than the 30 days before" */
 .change { margin-top: 10px; font-size: 13px; color: var(--on-surface-variant); }
 .change[hidden] { display: none; }
@@ -374,20 +471,13 @@
 
 /* ---------- Bigger screens ---------- */
 
-/* Two columns. "Showing up" is the tallest panel, so it takes the right column alone. */
+/* Two columns: your goals on the left (wide), everything else on the right (360px).
+   minmax(0, 1fr): a long goal name wraps instead of stretching the column. */
 @media (min-width: 1200px) {
     .panels {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-            "goal    consistency"
-            "habits  consistency"
-            "focus   skips";
+        grid-template-columns: minmax(0, 1fr) 360px;
         align-items: start;
+        gap: var(--lg);
     }
-    .panel-goal        { grid-area: goal; }
-    .panel-consistency { grid-area: consistency; }
-    .panel-habits      { grid-area: habits; }
-    .panel-focus       { grid-area: focus; }
-    .panel-skips       { grid-area: skips; }
 }

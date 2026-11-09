@@ -33,9 +33,11 @@
 /* ---------- 1. Guard ---------- */
 
 // Routine needs habits. No habits saved = they skipped the Habit step.
-// (getGoals()[0] can be null, so `goal ? ... : []` avoids a crash.)
-const goal = getActiveGoal() ;
-const habits = goal ? getHabitsForGoal(goal.id) : [];
+// ONE day, so EVERY active goal's habits are here: saving (replaceRoutinePlan)
+// replaces all habit times, so a goal left out here would lose its times.
+const goals = getActiveGoals();
+const goal = goals[0] || null;                                   // the main goal (for the card)
+const habits = goals.flatMap(item => getHabitsForGoal(item.id));
 if (habits.length === 0) {
     window.location.replace(editMode ? "habit.html?mode=edit" : "habit.html");
 }
@@ -507,7 +509,7 @@ function buildRoutineItems() {
 /* ---------- 9. Page load ---------- */
 
 if (habits.length > 0) {
-    goalTitle.textContent = goal.title;
+    goalTitle.textContent = goals.length > 1 ? `${goals.length} goals` : goal.title;
     habitNames.textContent = habits.map(habit => habit.name).join(" · ");
 
     plans = buildPlans();

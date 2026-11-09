@@ -35,6 +35,8 @@ if (!direction.area) {
 const goalForm = document.getElementById("goalForm");
 const goalTitle = document.getElementById("goalTitle");
 const goalChips = document.getElementById("goalChips");
+const areaPick = document.getElementById("areaPick");                // new goal only
+const areaPickChips = document.getElementById("areaPickChips");
 const numberDetails = document.getElementById("numberDetails");
 const finishLead = document.getElementById("finishLead");
 const finishTail = document.getElementById("finishTail");
@@ -68,12 +70,19 @@ const MIN_STEPS = 2;
 const MAX_STEPS = 8;
 const FALLBACK_UNITS = ["pages", "hours", "times"];   // for "Something else" areas
 
-// The area they picked on the Direction page (from areas.js).
-const area = getAreaById(direction.area);
+// The goal being edited (edit-mode.js: ?goal=…), or null for a NEW goal.
+// Onboarding: the one goal they saved, if they came back with Back.
+const existingGoal = getGoalToEdit();
 
-// The goal they already saved, if they came back with Back.
-// null the first time. Onboarding only ever creates one goal.
-const existingGoal = getActiveGoal();   
+// A new goal from Plan, but already at the limit (3 / 3)? Back to Plan.
+if (creatingGoal && !canAddGoal()) {
+    window.location.replace(PLAN_PAGE);
+}
+
+// Which part of life this goal is for (from areas.js).
+//   editing → the goal's own area · new from Plan → picked on this page · onboarding → the Direction
+let pickedArea = existingGoal && existingGoal.area ? existingGoal.area : direction.area;
+let area = getAreaById(pickedArea);
 
 /* ---------- 4. Readers: they only LOOK, never change anything ---------- */
 
@@ -148,6 +157,32 @@ function getProblem() {
 
 
 /* ---------- 5. Renderers: they DRAW things on the screen ---------- */
+
+// New goal from Plan: "Which part of your life is this goal for?" chips (from AREAS).
+// The current pick is white (aria-pressed="true").
+function renderAreaPick() {
+    areaPick.hidden = false;
+    const chips = AREAS.map(item => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "goal-chip area-chip";
+        chip.dataset.area = item.id;
+        chip.textContent = item.label;                     // textContent: plain text, always safe
+        chip.setAttribute("aria-pressed", item.id === pickedArea);
+        return chip;
+    });
+    areaPickChips.replaceChildren(...chips);
+}
+
+// Pick an area → its goal suggestions and units replace the old ones.
+function pickArea(areaId) {
+    pickedArea = areaId;
+    area = getAreaById(areaId);
+    renderAreaPick();
+    renderGoalChips();
+    renderUnitChips();
+    updatePage();
+}
 
 // The goal suggestion buttons, from area.goals in areas.js.
 // dataset.index remembers WHICH suggestion each button is,
@@ -354,7 +389,7 @@ function buildGoal() {
         // Keep the old id when editing. Habits will point at this goal
         // by goalId, so a new id would leave them pointing at nothing.
         id: existingGoal ? existingGoal.id : generateId("goal"),
-        area: direction.area,
+        area: pickedArea,
         title: goalTitle.value.trim(),
         why: whyInput.value.trim(),
         deadline: deadlineInput.value,                   // "" when not set
@@ -403,9 +438,19 @@ updatePage();
 
 // Opened from Plan (?mode=edit)? Same form, but Cancel / Save go back to Plan.
 // No active goal = you just closed one on Plan → this is your NEXT goal.
-if (editMode) applyEditMode(existingGoal ? "Editing your goal" : "Your next goal", continueButton);
+if (editMode) applyEditMode(existingGoal ? "Editing your goal" : "A new goal", continueButton);
+
+// A new goal from Plan: first, which part of life? (a goal for Studies gets Studies suggestions)
+if (creatingGoal) renderAreaPick();
 
 /* ---------- 8. Events ---------- */
+
+// The area chips (new goal only): pick one → new suggestions and units.
+areaPickChips.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-area]");
+    if (!chip) return;
+    pickArea(chip.dataset.area);
+});
 
 // Event delegation: ONE listener on the chip container handles every
 // chip. closest() finds the chip even if the click landed on its text.
@@ -455,8 +500,8 @@ goalForm.addEventListener("submit", (event) => {
     if (editMode && !confirmCountingChange(goal)) return;   // "your habits may stop counting" → Cancel = stay
 
         saveGoal(goal);                             // state.js does the saving
-    // A NEW goal from Plan has no habits yet → go straight to adding one.
-    if (editMode && !existingGoal) { window.location.href = "habit.html?mode=edit&add=1"; return; }
+    // A NEW goal from Plan has no habits yet → go straight to adding one, for THIS goal.
+    if (editMode && !existingGoal) { window.location.href = editLink("habit.html", goal.id, "&add=1"); return; }
     if (editMode) { leaveEditMode(); return; }  // edit: back to Plan, onboarding step untouched
     setCurrentStep(4);
     window.location.href = "habit.html";

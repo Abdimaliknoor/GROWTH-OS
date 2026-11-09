@@ -41,8 +41,20 @@ function getSkipReason(habitId, date = todayDate()) {
 /* ════════════════════ 2. HABIT RULES ════════════════════ */
 
 // Planned for this date?   days ["mon","wed"] + a Monday → true
+// Due on that day? Only if the habit EXISTED then, wasn't on a break, and it's one of its weekdays.
+// So adding a habit today never turns past days into "missed" (that used to break the streak).
 function isDueOn(habit, date = todayDate()) {
-    return !habit.archived && habit.days.includes(weekdayOf(date));
+    if (habit.createdAt && date < dateOf(habit.createdAt)) return false;   // not made yet
+    if (isOnBreak(habit, date)) return false;                               // archived then
+    return habit.days.includes(weekdayOf(date));
+}
+
+// breaks: [{ from: "2026-11-01", to: "2026-11-05" }]   to: null = still archived
+// Older data: archived with no breaks → treat as off on every day (as before).
+function isOnBreak(habit, date) {
+    const breaks = habit.breaks || [];
+    if (habit.archived && breaks.length === 0) return true;
+    return breaks.some(gap => date >= gap.from && (gap.to === null || date < gap.to));
 }
 
 // What one "+1" adds:  done/not → 1 · time → 5 min · amount → 1 (0.5 if the target is below 1)
@@ -246,9 +258,10 @@ function getStartDate() {
 // One day's result → { date, due, done, state }
 //   state: done · partial · missed · none (today, not yet) · rest · before · future
 // A skip is excused: it leaves the plan for that day, so it can't break the streak.
-function getDayResult(date, start = getStartDate()) {
+// goalId: only that goal's habits (Progress → each goal). null = all habits.
+function getDayResult(date, start = getStartDate(), goalId = null) {
     const today = todayDate();
-    const planned = getHabits().filter(habit => isDueOn(habit, date));
+    const planned = getHabits().filter(habit => isDueOn(habit, date) && (!goalId || habit.goalId === goalId));
     const due = planned.filter(habit => date > today || getHabitStatus(habit, date) !== "skipped");
     const done = date > today ? 0 : due.filter(habit => getHabitStatus(habit, date) === "done").length;
 
@@ -270,18 +283,46 @@ function getWeek(date = todayDate()) {
     return WEEK_DAYS.map((_, i) => getDayResult(addDaysTo(monday, i), start));
 }
 
-// Days in a row with every planned habit done, counting back from today.
-// Today unfinished doesn't break it. Rest days don't break or add. A missed past day ends it.
-function getStreak() {
-    const today = todayDate();
+// ── Streaks. THE rules, in one place (Today, Progress and the calendar all use them) ──
+//   🔥 main streak:  a day counts if you did AT LEAST ONE habit ("done" or "partial")
+//      goal streak:  a day counts only if ALL that goal's habits were done ("done")
+//   Both: rest days don't break or add · today unfinished doesn't break · a missed past day ends it.
+function countsForStreak(state, strict = false) {
+    return strict ? state === "done" : state === "done" || state === "partial";
+}
+
+function pausesStreak(state, date) {
+    return state === "rest" || state === "before" || (date === todayDate() && state === "none");
+}
+
+// Days in a row, counting back from today.  getStreak() → main · getStreak("goal-1") → that goal's
+function getStreak(goalId = null) {
     const start = getStartDate();
+    const strict = goalId !== null;
     let streak = 0;
-    let date = today;
+    let date = todayDate();
 
     while (date >= start) {
-        const result = getDayResult(date, start);
-        if (result.state === "done") streak++;
-        else if (result.state !== "rest" && date !== today) break;
+        const state = getDayResult(date, start, goalId).state;
+        if (countsForStreak(state, strict)) streak++;
+        else if (!pausesStreak(state, date)) break;
+        date = addDaysTo(date, -1);
+    }
+    return streak;
+}
+
+// One habit's streak: days in a row it was done. Skipped days are excused (don't break or add).
+function getHabitStreak(habit) {
+    const start = getStartDate();
+    let streak = 0;
+    let date = todayDate();
+
+    while (date >= start) {
+        if (isDueOn(habit, date)) {
+            const status = getHabitStatus(habit, date);
+            if (status === "done") streak++;
+            else if (status !== "skipped" && date !== todayDate()) break;
+        }
         date = addDaysTo(date, -1);
     }
     return streak;
@@ -566,8 +607,8 @@ function getBestStreak() {
     let run = 0;
     datesBetween(start, today).forEach(date => {
         const state = getDayResult(date, start).state;
-        if (state === "done") { run++; best = Math.max(best, run); }
-        else if (state === "rest" || state === "before" || (date === today && state === "none")) { /* doesn't break it */ }
+        if (countsForStreak(state)) { run++; best = Math.max(best, run); }
+        else if (pausesStreak(state, date)) { /* doesn't break it */ }
         else run = 0;
     });
     return best;
@@ -604,6 +645,23 @@ function getFocusTotals({ from, to }) {
     return { sessions: sessions.length, minutes, mood };
 }
 
+// Q4c · Which goal got the focus time? → [{ goal, minutes }], most first (goals with time only)
+//   Each session belongs to a habit, and each habit to a goal: that's how we know.
+function getFocusByGoal({ from, to }) {
+    const minutes = {};
+    getFocusSessions()
+        .filter(session => session.savedAt && session.date >= from && session.date <= to)
+        .forEach(session => {
+            const habit = getHabitById(session.habitId);
+            if (!habit) return;
+            minutes[habit.goalId] = (minutes[habit.goalId] || 0) + getFocusMinutes(session);
+        });
+    return getGoals()
+        .filter(goal => minutes[goal.id] > 0)
+        .map(goal => ({ goal, minutes: minutes[goal.id] }))
+        .sort((a, b) => b.minutes - a.minutes);
+}
+
 // Q4b · Why do I miss? → [{ reason: "travelling", count: 3 }], most first
 function getSkipReasons({ from, to }) {
     const counts = {};
@@ -618,20 +676,6 @@ function getSkipReasons({ from, to }) {
         .sort((a, b) => b.count - a.count);
 }
 
-
-// Q4b · Why do I miss? → [{ reason: "travelling", count: 3 }], most first
-function getSkipReasons({ from, to }) {
-    const counts = {};
-    getLogs()
-        .filter(log => log.status === "skipped" && log.date >= from && log.date <= to)
-        .forEach(log => {
-            const reason = (log.reason || "no reason").trim().toLowerCase();
-            counts[reason] = (counts[reason] || 0) + 1;
-        });
-    return Object.entries(counts)
-        .map(([reason, count]) => ({ reason, count }))
-        .sort((a, b) => b.count - a.count);
-}
 
 // The one-sentence summary on top. Simple rules, worked out from the numbers above.
 function getProgressSummary(rangeName, consistency, rates) {

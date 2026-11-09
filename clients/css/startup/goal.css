@@ -128,6 +128,16 @@
 
 .goal-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* New goal from Plan: "Which part of your life?" (the picked one is white) */
+.area-pick { margin: var(--lg) 0; padding: 0; border: none; }
+.area-pick[hidden] { display: none; }
+.area-pick legend { margin-bottom: 8px; }
+.area-chip[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--background);
+}
+
 /* ---------- Measure choice cards ---------- */
 
 /* Same fieldset fix as Direction: stops sideways scroll on phones */

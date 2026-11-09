@@ -10,7 +10,8 @@
 
    TWO JOBS, ONE PAGE
      habit.html              → onboarding: up to 3 habits, Continue → routine.html
-     habit.html?mode=edit    → from Plan:  up to 5 habits, Save → back to Plan
+     habit.html?mode=edit    → from Plan:  no habit limit, Save → back to Plan
+     ?goal=goal-123          → that goal's habits (edit-mode.js getGoalToEdit)
      habit.html?...&add=1    → from Plan's "＋ Add a habit": cursor in the name box
 
    MAP
@@ -34,9 +35,10 @@
 // Habits belong to a goal. No goal = they skipped a step.
 // replace() starts leaving, but the script keeps running,
 // so section 8 checks `if (goal)` before using it.
-const goal = getActiveGoal();
+// Which goal? (edit-mode.js: ?goal=… from Plan, otherwise the main goal)
+const goal = getGoalToEdit();
 if (!goal) {
-    window.location.replace("goal.html");
+    window.location.replace(editMode ? PLAN_PAGE : "goal.html");
 }
 
 
@@ -77,15 +79,16 @@ const continueButton = document.getElementById("continueButton");
 /* ════════════════════ 3. SETTINGS ════════════════════ */
 
 const MIN_NAME_LENGTH = 2;
-const MAX_HABITS = editMode ? 5 : 3;          // onboarding: 3 · edit from Plan: 5
+const MAX_HABITS = editMode ? Infinity : 3;   // onboarding: 3 (start small) · from Plan: no limit
 const TIME_UNITS = ["min", "hours"];
 const MINUTES_IN_DAY = 24 * 60;               // 1440: no habit can take longer than a day
 
 // One icon per habit type, for the list.
 const TYPE_ICONS = { quantity: "straighten", time: "timer", completion: "task_alt" };
 
-// The area from the Direction page → its habit suggestions and units.
-const area = getAreaById(getDirection().area);
+// The GOAL's area → its habit suggestions and units (a Studies goal gets Studies habits).
+// Older goals without an area use the Direction's.
+const area = getAreaById((goal && goal.area) || getDirection().area);
 
 
 /* ════════════════════ 4. PAGE STATE ════════════════════
@@ -281,7 +284,8 @@ function renderHabitList() {
     habitList.innerHTML = "";
     habits.forEach(habit => habitList.append(createHabitItem(habit)));
     habitEmpty.hidden = habits.length > 0;
-    habitCount.textContent = `${habits.length} / ${MAX_HABITS}`;
+    // "2 / 3" while setting up · just "4" from Plan (no limit)
+    habitCount.textContent = Number.isFinite(MAX_HABITS) ? `${habits.length} / ${MAX_HABITS}` : habits.length;
 }
 
 // Add a piece of text, bold or plain. Builds a sentence with <strong>

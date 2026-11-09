@@ -1,18 +1,36 @@
 /* ╔══════════════════════════════════════════════════════════════╗
    ║  PLAN  ·  js/app/plan.js                                     ║
-   ║  Shows your direction, goal, habits and week.                ║
+   ║  Your direction, your goals (each with ITS habits) and week. ║
    ╚══════════════════════════════════════════════════════════════╝
+
+   WHAT THIS PAGE SHOWS
+     • Direction: "I am someone who…"
+     • Goals: one block per active goal, main goal first (state.js getActiveGoals)
+         the goal card (bar, pace, end box, milestones, why) + ⋯ menu
+         its habits (🔥 streak, this week's dots, Archive) + "＋ Add a habit"
+         its archived habits (Restore)
+     • "＋ Add a goal" while under the limit (state.js GOAL_LIMIT)
+     • Coming up + My week (unchanged)
+
+   EVERY GOAL BLOCK IS BUILT FROM ONE <template>
+     So there are no ids inside a block (ids must be unique on a page).
+     Each block has data-goal-id; ONE listener on #goalList handles
+     every button in every block (event delegation, data-action).
 
    MAP OF THIS FILE
      1. Guard   2. Elements   3. Settings   4. Page state
      5. Helpers   6. Renderers   7. Actions   8. Page load   9. Events
    ══════════════════════════════════════════════════════════════════ */
-   /* ════════════════════ 1. GUARD ════════════════════ */
+
+
+/* ════════════════════ 1. GUARD ════════════════════ */
 
 const planReady = isOnboardingComplete();
 if (!planReady) {
     window.location.replace("../startup/welcome.html");
 }
+
+
 /* ════════════════════ 2. ELEMENTS ════════════════════ */
 
 // ── Top bar + direction ──
@@ -21,44 +39,20 @@ const direction = document.getElementById("direction");
 const directionArea = document.getElementById("directionArea");
 const directionIdentity = document.getElementById("directionIdentity");
 
-// ── Goal ──
-const goalTitle = document.getElementById("goalTitle");
-const goalFinish = document.getElementById("goalFinish");
-const goalBar = document.getElementById("goalBar");
-const goalBarFill = document.getElementById("goalBarFill");
-const goalNumbers = document.getElementById("goalNumbers");
-const goalDeadline = document.getElementById("goalDeadline");
-const goalWhy = document.getElementById("goalWhy");
-const goalPace = document.getElementById("goalPace");
-const goalPaceIcon = document.getElementById("goalPaceIcon");
-const goalPaceText = document.getElementById("goalPaceText");
-const goalEnd = document.getElementById("goalEnd");
-const goalEndIcon = document.getElementById("goalEndIcon");
-const goalEndTitle = document.getElementById("goalEndTitle");
-const goalEndHint = document.getElementById("goalEndHint");
-const goalExtend = document.getElementById("goalExtend");
-const newGoalButton = document.getElementById("newGoalButton");
+// ── Goals ──
 const noGoal = document.getElementById("noGoal");
-const planGoal = document.getElementById("planGoal");
-const planHabits = document.getElementById("planHabits");
-const milestoneList = document.getElementById("milestoneList");
-//upcoming
+const planGoals = document.getElementById("planGoals");
+const goalCount = document.getElementById("goalCount");
+const goalList = document.getElementById("goalList");
+const addGoal = document.getElementById("addGoal");
+const addGoalLeft = document.getElementById("addGoalLeft");
+const goalsFull = document.getElementById("goalsFull");
+const goalsFullText = document.getElementById("goalsFullText");
+
+// ── Coming up ──
 const upcomingList = document.getElementById("upcomingList");
 const upcomingEmpty = document.getElementById("upcomingEmpty");
-const upcomingTemplate = document.getElementById("upcomingTemplate");
 const upcomingAdd = document.getElementById("upcomingAdd");
-
-// ── Habits + archived ──
-const habitCount = document.getElementById("habitCount");
-const habitList = document.getElementById("habitList");
-const habitsEmpty = document.getElementById("habitsEmpty");
-const addHabit = document.getElementById("addHabit");
-const addHabitText = document.getElementById("addHabitText");
-const addHabitLeft = document.getElementById("addHabitLeft");
-const habitsFull = document.getElementById("habitsFull");
-const archived = document.getElementById("archived");
-const archivedCount = document.getElementById("archivedCount");
-const archivedList = document.getElementById("archivedList");
 
 // ── My week ──
 const weekChips = document.getElementById("weekChips");
@@ -70,21 +64,30 @@ const toast = document.getElementById("toast");
 const toastText = document.getElementById("toastText");
 
 // ── Templates ──
+const goalTemplate = document.getElementById("goalTemplate");
 const habitTemplate = document.getElementById("habitTemplate");
-const weekItemTemplate = document.getElementById("weekItemTemplate");
 const archivedTemplate = document.getElementById("archivedTemplate");
 const milestoneTemplate = document.getElementById("milestoneTemplate");
+const weekItemTemplate = document.getElementById("weekItemTemplate");
+const upcomingTemplate = document.getElementById("upcomingTemplate");
+
 
 /* ════════════════════ 3. SETTINGS ════════════════════ */
 
-const MAX_HABITS = 5;            // active habits allowed (onboarding allows 3)
 const TOAST_MS = 3000;
 const WEEK_ICONS = { wake: "wb_sunny", sleep: "bedtime", activity: "event", habit: "radio_button_checked" };
 const PACE_ICONS = { done: "celebration", start: "flag", ahead: "trending_up", behind: "warning" };
 
+// Where each ⋯ link goes. ?goal=… tells the page WHICH goal (startup/edit-mode.js).
+const GOAL_PAGE = "../startup/goal.html";
+const HABIT_PAGE = "../startup/habit.html";
+
+
 /* ════════════════════ 4. PAGE STATE ════════════════════ */
+
 let selectedDay = weekdayOf(todayDate());   // "My week" starts on today's weekday
 let toastTimer = null;
+
 
 /* ════════════════════ 5. HELPERS ════════════════════ */
 
@@ -96,6 +99,7 @@ function describeFinish(goal) {
         default:           return "Done by staying consistent";
     }
 }
+
 function formatDate(dateText) {
     const [year, month, day] = dateText.split("-").map(Number);
     return new Date(year, month - 1, day).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -109,6 +113,7 @@ function describeDeadline(goal) {
     if (daysLeft === 0) return "Due today";
     return `Past the date · ${date}`;
 }
+
 function describePace(goal, pace) {
     const unit = goal.unit;
     switch (pace.state) {
@@ -122,16 +127,31 @@ function describePace(goal, pace) {
         default:       return "";
     }
 }
+
+// "05:30" or "05:30 / 18:00" (a habit can sit at two times)
 function habitTimes(habitId) {
     const times = getRoutine()
         .filter(item => item.kind === "habit" && item.habitId === habitId)
         .map(item => item.time);
     return [...new Set(times)].sort().join(" / ");
 }
+
+// "1 goal" / "3 goals"
+function plural(count, word) {
+    return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
+
 // Copy a <template>'s content so we can fill it in.
 function copyTemplate(template) {
     return template.content.firstElementChild.cloneNode(true);
 }
+
+// Inside one goal block: block.querySelector, shorter.
+function part(block, selector) {
+    return block.querySelector(selector);
+}
+
+
 /* ════════════════════ 6. RENDERERS ════════════════════ */
 
 // ── Direction: "QURAN" + "I am someone who…". Hidden if there's none. ──
@@ -141,55 +161,121 @@ function renderDirection() {
     directionArea.textContent = areaLabel || "";
     directionIdentity.textContent = identity || "";
 }
-// ── Goal card ──
-function renderGoal(goal) {
+
+// ── All goals: one block each (main first), the counts, "＋ Add a goal" ──
+function renderGoals() {
+    const goals = getActiveGoals();
+
+    noGoal.hidden = goals.length > 0;
+    planGoals.hidden = goals.length === 0;
+    goalList.replaceChildren(...goals.map((goal, index) => buildGoalBlock(goal, index === 0)));
+
+    goalCount.textContent = `${goals.length} / ${GOAL_LIMIT}`;
+    const habitTotal = goals.reduce((sum, goal) => sum + getHabitsForGoal(goal.id).length, 0);
+    planCount.textContent = `${plural(goals.length, "goal")} · ${plural(habitTotal, "habit")}`;
+
+    // "＋ Add a goal ……… 1 left"   ·   at the limit → the hint instead
+    const left = GOAL_LIMIT - goals.length;
+    addGoal.hidden = !canAddGoal();
+    addGoalLeft.textContent = left === 1 ? "1 left" : `${left} left`;
+    goalsFull.hidden = canAddGoal();
+    goalsFullText.textContent = `${GOAL_LIMIT} / ${GOAL_LIMIT} goals. Close one to start another.`;
+}
+
+// ── ONE goal block: the card on top, its habits under it ──
+function buildGoalBlock(goal, isMain) {
+    const block = copyTemplate(goalTemplate);
+    block.dataset.goalId = goal.id;
+    block.dataset.color = goal.color;                    // app.css → var(--goal) for the dot, edge and bar
+
+    fillGoalCard(block, goal);
+    fillGoalMenu(block, goal, isMain);
+    fillGoalHabits(block, goal);
+    return block;
+}
+
+// The card: title, finish line, bar, numbers, pace, end box, milestones, why
+function fillGoalCard(block, goal) {
     const progress = getGoalProgress(goal);
     const unit = goal.measure === "milestones" ? "steps" : goal.measure === "consistency" ? "check-ins" : goal.unit;
 
-    goalTitle.textContent = goal.title;
-    goalFinish.textContent = describeFinish(goal);
-    goalBarFill.style.width = progress.percent + "%";
-    goalBar.setAttribute("aria-valuenow", progress.percent);
-    goalNumbers.textContent = `${progress.done} / ${progress.target} ${unit} · ${progress.percent}%`;
-    goalDeadline.textContent = describeDeadline(goal);
-    goalWhy.textContent = goal.why ? `“${goal.why}”` : "";
-    goalWhy.hidden = !goal.why;
+    part(block, ".goal-title").textContent = goal.title;
+    part(block, ".goal-card-finish").textContent = describeFinish(goal);
+    part(block, ".goal-bar .bar-fill").style.width = progress.percent + "%";
+    part(block, ".goal-bar").setAttribute("aria-valuenow", progress.percent);
+    part(block, ".goal-bar").setAttribute("aria-label", `${goal.title}: ${progress.percent}%`);
+    part(block, ".goal-numbers").textContent = `${progress.done} / ${progress.target} ${unit} · ${progress.percent}%`;
+    part(block, ".goal-deadline").textContent = describeDeadline(goal);
+
+    const why = part(block, ".goal-card-why");
+    why.textContent = goal.why ? `“${goal.why}”` : "";
+    why.hidden = !goal.why;
 
     // On track? (total goals only)
     const pace = getGoalPace(goal);
     const sentence = describePace(goal, pace);
-    goalPace.hidden = !sentence;
-    goalPace.className = `goal-pace is-${pace.state}`;
-    goalPaceIcon.textContent = PACE_ICONS[pace.state] || "";
-    goalPaceText.textContent = sentence;
+    const paceLine = part(block, ".goal-pace");
+    paceLine.hidden = !sentence;
+    paceLine.classList.add(`is-${pace.state}`);
+    part(block, ".goal-pace-icon").textContent = PACE_ICONS[pace.state] || "";
+    part(block, ".goal-pace-text").textContent = sentence;
 
-    // The end: reached 🎉 or the date has passed → offer the next goal
-    renderGoalEnd(goal, progress);
+    fillGoalEnd(block, goal, progress);
 
     // Milestone goals: the steps, tickable
-    milestoneList.hidden = goal.measure !== "milestones";
-    milestoneList.replaceChildren(...goal.milestones.map(buildMilestone));
+    const steps = part(block, ".milestone-list");
+    steps.hidden = goal.measure !== "milestones";
+    steps.replaceChildren(...goal.milestones.map(buildMilestone));
 }
 
-function renderGoalEnd(goal, progress) {
+// The end: reached 🎉 or the date has passed → close it (or change the date)
+function fillGoalEnd(block, goal, progress) {
     const reached = goal.measure !== "consistency" && progress.percent >= 100;
     const daysLeft = getDaysLeft(goal);
     const datePassed = daysLeft !== null && daysLeft < 0;
 
-    goalEnd.hidden = !reached && !datePassed;
-    if (goalEnd.hidden) return;
+    const end = part(block, ".goal-end");
+    end.hidden = !reached && !datePassed;
+    if (end.hidden) return;
 
-    goalEnd.classList.toggle("is-reached", reached);
-    goalExtend.hidden = reached;                     // reached: no need for more time
+    end.classList.toggle("is-reached", reached);
+    part(block, ".goal-extend").hidden = reached;        // reached: no need for more time
     if (reached) {
-        goalEndIcon.textContent = "celebration";
-        goalEndTitle.textContent = "You reached your goal";
-        goalEndHint.textContent = "Close it and pick your next one. Your history stays.";
+        part(block, ".goal-end-icon").textContent = "celebration";
+        part(block, ".goal-end-title").textContent = "You reached this goal";
+        part(block, ".goal-end-hint").textContent = "Close it to free a place for your next one. Your history stays.";
     } else {
-        goalEndIcon.textContent = "event_busy";
-        goalEndTitle.textContent = "The date has passed";
-        goalEndHint.textContent = `You got to ${progress.percent}%. Give it more time, or close it and start fresh.`;
+        part(block, ".goal-end-icon").textContent = "event_busy";
+        part(block, ".goal-end-title").textContent = "The date has passed";
+        part(block, ".goal-end-hint").textContent = `You got to ${progress.percent}%. Give it more time, or close it.`;
     }
+}
+
+// ⋯ menu: the links know WHICH goal (?goal=…). The main goal has no "Make main".
+function fillGoalMenu(block, goal, isMain) {
+    const editGoal = `${GOAL_PAGE}?mode=edit&goal=${encodeURIComponent(goal.id)}`;
+    const editHabits = `${HABIT_PAGE}?mode=edit&goal=${encodeURIComponent(goal.id)}`;
+
+    block.querySelectorAll("[data-link='goal']").forEach(link => { link.href = editGoal; });
+    part(block, "[data-link='habits']").href = editHabits;
+    part(block, "[data-link='add-habit']").href = `${editHabits}&add=1`;
+
+    part(block, ".goal-main-tag").hidden = !isMain || getActiveGoals().length < 2;   // "Main" only matters with 2+
+    part(block, "[data-action='make-main']").hidden = isMain;
+    part(block, ".goal-menu-button").setAttribute("aria-label", `Options for ${goal.title}`);
+}
+
+// Its habits (🔥, this week) + "No habits yet" + its archived habits
+function fillGoalHabits(block, goal) {
+    const habits = getHabitsForGoal(goal.id);
+    const old = getArchivedHabits(goal.id);
+
+    part(block, ".goal-habit-list").replaceChildren(...habits.map(habit => buildHabit(habit, goal)));
+    part(block, ".goal-habits-empty").hidden = habits.length > 0;
+
+    part(block, ".goal-archived").hidden = old.length === 0;
+    part(block, ".goal-archived-count").textContent = old.length;
+    part(block, ".goal-archived-list").replaceChildren(...old.map(buildArchived));
 }
 
 // One milestone step: a checkbox + its title.
@@ -200,7 +286,8 @@ function buildMilestone(step) {
     li.querySelector(".milestone-title").textContent = step.title;
     return li;
 }
-// ── One active habit: name, "1 page · Every day · 05:30", tag, this week, Archive ──
+
+// ── One active habit: name (+ tag) + 🔥, "1 page · Every day · 05:30", this week, Archive ──
 function buildHabit(habit, goal) {
     const li = copyTemplate(habitTemplate);
     li.dataset.habitId = habit.id;
@@ -208,6 +295,12 @@ function buildHabit(habit, goal) {
     const time = habitTimes(habit.id) || "Anytime";
     li.querySelector(".habit-item-detail").textContent = `${describeHabitAmount(habit)} · ${describeDays(habit.days)} · ${time}`;
     li.querySelector(".habit-item-tag").hidden = !countsTowardGoal(habit, goal);
+
+    // 🔥 its own streak (insight.js). Hidden at 0: no "🔥 0" shaming.
+    const streak = getHabitStreak(habit);
+    li.querySelector(".habit-streak").hidden = streak === 0;
+    li.querySelector(".habit-streak-count").textContent = streak;
+    li.querySelector(".habit-streak").setAttribute("aria-label", `${streak} days in a row`);
 
     // This week: 7 dots + "4 / 5"
     const week = getHabitWeek(habit);
@@ -231,75 +324,6 @@ function buildArchived(habit) {
     li.querySelector("[data-action='restore']").setAttribute("aria-label", `Restore ${habit.name}`);
     return li;
 }
-
-// ── Habits + archived lists, and the counts ──
-function renderHabits(goal) {
-    const habits = getHabitsForGoal(goal.id);
-    const old = getArchivedHabits(goal.id);
-
-    habitList.replaceChildren(...habits.map(habit => buildHabit(habit, goal)));
-    habitsEmpty.hidden = habits.length > 0;
-    habitCount.textContent = `${habits.length} / ${MAX_HABITS}`;
-    planCount.textContent = habits.length === 1 ? "1 habit" : `${habits.length} habits`;
-
-    // "＋ Add a habit ……… 4 spots left"   ·   full → the "Archive one" hint instead
-    const spots = MAX_HABITS - habits.length;
-    addHabit.hidden = spots <= 0;
-    habitsFull.hidden = spots > 0;s
-    addHabitText.textContent = habits.length === 0 ? "Add your first habit" : "Add a habit";
-    addHabitLeft.textContent = spots === 1 ? "1 spot left" : `${spots} spots left`;
-
-    archivedList.replaceChildren(...old.map(buildArchived));
-    archivedCount.textContent = old.length;
-    archived.hidden = old.length === 0;
-}
-// ── One active habit: name, "1 page · Every day · 05:30", tag, this week, Archive ──
-function buildHabit(habit, goal) {
-    const li = copyTemplate(habitTemplate);
-    li.dataset.habitId = habit.id;
-    li.querySelector(".habit-item-title").textContent = habit.name;
-    const time = habitTimes(habit.id) || "Anytime";
-    li.querySelector(".habit-item-detail").textContent = `${describeHabitAmount(habit)} · ${describeDays(habit.days)} · ${time}`;
-    li.querySelector(".habit-item-tag").hidden = !countsTowardGoal(habit, goal);
-
-    // This week: 7 dots + "4 / 5"
-    const week = getHabitWeek(habit);
-    const dots = week.days.map(day => {
-        const dot = document.createElement("li");
-        dot.className = `habit-dot is-${day.state}`;
-        return dot;
-    });
-    li.querySelector(".habit-dots").replaceChildren(...dots);
-    li.querySelector(".habit-week-count").textContent = `${week.done} / ${week.due} this week`;
-    li.querySelector("[data-action='archive']").setAttribute("aria-label", `Archive ${habit.name}`);
-    return li;
-}
-
-// ── One archived habit: name + Restore ──
-function buildArchived(habit) {
-    const li = copyTemplate(archivedTemplate);
-    li.dataset.habitId = habit.id;
-    li.querySelector(".habit-item-title").textContent = habit.name;
-    li.querySelector(".habit-item-detail").textContent = `${describeHabitAmount(habit)} · ${describeDays(habit.days)}`;
-    li.querySelector("[data-action='restore']").setAttribute("aria-label", `Restore ${habit.name}`);
-    return li;
-}
-
-// ── Habits + archived lists, and the counts ──
-function renderHabits(goal) {
-    const habits = getHabitsForGoal(goal.id);
-    const old = getArchivedHabits(goal.id);
-
-    habitList.replaceChildren(...habits.map(habit => buildHabit(habit, goal)));
-    habitsEmpty.hidden = habits.length > 0;
-    habitCount.textContent = `${habits.length} / ${MAX_HABITS}`;
-    planCount.textContent = habits.length === 1 ? "1 habit" : `${habits.length} habits`;
-
-    archivedList.replaceChildren(...old.map(buildArchived));
-    archivedCount.textContent = old.length;
-    archived.hidden = old.length === 0;
-}
-// weekday plan: all routine items for that day, sorted by time. Habit items only if the habit still exists and is due.
 
 // ── One line of "My week" ──
 function buildWeekItem(item) {
@@ -330,7 +354,7 @@ function renderUpcoming() {
 
 function buildUpcoming(item) {
     const li = copyTemplate(upcomingTemplate);
-        li.dataset.itemId = item.id;                 
+    li.dataset.itemId = item.id;
     li.querySelector(".upcoming-when").textContent = `${describeUpcomingDay(item.date)} ${item.time}`;
     li.querySelector(".upcoming-label").textContent = item.label;
     const note = li.querySelector(".upcoming-note");
@@ -338,26 +362,16 @@ function buildUpcoming(item) {
     note.hidden = !item.note;
     return li;
 }
+
 // ── Redraw everything ──
 function updatePage() {
-   const goal = getActiveGoal();
     renderDirection();
-    noGoal.hidden = !!goal;
-    planGoal.hidden = !goal;
-    planHabits.hidden = !goal;
-
-    if (goal) {
-        renderGoal(goal);
-        renderHabits(goal);
-    }
+    renderGoals();
     renderWeek();
     renderUpcoming();
 }
-/* ════════════════════ 8. PAGE LOAD ════════════════════ */
 
-if (planReady) {
-    updatePage();
-}
+
 /* ════════════════════ 7. ACTIONS ════════════════════ */
 
 // Archive: hidden from Today, history kept, can come back.
@@ -369,35 +383,45 @@ function archive(habitId) {
     updatePage();
     showToast(`${habit.name} archived`);
 }
-// Restore: back on Today with its old times. Not past the limit.
+
+// Restore: back on Today with its old times. (No habit limit any more.)
 function restore(habitId) {
     const habit = getHabitById(habitId);
     if (!habit) return;
-    if (getHabitsForGoal(habit.goalId).length >= MAX_HABITS) {
-        showToast(`You have ${MAX_HABITS} habits. Archive one first.`);
-        return;
-    }
     restoreHabit(habitId);
     updatePage();
     showToast(`${habit.name} is back on Today`);
 }
-// Tick / untick a milestone step → the bar and "2 / 4 steps" update.
-function tickMilestone(stepId) {
-    const goal = getActiveGoal();
-    const updated = toggleMilestone(goal.id, stepId);
+
+// Tick / untick a milestone step → that goal's bar and "2 / 4 steps" update.
+function tickMilestone(goalId, stepId) {
+    const updated = toggleMilestone(goalId, stepId);
+    if (!updated) return;
     updatePage();
     const step = updated.milestones.find(item => item.id === stepId);
     showToast(step.done ? `"${step.title}" done` : `"${step.title}" not done`);
 }
-// Start a new goal: close this one (habits → archive), then fill in the next.
-// goal.html?mode=edit finds no active goal, so it opens empty ("Your next goal").
-function startNewGoal() {
-    const goal = getActiveGoal();
+
+// ⋯ → Make it my main goal: it moves to the top (and to Today's first place).
+function makeMain(goalId) {
+    const goal = getGoalById(goalId);
     if (!goal) return;
-    if (!confirm(`Close "${goal.title}" and start a new goal?\n\nIts habits go to the archive. All your history stays.`)) return;
-    finishGoal(goal.id);
-    window.location.href = "../startup/goal.html?mode=edit";
+    setMainGoal(goalId);
+    updatePage();
+    showToast(`"${goal.title}" is your main goal`);
 }
+
+// ⋯ → Close this goal: it gets the "done" sticker, its habits go to the archive.
+// A place frees up for a new goal. All history stays.
+function closeGoal(goalId) {
+    const goal = getGoalById(goalId);
+    if (!goal) return;
+    if (!confirm(`Close "${goal.title}"?\n\nIts habits leave Today and go to the archive. All your history stays.`)) return;
+    finishGoal(goalId);
+    updatePage();
+    showToast(`"${goal.title}" closed`);
+}
+
 // The schedule sheet (item-sheet.js) calls this after Save / Remove.
 function afterItemChange(message) {
     updatePage();
@@ -417,33 +441,53 @@ function showToast(message) {
     toastTimer = setTimeout(() => { toast.hidden = true; }, TOAST_MS);
 }
 
+
+/* ════════════════════ 8. PAGE LOAD ════════════════════ */
+
+if (planReady) {
+    updatePage();
+}
+
+
 /* ════════════════════ 9. EVENTS ════════════════════
    All at the top level. Lists use event delegation (one listener each). */
 
-habitList.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-action='archive']");
-    if (button) archive(button.closest("[data-habit-id]").dataset.habitId);
-});
+// Every button in every goal block: one listener. data-action says what to do,
+// the closest [data-goal-id] / [data-habit-id] says on WHICH goal / habit.
+goalList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
 
-archivedList.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-action='restore']");
-    if (button) restore(button.closest("[data-habit-id]").dataset.habitId);
+    const goalId = button.closest("[data-goal-id]").dataset.goalId;
+    const habitRow = button.closest("[data-habit-id]");
+    const action = button.dataset.action;
+
+    button.closest(".goal-menu")?.removeAttribute("open");   // close the ⋯ menu after a choice
+
+    if (action === "archive") archive(habitRow.dataset.habitId);
+    if (action === "restore") restore(habitRow.dataset.habitId);
+    if (action === "make-main") makeMain(goalId);
+    if (action === "close-goal") closeGoal(goalId);
 });
 
 // "change" (not "click"): a checkbox changes by click, Space key or a screen reader.
-milestoneList.addEventListener("change", (event) => {
+goalList.addEventListener("change", (event) => {
     const step = event.target.closest("[data-step-id]");
-    if (step) tickMilestone(step.dataset.stepId);
+    if (!step) return;
+    tickMilestone(step.closest("[data-goal-id]").dataset.goalId, step.dataset.stepId);
+});
+
+// Click anywhere else → any open ⋯ menu closes.
+document.addEventListener("click", (event) => {
+    document.querySelectorAll(".goal-menu[open]").forEach(menu => {
+        if (!menu.contains(event.target)) menu.removeAttribute("open");
+    });
 });
 
 weekChips.addEventListener("click", (event) => {
     const chip = event.target.closest("[data-day]");
     if (chip) chooseDay(chip.dataset.day);
 });
-
-// "Start a new goal" in the end box
-newGoalButton.addEventListener("click", startNewGoal);
-
 
 // Coming up: ＋ Add, or tap a row to change it (the shared schedule sheet)
 upcomingAdd.addEventListener("click", () => openAddItem(afterItemChange));

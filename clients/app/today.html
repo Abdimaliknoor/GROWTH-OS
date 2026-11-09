@@ -11,7 +11,7 @@
       Navigation ......... phone: bottom bar · desktop: left sidebar
       Top bar ............ "📅 Today          SUNDAY 25 OCTOBER"
       1. Header .......... greeting + "2 of 5 done" ring
-      2. Side ............ goal · this week · coming up
+      2. Side ............ your goals (one row each) · this week · coming up
       3. Day line ........ wake → habits → activities → sleep  + "Add to my day"
       4. Evening card .... "Review your day" (from 18:00)
 
@@ -21,6 +21,7 @@
     TEMPLATES (copied and filled by today.js)
       markerTemplate ..... Wake up / Sleep / Class (+ your note)
       rowTemplate ........ a small habit row
+      goalRowTemplate .... one goal in "Your goals"
       nowTemplate ........ the big "Still to do" card
       allDoneTemplate .... "All done today"
       upcomingTemplate ... one "Coming up" line
@@ -186,27 +187,17 @@
                Phone: above the day line.  Tablet: 2 columns.
                Big screens (1200px+): a column on the right. Only CSS moves it. -->
           <aside class="today-side" aria-label="Your progress">
-            <!-- The goal + its bar -->
-            <section class="goal-strip" id="goalStrip" aria-label="Your goal">
-              <div class="goal-strip-top">
-                <span class="icon goal-strip-icon" aria-hidden="true"
-                  >flag</span
-                >
-                <span class="goal-strip-title" id="goalTitle"></span>
-                <span class="goal-strip-days" id="goalDays"></span>
-              </div>
-              <div
-                class="bar"
-                id="goalBar"
-                role="progressbar"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow="0"
-                aria-label="Goal progress"
-              >
-                <span class="bar-fill" id="goalBarFill"></span>
-              </div>
-              <p class="goal-strip-numbers" id="goalNumbers"></p>
+            <!-- Your goals: one row each, main first (today.js copies #goalRowTemplate).
+                 "Your goals" title only shows with 2+ goals. -->
+            <section
+              class="goal-strip"
+              id="goalStrip"
+              aria-labelledby="goalsTitle"
+            >
+              <h2 class="goal-strip-heading" id="goalsTitle" hidden>
+                Your goals
+              </h2>
+              <ul class="goal-rows" id="goalRows"></ul>
             </section>
 
             <!-- This week: M T W T F S S + the streak. Hidden on small phones. -->
@@ -330,11 +321,33 @@
           <span class="row-name"></span>
           <span class="row-detail">
             <span class="item-time"></span>
+            <span class="goal-tag" hidden></span>
             <span class="row-status"></span>
           </span>
         </button>
         <span class="tag row-extra" hidden></span>
         <button class="row-button" type="button" data-action="add"></button>
+      </li>
+    </template>
+
+    <!-- GOAL ROW · dot + title + days left, the bar (in the goal's colour), "6 / 12 pages · 50%" -->
+    <template id="goalRowTemplate">
+      <li class="goal-row">
+        <div class="goal-strip-top">
+          <span class="goal-dot" aria-hidden="true"></span>
+          <span class="goal-strip-title"></span>
+          <span class="goal-strip-days"></span>
+        </div>
+        <div
+          class="bar goal-row-bar"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <span class="bar-fill"></span>
+        </div>
+        <p class="goal-strip-numbers"></p>
       </li>
     </template>
 
@@ -346,6 +359,7 @@
           <p class="now-label">
             <span class="now-badge"></span>
             <span class="item-time"></span>
+            <span class="goal-tag" hidden></span>
           </p>
           <h2 class="now-name"></h2>
           <div class="now-progress">

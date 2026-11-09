@@ -6,8 +6,12 @@
    Every panel follows the same 3 steps: a question → the answer → one sentence.
    Every colour comes from ONE scale (levelOf): green ≥ 80 · white 60–79 · red < 60.
 
+   LAYOUT  left: one panel per goal (main first), its habits inside it
+           right: showing up · focus (split by goal) · skips
+
    DATA   insight.js section 9: getRange, getConsistency, getHabitRates,
-          getFocusTotals, getSkipReasons, getProgressSummary, getBestStreak
+          getFocusTotals, getFocusByGoal, getSkipReasons, getProgressSummary,
+          getBestStreak · streaks: getStreak, getStreak(goalId), getHabitStreak
 
    MAP
      1. Guard     2. Elements     3. Settings     4. Page state
@@ -30,15 +34,10 @@ const rangeLabel = document.getElementById("rangeLabel");
 const rangeChips = document.getElementById("rangeChips");
 const summaryText = document.getElementById("summaryText");
 const summaryLink = document.getElementById("summaryLink");
-// ── 1. Goal ──
-const goalCard = document.getElementById("goalCard");
-const goalName = document.getElementById("goalName");
-const goalBar = document.getElementById("goalBar");
-const goalBarFill = document.getElementById("goalBarFill");
-const goalSays = document.getElementById("goalSays");
-const goalPace = document.getElementById("goalPace");
-const paceBadge = document.getElementById("paceBadge");
-const paceText = document.getElementById("paceText");
+// ── Left: your goals (each with its habits) ──
+const goalPanels = document.getElementById("goalPanels");
+const goalsEmpty = document.getElementById("goalsEmpty");
+const ratesSays = document.getElementById("ratesSays");
 
 // ── 2. Showing up ──
 const consistencyPercent = document.getElementById("consistencyPercent");
@@ -51,15 +50,13 @@ const streakNumber = document.getElementById("streakNumber");
 const streakLabel = document.getElementById("streakLabel");
 const squares = document.getElementById("squares");
 
-// ── 3. Habits ──
-const ratesSays = document.getElementById("ratesSays");
-const rateList = document.getElementById("rateList");
-const ratesEmpty = document.getElementById("ratesEmpty");
-
 // ── 4. Focus ──
 const focusTime = document.getElementById("focusTime");
 const focusSays = document.getElementById("focusSays");
 const focusChange = document.getElementById("focusChange");
+const focusSplit = document.getElementById("focusSplit");
+const focusStack = document.getElementById("focusStack");
+const focusLegend = document.getElementById("focusLegend");
 
 // ── 5. Skips ──
 const reasonsSays = document.getElementById("reasonsSays");
@@ -67,6 +64,7 @@ const reasonList = document.getElementById("reasonList");
 const reasonsEmpty = document.getElementById("reasonsEmpty");
 
 // ── Templates ──
+const goalPanelTemplate = document.getElementById("goalPanelTemplate");
 const rateTemplate = document.getElementById("rateTemplate");
 const reasonTemplate = document.getElementById("reasonTemplate");
 
@@ -110,12 +108,11 @@ function shortDate(date) {
 // The days of the CURRENT streak (newest first), counting back from today:
 // done days join it, rest days and an unfinished today are stepped over, anything else ends it.
 function getStreakDates(days) {
-    const today = todayDate();
     const dates = new Set();
     for (let i = days.length - 1; i >= 0; i--) {
         const day = days[i];
-        if (day.state === "done") dates.add(day.date);
-        else if (day.state === "rest" || (day.date === today && day.state === "none")) continue;
+        if (countsForStreak(day.state)) dates.add(day.date);       // same rule as the 🔥 number (insight.js)
+        else if (pausesStreak(day.state, day.date)) continue;
         else break;
     }
     return dates;
@@ -128,20 +125,45 @@ function copyTemplate(template) {
 
 /* ════════════════════ 6. RENDERERS ════════════════════ */
 
-// ── 1. Goal: name, bar, "31 of 60 pages", pace badge ──
-function renderGoal() {
-    const goal = getActiveGoal();
-    goalCard.hidden = !goal;
-    if (!goal) return;
+// ── Left: one panel per goal (main first), its habits inside ──
+function renderGoals(rates) {
+    const goals = getActiveGoals();
+    goalsEmpty.hidden = goals.length > 0;
+    goalPanels.replaceChildren(...goals.map(goal => buildGoalPanel(goal, rates)));
+}
+
+// One goal: dot + name + 🔥, bar, "8 of 20 pages", pace badge, then ITS habits
+function buildGoalPanel(goal, rates) {
+    const panel = copyTemplate(goalPanelTemplate);
+    panel.dataset.color = goal.color;                    // app.css → var(--goal): edge, dot, bar
 
     const progress = getGoalProgress(goal);
     const unit = goal.measure === "milestones" ? "steps" : goal.measure === "consistency" ? "check-ins" : goal.unit;
-    goalName.textContent = goal.title;
-    goalBarFill.style.width = progress.percent + "%";
-    goalBar.setAttribute("aria-valuenow", progress.percent);
-    goalSays.textContent = `${progress.done} of ${progress.target} ${unit} done (${progress.percent}%).`;
+    panel.querySelector(".goal-name").textContent = goal.title;
+    panel.querySelector(".bar-fill").style.width = progress.percent + "%";
+    const bar = panel.querySelector(".goal-bar");
+    bar.setAttribute("aria-valuenow", progress.percent);
+    bar.setAttribute("aria-label", `${goal.title}: ${progress.percent}%`);
+    panel.querySelector(".goal-says").textContent = `${progress.done} of ${progress.target} ${unit} done (${progress.percent}%).`;
 
-    // On track? A badge + one line. Same colours as the score.
+    // 🔥 goal streak: ALL its habits done, days in a row (insight.js). Hidden at 0.
+    const streak = getStreak(goal.id);
+    const flame = panel.querySelector(".goal-streak");
+    flame.hidden = streak === 0;
+    panel.querySelector(".goal-streak-count").textContent = streak === 1 ? "1 day" : `${streak} days`;
+    flame.title = "Days in a row with all of this goal's habits done";
+
+    fillPace(panel, goal, unit);
+
+    // Its habits, strongest first (rates is already sorted)
+    const own = rates.filter(rate => rate.habit.goalId === goal.id && rate.due > 0);
+    panel.querySelector(".goal-rates").replaceChildren(...own.map(buildRate));
+    panel.querySelector(".goal-rates-empty").hidden = own.length > 0;
+    return panel;
+}
+
+// On track? A badge + one line. Same colours as the score.
+function fillPace(panel, goal, unit) {
     const pace = getGoalPace(goal);
     const finish = pace.finishDate ? shortDate(pace.finishDate) : "";
     const words = {
@@ -150,11 +172,12 @@ function renderGoal() {
         behind: ["Behind", `At this pace you finish around ${finish}. Aim for ${pace.needPerDay} ${unit} a day to make your date.`],
         start:  ["Not started", `Log your first ${unit} to see your pace.`]
     }[pace.state];
-    goalPace.hidden = !words;
+    const box = panel.querySelector(".pace");
+    box.hidden = !words;
     if (!words) return;
-    goalPace.className = `pace is-${pace.state}`;
-    paceBadge.textContent = words[0];
-    paceText.textContent = words[1];
+    box.classList.add(`is-${pace.state}`);
+    panel.querySelector(".pace-badge").textContent = words[0];
+    panel.querySelector(".pace-text").textContent = words[1];
 }
 
 // ── 2. Showing up: score ring, 🔥 streak, a square per day ──
@@ -176,7 +199,7 @@ function renderConsistency(consistency) {
 
     streakNumber.textContent = streak;
     streakBox.classList.toggle("is-cold", streak === 0);
-    streakLabel.textContent = streak === 0 ? "Finish today to start one" : `${streak === 1 ? "day" : "days"} in a row`;
+    streakLabel.textContent = streak === 0 ? "Do one habit today to start one" : `${streak === 1 ? "day" : "days"} in a row`;
 
     // Empty squares before the first day, so it starts under the right weekday
     const firstWeekday = WEEK_DAYS.indexOf(weekdayOf(consistency.days[0].date));
@@ -206,11 +229,9 @@ function renderConsistency(consistency) {
     squares.replaceChildren(...blanks, ...days);
 }
 
-// ── 3. Habits: a sentence, then one bar each, strongest first ──
-function renderRates(rates) {
+// ── One sentence about ALL habits, over the goals (the bars live inside each goal) ──
+function renderRatesSentence(rates) {
     const shown = rates.filter(rate => rate.due > 0);
-    ratesEmpty.hidden = shown.length > 0;
-    rateList.replaceChildren(...shown.map(buildRate));
 
     // One line on top: the best one, and the one to fix (if any)
     const weakest = shown.at(-1);
@@ -233,6 +254,12 @@ function buildRate(rate) {
     const gentle = level === "tough" && isFirstWeek();      // week 1: "Early days", not red "Needs attention"
     li.classList.add(gentle ? "is-warming" : `is-${level}`);
     li.querySelector(".rate-name").textContent = rate.habit.name;
+
+    // 🔥 its own streak (insight.js). Hidden at 0.
+    const streak = getHabitStreak(rate.habit);
+    li.querySelector(".rate-streak").hidden = streak === 0;
+    li.querySelector(".rate-streak-count").textContent = streak;
+    li.querySelector(".rate-streak").setAttribute("aria-label", `${streak} days in a row`);
     li.querySelector(".rate-word").textContent = gentle ? "Early days" : { great: "Strong", good: "Okay", tough: "Needs attention" }[level];
     li.querySelector(".rate-percent").textContent = `${rate.percent}%`;
     li.querySelector(".rate-days").textContent = `${rate.done} of ${rate.due} days`;
@@ -249,6 +276,7 @@ function renderFocus(range) {
     const focus = getFocusTotals(range);
     focusTime.textContent = formatMinutes(focus.minutes);
     focusChange.hidden = true;
+    renderFocusSplit(range, focus.minutes);
     if (focus.sessions === 0) {
         focusSays.textContent = "No focus sessions yet. Start one from Today.";
         return;
@@ -265,6 +293,34 @@ function renderFocus(range) {
     focusChange.hidden = false;
     focusChange.className = `change ${difference > 0 ? "is-up" : "is-down"}`;
     focusChange.textContent = `${difference > 0 ? "↑" : "↓"} ${formatMinutes(Math.abs(difference))} ${difference > 0 ? "more" : "less"} than ${period}`;
+}
+
+// Which goal got the time: a bar split by colour + "● Quran   5h 35m". Only with 2+ goals.
+function renderFocusSplit(range, total) {
+    const parts = getFocusByGoal(range);
+    focusSplit.hidden = getActiveGoals().length < 2 || total === 0;
+    if (focusSplit.hidden) return;
+
+    focusStack.replaceChildren(...parts.map(part => {
+        const piece = document.createElement("span");
+        piece.dataset.color = part.goal.color;
+        piece.style.width = `${(part.minutes / total) * 100}%`;
+        return piece;
+    }));
+    focusLegend.replaceChildren(...parts.map(part => {
+        const li = document.createElement("li");
+        li.dataset.color = part.goal.color;
+        const dot = document.createElement("span");
+        dot.className = "goal-dot";
+        const name = document.createElement("span");
+        name.className = "focus-legend-name";
+        name.textContent = part.goal.title;               // textContent: plain text, always safe
+        const time = document.createElement("span");
+        time.className = "focus-legend-time";
+        time.textContent = formatMinutes(part.minutes);
+        li.append(dot, name, time);
+        return li;
+    }));
 }
 
 // ── 5. Skips: a sentence, then each reason with its count ──
@@ -299,9 +355,9 @@ function updatePage() {
     // Week 1 with nothing done yet → a way straight to Today
     const sinceStart = getConsistency({ from: getStartDate(), to: todayDate() });
     summaryLink.hidden = !(isFirstWeek() && sinceStart.done === 0);
-    renderGoal();
+    renderRatesSentence(rates);
+    renderGoals(rates);
     renderConsistency(consistency);
-    renderRates(rates);
     renderFocus(range);
     renderReasons(range);
 }

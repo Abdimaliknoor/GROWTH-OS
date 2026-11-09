@@ -49,11 +49,9 @@ const tipOk = document.getElementById("tipOk");
 const tipHelp = document.getElementById("tipHelp");
 // ── Side: goal, week, coming up ──
 const goalStrip = document.getElementById("goalStrip");
-const goalTitle = document.getElementById("goalTitle");
-const goalDays = document.getElementById("goalDays");
-const goalBar = document.getElementById("goalBar");
-const goalBarFill = document.getElementById("goalBarFill");
-const goalNumbers = document.getElementById("goalNumbers");
+const goalsTitle = document.getElementById("goalsTitle");
+const goalRows = document.getElementById("goalRows");
+const goalRowTemplate = document.getElementById("goalRowTemplate");
 const weekDays = document.getElementById("weekDays");
 const weekCount = document.getElementById("weekCount");
 const weekStreak = document.getElementById("weekStreak");
@@ -215,25 +213,47 @@ function renderHeader(summary) {
     dayRing.style.strokeDashoffset = RING_LENGTH * (1 - summary.done / summary.total);
 }
 
-// ── Goal strip (hidden when there is no active goal) ──
-function renderGoal() {
-    const goal = getActiveGoal();
-    goalStrip.hidden = !goal;
-    if (!goal) return;
+// ── Your goals: one row each, main first (hidden when there are none) ──
+function renderGoals() {
+    const goals = getActiveGoals();
+    goalStrip.hidden = goals.length === 0;
+    goalsTitle.hidden = goals.length < 2;               // one goal: no title needed
+    goalRows.replaceChildren(...goals.map(buildGoalRow));
+}
 
+// One goal: dot + title + days left, the bar, "6 / 12 pages · 50%"
+function buildGoalRow(goal) {
+    const li = copyTemplate(goalRowTemplate);
+    li.dataset.color = goal.color;                      // app.css → var(--goal) for the dot and bar
     const progress = getGoalProgress(goal);
     const daysLeft = getDaysLeft(goal);
-    goalTitle.textContent = goal.title;
-    goalBarFill.style.width = progress.percent + "%";
-    goalBar.setAttribute("aria-valuenow", progress.percent);
 
-    if (daysLeft === null) goalDays.textContent = "";
-    else if (daysLeft > 0) goalDays.textContent = `${daysLeft} days left`;
-    else if (daysLeft === 0) goalDays.textContent = "Due today";
-    else goalDays.textContent = "Past the date";
+    li.querySelector(".goal-strip-title").textContent = goal.title;
+    li.querySelector(".bar-fill").style.width = progress.percent + "%";
+    const bar = li.querySelector(".bar");
+    bar.setAttribute("aria-valuenow", progress.percent);
+    bar.setAttribute("aria-label", `${goal.title} progress`);
+
+    let days = "";
+    if (daysLeft === null) days = "";
+    else if (daysLeft > 0) days = `${daysLeft} days left`;
+    else if (daysLeft === 0) days = "Due today";
+    else days = "Past the date";
+    li.querySelector(".goal-strip-days").textContent = days;
 
     const unit = goal.measure === "milestones" ? "steps" : goal.measure === "consistency" ? "check-ins" : goal.unit;
-    goalNumbers.textContent = `${progress.done} / ${progress.target} ${unit} · ${progress.percent}%`;
+    li.querySelector(".goal-strip-numbers").textContent = `${progress.done} / ${progress.target} ${unit} · ${progress.percent}%`;
+    return li;
+}
+
+// A habit row or the Now card: its goal's colour, and (with 2+ goals) "● Goal name".
+function markGoal(li, habit) {
+    const goal = getGoalById(habit.goalId);
+    if (!goal) return;
+    li.dataset.color = goal.color;
+    const tag = li.querySelector(".goal-tag");
+    tag.hidden = getActiveGoals().length < 2;
+    tag.textContent = goal.title;
 }
 
 // ── Week card: 7 dots, "9 / 20 check-ins", streak ──
@@ -271,7 +291,7 @@ function renderWeek() {
     weekCount.textContent = `${done} / ${due} check-ins`;
 
     const streak = getStreak();
-    if (streak === 0) weekStreak.textContent = "Finish today to start a streak";
+    if (streak === 0) weekStreak.textContent = "Do one habit today to start a streak";
     else if (streak === 1) weekStreak.textContent = "1-day streak";
     else weekStreak.textContent = `${streak}-day streak`;
 }
@@ -315,6 +335,7 @@ function buildRow(item, late) {
     const li = copyTemplate(rowTemplate);
     const habit = item.habit;
     li.dataset.habitId = habit.id;
+    markGoal(li, habit);
     li.querySelector(".row-name").textContent = item.label;
     li.querySelector(".item-time").textContent = item.time || "Anytime";
 
@@ -369,6 +390,7 @@ function buildNow(item, badge) {
     const habit = item.habit;
     const finished = badge === "Done";
     li.dataset.habitId = habit.id;
+    markGoal(li, habit);
     li.querySelector(".now-badge").textContent = badge;
     li.querySelector(".item-time").textContent = item.time;
     li.querySelector(".now-name").textContent = item.label;
@@ -463,7 +485,7 @@ function updatePage() {
     const plan = getDayPlan();
     const summary = getDaySummary();
     renderHeader(summary);
-    renderGoal();
+    renderGoals();
     renderWeek();
     renderUpcoming();
     renderLine(plan, summary);
