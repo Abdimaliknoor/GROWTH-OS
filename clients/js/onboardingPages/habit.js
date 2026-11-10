@@ -200,6 +200,16 @@ function getUnitSuggestions() {
 }
 
 
+// Habits that have no time in the routine yet (new ones from Plan).
+//   [Read Quran ✓ 06:00, Gym (new)] → [Gym]
+function getHabitsWithoutTime(list) {
+    const timed = getRoutine()
+        .filter(item => item.kind === "habit")
+        .map(item => item.habitId);
+    return list.filter(habit => !timed.includes(habit.id));
+}
+
+
 /* ════════════════════ 6. RENDERERS ════════════════════
    They DRAW. User text always goes in with textContent, never innerHTML. */
 
@@ -607,7 +617,15 @@ habitList.addEventListener("click", (event) => {
 continueButton.addEventListener("click", () => {
     if (habits.length === 0) return;
     replaceGoalHabits(goal.id, habits);
-    if (editMode) { leaveEditMode(); return; }          // edit: back to Plan
+    if (editMode) {
+        // A habit with no time yet would hide in "Anytime" → Routine first, then Plan.
+        if (getHabitsWithoutTime(habits).length > 0) {
+            window.location.href = editLink("routine.html", goal.id, "&new=1");
+            return;
+        }
+        leaveEditMode();                                // nothing new: back to Plan
+        return;
+    }
     setCurrentStep(5);
     window.location.href = "routine.html";
 });
