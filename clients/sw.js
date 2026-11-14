@@ -32,7 +32,7 @@
 
 /* ═══════════ 1. SETTINGS ═══════════ */
 
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE_NAME = `growth-os-${CACHE_VERSION}`;
 
 // The app itself: saved on install, so it opens offline from day one.
@@ -55,6 +55,9 @@ const APP_FILES = [
     "css/app/progress.css",
     "css/app/me.css",
     "css/app/focus.css",
+
+    "js/pwa.js",
+    "manifest.webmanifest",
 
     "js/data/storage.js",
     "js/data/state.js",
@@ -86,7 +89,7 @@ self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache =>
             // allSettled: one missing file must not stop the others being saved
-                        // cache: "reload" = download fresh from Firebase, never the phone's old copy
+            // cache: "reload" = download fresh from Firebase, never the phone's old copy
             Promise.allSettled(APP_FILES.map(file => cache.add(new Request(file, { cache: "reload" }))))
         )
     );
@@ -137,12 +140,14 @@ async function networkFirst(request) {
         return response;
     } catch {
         // ignoreSearch: "today.html?done=h1" still finds the saved "today.html"
-        const saved = await cache.match(request, { ignoreSearch: true });
+        // ignoreVary:  iPhone Safari is strict about Firebase's "Vary" note and would say
+        //              "not found" for a file that IS saved (the unstyled offline page)
+        const saved = await cache.match(request, { ignoreSearch: true, ignoreVary: true });
         if (saved) return saved;
 
         // A page we never saved, while offline → open Today instead of the browser's error page
         if (request.mode === "navigate") {
-            const today = await cache.match("app/today.html");
+            const today = await cache.match("app/today.html", { ignoreVary: true });
             if (today) return today;
         }
         return Response.error();
@@ -152,7 +157,7 @@ async function networkFirst(request) {
 // The saved copy if there is one, otherwise download it and save it.
 async function savedFirst(request) {
     const cache = await caches.open(CACHE_NAME);
-    const saved = await cache.match(request);
+    const saved = await cache.match(request, { ignoreVary: true });
     if (saved) return saved;
 
     const response = await fetch(request);
