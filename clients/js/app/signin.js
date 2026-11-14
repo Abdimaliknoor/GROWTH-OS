@@ -16,7 +16,7 @@
      1. Settings + elements .... PROMPT_MAX, PROMPT_GAP_DAYS, the sheet parts
      2. Small helpers .......... countLabel, describeWhen, signInMessage
      3. When to offer it ....... shouldOfferSignIn
-     4. Open / close ........... openSignIn, closeSignIn
+     4. Open / close ........... openSignIn, updateSignInButton, closeSignIn
      5. "Continue with Google" . continueWithGoogle
      6. "Which one?" ........... showConflict, chooseVersion
      7. Events + start
@@ -38,6 +38,8 @@ const signinGoogle = document.getElementById("signinGoogle");
 const signinGoogleText = document.getElementById("signinGoogleText");
 const signinError = document.getElementById("signinError");
 const signinLater = document.getElementById("signinLater");
+
+const topbarSignIn = document.getElementById("topbarSignIn");   // the "Sign in" pill (Today)
 
 const conflictSheet = document.getElementById("conflictSheet");
 const conflictAccount = document.getElementById("conflictAccount");
@@ -106,6 +108,11 @@ function openSignIn() {
 
     prepareSignIn();                                      // sync.js: load Firebase now, before the tap
     signinSheet.showModal();
+}
+
+// The "Sign in" pill in the top bar: shown only while signed out.
+function updateSignInButton() {
+    if (topbarSignIn) topbarSignIn.hidden = Boolean(getAccount());
 }
 
 // "Not now" (or Esc): count this time, so it waits 3 days.
@@ -182,6 +189,10 @@ if (conflictSheet) {
 }
 
 window.addEventListener("growthos:conflict", showConflict);  // sync.js asks
+
+if (topbarSignIn) topbarSignIn.addEventListener("click", openSignIn);
+window.addEventListener("growthos:sync", updateSignInButton);  // signed in → the pill goes
+updateSignInButton();
 
 // Offer it a moment after the page appears (not in their face on load).
 if (shouldOfferSignIn()) setTimeout(openSignIn, 800);

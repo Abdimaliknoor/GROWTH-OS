@@ -112,6 +112,33 @@
 .topbar-help:hover { background: var(--surface-container); color: var(--on-surface); }
 .topbar-help:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* "Sign in" pill (Today, only while signed out) */
+.topbar-signin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px 0 10px;
+    flex-shrink: 0;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-full);
+    background: var(--surface-container);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface);
+    cursor: pointer;
+}
+.topbar-signin .icon { font-size: 18px; color: var(--on-surface-variant); }
+.topbar-signin:hover { background: var(--surface-container-high); }
+.topbar-signin:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.topbar-signin[hidden] { display: none; }               /* the [hidden] trap */
+
+/* On a phone the date, the pill and "?" don't all fit: hide the date while the pill shows */
+@media (max-width: 480px) {
+    .app-topbar-end:has(.topbar-signin:not([hidden])) .app-topbar-meta { display: none; }
+}
+
 
 /* ---------- 2. Navigation: phone = bottom bar ----------
    nav.js draws what's inside <nav id="appNav">. These rules only style it.
@@ -883,8 +910,6 @@
 .item-date { margin-top: 10px; }
 .item-date[hidden] { display: none; }
 .sheet-optional { font-weight: 400; color: var(--outline); }
-
-
 
 /* ═════════════════════════════════════════════════════════
    SIGN-IN SHEETS  (js/app/signin.js · Today + Me)

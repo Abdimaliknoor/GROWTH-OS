@@ -98,6 +98,16 @@
               Today
             </h1>
             <div class="app-topbar-end">
+              <!-- Only while signed out: opens the sign-in sheet (signin.js) -->
+              <button
+                class="topbar-signin"
+                id="topbarSignIn"
+                type="button"
+                hidden
+              >
+                <span class="icon" aria-hidden="true">cloud_upload</span>
+                Sign in
+              </button>
               <p class="app-topbar-meta" id="todayDate"></p>
               <!-- Brings the first-time tip back -->
               <button
