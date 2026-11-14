@@ -29,7 +29,8 @@
      ║  WELCOME  ·  startup/welcome.html                            ║
      ║  The first screen after "Start free". One promise, one button.║
      ╚══════════════════════════════════════════════════════════════╝
-     Already set up? welcome.js sends you straight to Today. -->
+     Already set up? welcome.js sends you straight to Today.
+     New phone? "Already have an account? Sign in" brings your progress back. -->
   <body>
     <div class="ob-page welcome">
       <main class="ob-content welcome-content">
@@ -64,10 +65,21 @@
           <span class="icon" aria-hidden="true">arrow_forward</span>
         </a>
         <p class="welcome-note">About 5 minutes. Free during beta.</p>
+
+        <!-- New phone? Bring your progress back from your Google account (welcome.js) -->
+        <button class="welcome-signin" id="welcomeSignIn" type="button">
+          Already have an account? <strong>Sign in</strong>
+        </button>
+        <p
+          class="welcome-signin-note"
+          id="welcomeSignInNote"
+          role="status"
+          hidden
+        ></p>
       </footer>
     </div>
 
-    <!-- storage → state → this page -->
+    <!-- storage → state → sync → this page -->
     <script src="../js/data/storage.js"></script>
     <script src="../js/data/state.js"></script>
     <script src="../js/data/sync.js"></script>
