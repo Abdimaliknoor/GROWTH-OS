@@ -19,9 +19,9 @@ function readStorage() {
 function writeStorage(data) {
     data.updatedAt = Date.now();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    const sync = readSyncState()
-    if (sync) writeSyncState({...sync,pending:true})
-    window.dispatchEvent(newEvent ('growthos:saved'))    
+    const sync = readSyncState();
+    if (sync.uid) writeSyncState({ ...sync, pending: true });       
+    window.dispatchEvent(new Event("growthos:saved"));             
 }
 // Save a copy exactly as it is, WITHOUT a new stamp and without telling sync.
 // Only sync.js uses it: when the account's copy comes DOWN, it must keep the
