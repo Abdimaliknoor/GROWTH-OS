@@ -86,7 +86,8 @@ self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache =>
             // allSettled: one missing file must not stop the others being saved
-            Promise.allSettled(APP_FILES.map(file => cache.add(file)))
+                        // cache: "reload" = download fresh from Firebase, never the phone's old copy
+            Promise.allSettled(APP_FILES.map(file => cache.add(new Request(file, { cache: "reload" }))))
         )
     );
     self.skipWaiting();             // use the new version straight away, don't wait for every tab to close
