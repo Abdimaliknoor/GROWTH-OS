@@ -49,9 +49,32 @@
 
 /* Footer: one button, a small line under it */
 .welcome-footer { flex-direction: column; align-items: stretch; gap: 10px; }
-.welcome-note { text-align: center; font-size: 13px; color: var(--outline); }
+.welcome-note { text-align: center; font-size: 13px; color: var(--on-surface-variant); }
 
 @media (min-width: 768px) {
     .welcome-title { font-size: 56px; }
     .welcome-footer { align-items: flex-start; }
 }
+
+/* "Already have an account? Sign in": for a new phone */
+.welcome-signin {
+    min-height: 44px;                      /* big enough to tap */
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+}
+.welcome-signin strong { color: var(--primary); }
+.welcome-signin:hover strong { text-decoration: underline; }
+.welcome-signin:disabled { opacity: 0.6; cursor: wait; }
+.welcome-signin[hidden] { display: none; }
+
+.welcome-signin-note {
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--on-surface-variant);
+}
+.welcome-signin-note[hidden] { display: none; }

@@ -2,6 +2,7 @@
    ME  (app/me.html)
 
    You ........... your name (change it), your goal (→ Plan)
+   Account ....... "Back up and sync" (signed out)  ·  who, "Synced", Sign out (signed in)
    Backup ........ save a file  ·  bring one back  ·  undo that
    Start over .... reset everything (data AND photos)
 
@@ -9,6 +10,8 @@
      getName, saveName, getDirection, getActiveGoals         → state.js
      exportData, readBackupFile, restoreData, undoRestore   → state.js (14. Backup)
      cleanUnusedPhotos                                      → photos.js
+     getAccount, getSyncStatus, signOutAndClear, uploadNow  → sync.js
+     openSignIn                                             → signin.js
 
    1. Guard   2. Elements   3. Settings   4. Helpers
    5. Renderers   6. Actions   7. Page load   8. Events
@@ -33,10 +36,23 @@ const nameSub = document.getElementById("nameSub");
 const goalRowTitle = document.getElementById("goalRowTitle");
 const goalSub = document.getElementById("goalSub");
 
+const syncRow = document.getElementById("syncRow");
+const accountRow = document.getElementById("accountRow");
+const accountPhoto = document.getElementById("accountPhoto");
+const accountName = document.getElementById("accountName");
+const accountEmail = document.getElementById("accountEmail");
+const syncStatusRow = document.getElementById("syncStatusRow");
+const syncStatusIcon = document.getElementById("syncStatusIcon");
+const syncStatusText = document.getElementById("syncStatusText");
+const syncStatusSub = document.getElementById("syncStatusSub");
+const signOutRow = document.getElementById("signOutRow");
+
+const backupNote = document.getElementById("backupNote");
 const saveBackup = document.getElementById("saveBackup");
 const backupInput = document.getElementById("backupInput");
 const undoRestoreRow = document.getElementById("undoRestoreRow");
 const resetRow = document.getElementById("resetRow");
+const resetSub = document.getElementById("resetSub");
 
 const nameSheet = document.getElementById("nameSheet");
 const nameInput = document.getElementById("nameInput");
@@ -67,6 +83,27 @@ function describeSavedAt(savedAt) {
 }
 
 
+// A time stamp → "just now" · "5 min ago" · "3 h ago" · "12 Nov"
+function timeAgo(time) {
+    const minutes = Math.floor((Date.now() - time) / 60000);
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h ago`;
+    return new Date(time).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+// What sync is doing → what Me shows.   status (sync.js) → [icon, title, small text]
+const SYNC_WORDS = {
+    synced:   ["cloud_done", "Synced", ""],                                   // the small text = "2 min ago"
+    saving:   ["sync", "Syncing…", "Saving your latest changes"],
+    checking: ["sync", "Syncing…", "Checking your account"],
+    off:      ["sync", "Syncing…", "Connecting to your account"],
+    offline:  ["cloud_off", "Offline", "Your changes will sync when you're back online"],
+    error:    ["error", "Couldn't sync", "We'll try again. Check your internet."],
+    conflict: ["sync_problem", "Waiting for your choice", "Pick which progress to keep"]
+};
+
+
 /* ---------- 5. Renderers ---------- */
 
 function updatePage() {
@@ -82,6 +119,54 @@ function updatePage() {
     else if (goals.length === 1) goalSub.textContent = goals[0].title;
     else goalSub.textContent = `${goals[0].title} + ${goals.length - 1} more`;
     undoRestoreRow.hidden = !canUndoRestore();
+    renderAccount();
+}
+
+// Signed out → one row: "Back up and sync".   Signed in → who · status · Sign out.
+function renderAccount() {
+    const account = getAccount();
+    syncRow.hidden = Boolean(account);
+    accountRow.hidden = !account;
+    syncStatusRow.hidden = !account;
+    signOutRow.hidden = !account;
+
+    backupNote.textContent = account
+        ? "Your data is also saved to your Google account. A backup file is extra safety."
+        : "Your data lives on this phone. Save a backup now and then, so you never lose it.";
+    resetSub.textContent = account
+        ? "Deletes all your data, on this device and in your account"
+        : "Deletes all your data and photos on this phone";
+
+    if (!account) return;
+
+    accountName.textContent = account.name || "Signed in";
+    accountEmail.textContent = account.email;
+    renderPhoto(account);
+    renderSyncStatus();
+}
+
+// Their first letter now; their Google photo once it has loaded (if it loads).
+function renderPhoto(account) {
+    accountPhoto.textContent = (account.name || account.email || "?").trim()[0].toUpperCase();
+    if (!account.photo) return;
+
+    const photo = new Image();
+    photo.alt = "";
+    photo.referrerPolicy = "no-referrer";                // Google's photo server can refuse otherwise
+    photo.addEventListener("load", () => accountPhoto.replaceChildren(photo));
+    photo.src = account.photo;
+}
+
+function renderSyncStatus() {
+    const account = getAccount();
+    if (!account) return;
+
+    const status = getSyncStatus();
+    const [icon, title, sub] = SYNC_WORDS[status] || SYNC_WORDS.off;
+    syncStatusIcon.textContent = icon;
+    syncStatusText.textContent = title;
+    syncStatusSub.textContent = status === "synced" ? `Last synced ${timeAgo(account.lastSyncedAt)}` : sub;
+    syncStatusRow.classList.toggle("is-problem", status === "error" || status === "offline");
 }
 
 function showToast(message) {
@@ -147,13 +232,35 @@ function undoLastRestore() {
     window.location.replace("me.html?undone=1");
 }
 
-/* ── 6d. Start over ── */
+/* ── 6d. Account ── */
+
+// Sign out: sync.js sends the last changes, signs out, empties this device, goes to the start.
+async function signOut() {
+    if (!confirm("Sign out?\n\nYour data will be removed from this device. It stays safe in your Google account.")) return;
+    signOutRow.disabled = true;
+    try {
+        await signOutAndClear();
+    } catch (error) {
+        signOutRow.disabled = false;
+        showToast(error.message === "not-uploaded"
+            ? "Connect to the internet first, so your latest changes are saved"
+            : "Couldn't sign out. Please try again.");
+    }
+}
+
+/* ── 6e. Start over ── */
 
 async function resetEverything() {
-    if (!confirm("Delete ALL your data and photos on this phone?\n\nThis can't be undone. Save a backup first if you might want it back.")) return;
+    const account = getAccount();
+    const question = account
+        ? "Delete ALL your data, on this device AND in your Google account?\n\nThis can't be undone. Save a backup first if you might want it back."
+        : "Delete ALL your data and photos on this phone?\n\nThis can't be undone. Save a backup first if you might want it back.";
+    if (!confirm(question)) return;
+
     await cleanUnusedPhotos([], Infinity);                   // "no photo is used", any age → delete them all
     clearSafetyCopy();
     resetUser();
+    if (account) await uploadNow();                          // the empty start goes to the account too
     window.location.replace("../startup/welcome.html");
 }
 
@@ -179,6 +286,11 @@ nameSave.addEventListener("click", saveNewName);
 nameInput.addEventListener("keydown", event => {
     if (event.key === "Enter") saveNewName();
 });
+
+syncRow.addEventListener("click", () => openSignIn());      // signin.js loads AFTER me.js: look it up on tap
+signOutRow.addEventListener("click", signOut);
+window.addEventListener("growthos:sync", renderAccount);     // sync.js: status changed (or just signed in)
+setInterval(renderSyncStatus, 60 * 1000);                    // keep "2 min ago" up to date
 
 saveBackup.addEventListener("click", downloadBackup);
 backupInput.addEventListener("change", () => {

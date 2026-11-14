@@ -58,8 +58,10 @@ const APP_FILES = [
 
     "js/data/storage.js",
     "js/data/state.js",
-    "js/data/insights.js",
+    "js/data/insight.js",
     "js/data/photos.js",
+    "js/data/sync.js",
+    "js/app/signin.js",
     "js/app/nav.js",
     "js/app/item-sheet.js",
     "js/app/focus-bar.js",

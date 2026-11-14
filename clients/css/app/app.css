@@ -883,3 +883,149 @@
 .item-date { margin-top: 10px; }
 .item-date[hidden] { display: none; }
 .sheet-optional { font-weight: 400; color: var(--outline); }
+
+
+
+/* ═════════════════════════════════════════════════════════
+   SIGN-IN SHEETS  (js/app/signin.js · Today + Me)
+   "Keep your progress safe" and "Which one do you want to keep?"
+   They use .sheet (section 4) and only add what's new.
+   ═════════════════════════════════════════════════════════ */
+
+.signin-sheet { text-align: center; }
+
+/* The round icon on top */
+.signin-badge {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin: 8px auto 16px;
+    border-radius: 50%;
+    background: var(--surface-container-high);
+    color: var(--primary);
+}
+.signin-badge .icon { font-size: 32px; }
+
+.signin-text {
+    max-width: 34ch;                       /* ch = width of one letter: short lines read easier */
+    margin: 10px auto 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+}
+
+/* "3 goals · 9 habits · 10-day streak": their real numbers */
+.signin-stake {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0 6px;
+    padding: 0;
+    list-style: none;
+}
+.signin-stake li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface);
+}
+.signin-stake .icon { font-size: 16px; color: var(--on-surface-variant); }
+.signin-stake .is-streak .icon { color: #ff8a3d; }       /* the same orange as the streak flame */
+.signin-stake li[hidden] { display: none; }              /* the [hidden] trap: inline-flex would win */
+
+.signin-risk {
+    max-width: 36ch;
+    margin: 14px auto 22px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--on-surface-variant);
+}
+
+/* Google's own look: white, the coloured G, dark text */
+.google-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 52px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: #ffffff;
+    color: #1f1f1f;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.google-button svg { width: 20px; height: 20px; flex-shrink: 0; }
+.google-button:hover { background: #f1f1f1; }
+.google-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.google-button:disabled { opacity: 0.6; cursor: wait; }
+
+.signin-error {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--error);
+}
+.signin-error[hidden] { display: none; }
+
+.signin-later {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 8px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+}
+.signin-later:hover { color: var(--on-surface); }
+
+.signin-private {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--on-surface-variant);
+}
+.signin-private .icon { font-size: 14px; }
+
+/* "Which one?": two big choices */
+.conflict-choices {
+    display: grid;
+    gap: 10px;
+    margin-top: 22px;
+}
+.conflict-choice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--surface-container-highest);
+    border-radius: var(--radius-lg);
+    background: var(--surface-container);
+    color: var(--on-surface);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.conflict-choice:hover { background: var(--surface-container-high); }
+.conflict-choice:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.conflict-choice > .icon { font-size: 26px; color: var(--on-surface-variant); }
+.conflict-choice-text { display: grid; gap: 2px; }
+.conflict-choice-text strong { font-size: 15px; }
+.conflict-choice-text span { font-size: 13px; color: var(--on-surface-variant); }

@@ -94,15 +94,87 @@
             </div>
           </section>
 
-          <!-- ═══════════════ 2. BACKUP ═══════════════
+          <!-- ═══════════════ 2. ACCOUNT ═══════════════
+                 Signed out → "Back up and sync" (opens the sign-in sheet).
+                 Signed in  → who · "Synced ✓" · Sign out.   (me.js shows one or the other) -->
+          <section class="me-section" aria-labelledby="accountTitle">
+            <h2 class="me-section-title" id="accountTitle">Account</h2>
+            <div class="me-card">
+              <!-- Signed out -->
+              <button class="me-row" id="syncRow" type="button">
+                <span class="me-row-icon icon" aria-hidden="true"
+                  >cloud_upload</span
+                >
+                <span class="me-row-text">
+                  <span class="me-row-title">Back up and sync</span>
+                  <span class="me-row-sub"
+                    >Sign in with Google to keep your progress safe on every
+                    device</span
+                  >
+                </span>
+                <span class="me-row-go icon" aria-hidden="true"
+                  >chevron_right</span
+                >
+              </button>
+
+              <!-- Signed in: who -->
+              <div class="me-row is-static" id="accountRow" hidden>
+                <span
+                  class="me-account-photo"
+                  id="accountPhoto"
+                  aria-hidden="true"
+                ></span>
+                <span class="me-row-text">
+                  <span class="me-row-title" id="accountName"></span>
+                  <span class="me-row-sub" id="accountEmail"></span>
+                </span>
+              </div>
+
+              <!-- Signed in: what sync is doing ("Synced · 2 min ago", "Offline"…) -->
+              <div
+                class="me-row is-static"
+                id="syncStatusRow"
+                role="status"
+                aria-live="polite"
+                hidden
+              >
+                <span
+                  class="me-row-icon icon"
+                  id="syncStatusIcon"
+                  aria-hidden="true"
+                  >cloud_done</span
+                >
+                <span class="me-row-text">
+                  <span class="me-row-title" id="syncStatusText"></span>
+                  <span class="me-row-sub" id="syncStatusSub"></span>
+                </span>
+              </div>
+
+              <!-- Signed in: sign out -->
+              <button class="me-row" id="signOutRow" type="button" hidden>
+                <span class="me-row-icon icon" aria-hidden="true">logout</span>
+                <span class="me-row-text">
+                  <span class="me-row-title">Sign out</span>
+                  <span class="me-row-sub"
+                    >Removes your data from this device. It stays in your
+                    account.</span
+                  >
+                </span>
+              </button>
+            </div>
+          </section>
+
+          <!-- ═══════════════ 3. BACKUP ═══════════════
                  Plain words: no "JSON", no "export". -->
           <section class="me-section" aria-labelledby="backupTitle">
             <h2 class="me-section-title" id="backupTitle">Backup</h2>
             <div class="me-card">
               <p class="me-note">
                 <span class="icon" aria-hidden="true">info</span>
-                Your data lives on this phone. Save a backup now and then, so
-                you never lose it.
+                <span id="backupNote"
+                  >Your data lives on this phone. Save a backup now and then, so
+                  you never lose it.</span
+                >
               </p>
               <button class="me-row" id="saveBackup" type="button">
                 <span class="me-row-icon icon" aria-hidden="true"
@@ -146,7 +218,7 @@
             </div>
           </section>
 
-          <!-- ═══════════════ 3. START OVER ═══════════════
+          <!-- ═══════════════ 4. START OVER ═══════════════
                  At the bottom, in red, behind "Are you sure?" -->
           <section class="me-section" aria-labelledby="resetTitle">
             <h2 class="me-section-title" id="resetTitle">Start over</h2>
@@ -157,7 +229,7 @@
                 >
                 <span class="me-row-text">
                   <span class="me-row-title">Reset everything</span>
-                  <span class="me-row-sub"
+                  <span class="me-row-sub" id="resetSub"
                     >Deletes all your data and photos on this phone</span
                   >
                 </span>
@@ -195,6 +267,107 @@
     </dialog>
 
     <!-- ═══════════════ TOAST ═══════════════ -->
+    <!-- SIGN-IN SHEET · "Keep your progress safe" (signin.js decides when it shows) -->
+    <dialog
+      class="sheet signin-sheet"
+      id="signinSheet"
+      aria-labelledby="signinTitle"
+    >
+      <div class="signin-badge">
+        <span class="icon" aria-hidden="true">cloud_done</span>
+      </div>
+      <h2 class="sheet-title" id="signinTitle">Keep your progress safe</h2>
+      <p class="signin-text">
+        Right now everything you've built lives only on this device.
+      </p>
+
+      <!-- What they'd lose: their real numbers (signin.js fills them) -->
+      <ul class="signin-stake">
+        <li>
+          <span class="icon" aria-hidden="true">flag</span>
+          <span id="signinGoals"></span>
+        </li>
+        <li>
+          <span class="icon" aria-hidden="true">checklist</span>
+          <span id="signinHabits"></span>
+        </li>
+        <li class="is-streak" id="signinStreakItem" hidden>
+          <span class="icon" aria-hidden="true">local_fire_department</span>
+          <span id="signinStreak"></span>
+        </li>
+      </ul>
+
+      <p class="signin-risk">
+        Clear your browser, change phones or add the app to your home screen,
+        and it's gone. Sign in and it's saved to your account, on every device.
+      </p>
+
+      <button class="google-button" id="signinGoogle" type="button">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path
+            fill="#EA4335"
+            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+          />
+          <path
+            fill="#4285F4"
+            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+          />
+          <path
+            fill="#34A853"
+            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+          />
+        </svg>
+        <span id="signinGoogleText">Continue with Google</span>
+      </button>
+      <p class="signin-error" id="signinError" role="alert" hidden></p>
+      <button class="signin-later" id="signinLater" type="button">
+        Not now
+      </button>
+      <p class="signin-private">
+        <span class="icon" aria-hidden="true">lock</span>
+        Only you can see your data.
+      </p>
+    </dialog>
+
+    <!-- WHICH ONE? · this device and the account have different data → they pick -->
+    <dialog
+      class="sheet signin-sheet"
+      id="conflictSheet"
+      aria-labelledby="conflictTitle"
+    >
+      <div class="signin-badge">
+        <span class="icon" aria-hidden="true">sync_problem</span>
+      </div>
+      <h2 class="sheet-title" id="conflictTitle">
+        Which one do you want to keep?
+      </h2>
+      <p class="signin-text">
+        This device and your account have different progress. The one you don't
+        pick is replaced.
+      </p>
+
+      <div class="conflict-choices">
+        <button class="conflict-choice" type="button" data-keep="account">
+          <span class="icon" aria-hidden="true">cloud</span>
+          <span class="conflict-choice-text">
+            <strong>Your account</strong>
+            <span id="conflictAccount"></span>
+          </span>
+        </button>
+        <button class="conflict-choice" type="button" data-keep="phone">
+          <span class="icon" aria-hidden="true">smartphone</span>
+          <span class="conflict-choice-text">
+            <strong>This device</strong>
+            <span id="conflictPhone"></span>
+          </span>
+        </button>
+      </div>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite" hidden>
       <span class="icon" aria-hidden="true">check_circle</span>
       <span class="toast-text" id="toastText"></span>
@@ -203,10 +376,12 @@
     <!-- storage → state → photos (Reset deletes them too) → insights → this page → mini focus bar -->
     <script src="../js/data/storage.js"></script>
     <script src="../js/data/state.js"></script>
+    <script src="../js/data/sync.js"></script>
     <script src="../js/app/nav.js"></script>
     <script src="../js/data/photos.js"></script>
     <script src="../js/data/insight.js"></script>
     <script src="../js/app/me.js"></script>
+    <script src="../js/app/signin.js"></script>
     <script src="../js/app/focus-bar.js"></script>
   </body>
 </html>
